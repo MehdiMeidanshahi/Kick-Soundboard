@@ -10,7 +10,7 @@
 
 ## Quick start
 
-1. Download the [v0.1.0 Windows installer](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/download/v0.1.0/Kick-Soundboard-Setup-0.1.0.exe) from [Releases](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) and install it.
+1. Download the [latest Windows installer](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest) from [Releases](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) and install it.
 2. Sign in to Kick, open [Kick Developer settings](https://kick.com/settings/developer), and create your own app. Set the redirect URL to `http://localhost:9000`, enable **Read Channel points rewards information on a channel** (`channel:rewards:read`), and leave webhooks off. Save and copy that app's Client ID and Client Secret. **Keep the secret private.**
 3. In Kick Soundboard, open **Settings**, enter the Client ID and Client Secret, and choose **Save locally**. Choose **Connect Kick** and approve the read-only access in Kick's browser page.
 4. Choose an audio file for each reward and use **Test** to check it. Keep the app open while streaming; connect its Windows audio output to OBS if you want viewers to hear the sounds.
@@ -35,7 +35,7 @@ Each streamer connects their own Kick Developer app. The app runs locally and do
 
 - Loads the signed-in streamer's Kick channel point rewards and shows whether each reward is enabled, paused, or disabled.
 - Lets you choose an audio file on your computer for each reward. Supported formats: MP3, WAV, OGG, M4A, AAC, and FLAC.
-- Plays a mapped sound when it sees a new, non-rejected redemption. Sounds play in a queue; **Stop audio** stops the current sound and clears the queue.
+- Plays a mapped sound when it sees a new, non-rejected redemption. Sounds play in arrival order in a queue; ten redemptions close together are kept and played one at a time. The queue shows total queued and waiting counts. **Stop audio** stops the current sound and clears the queue.
 - Includes master and per-reward volume controls, a per-reward cooldown, a test button, and redemption history.
 - Shows the redeemer and their optional message when Kick supplies those fields. Kick's current polling schema supplies the redeemer's numeric ID, not their username, so history normally displays the ID.
 - Has English and Persian interfaces, including right-to-left layout.
@@ -44,7 +44,7 @@ Each streamer connects their own Kick Developer app. The app runs locally and do
 
 ### 1. Download the app
 
-Open the project's [Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) and download `Kick-Soundboard-Setup-<version>.exe`. For v0.1.0, use the [direct installer link](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/download/v0.1.0/Kick-Soundboard-Setup-0.1.0.exe). Run the installer; it installs for your Windows account and creates Start Menu and desktop shortcuts.
+Open the project's [latest release](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest) and download `Kick-Soundboard-Setup-<version>.exe`. Run the installer; it installs for your Windows account and creates Start Menu and desktop shortcuts.
 
 Only download the installer from this project's official [GitHub Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases). The early-preview installer is not code-signed, so Windows may show an **Unknown publisher** or SmartScreen warning.
 
@@ -76,7 +76,7 @@ Kick may limit how many Developer apps an account can create. If Kick reports th
 1. Find a reward in **Reward sounds** and choose **Choose sound**.
 2. Pick an audio file from your computer. The app stores the file path; it does not copy or upload the audio. If you move or rename the file later, select it again.
 3. Choose **Test** to preview it. Adjust **Sound volume** for that reward and **Master volume** for all sounds.
-4. Set **Cooldown · sec** if repeated redemptions should not replay that reward too quickly. A cooldown skips a sound while it is cooling down; it does not remove the redemption from history.
+4. Set **Cooldown · sec** to add a minimum gap between plays of the same reward. Redemptions are kept in the queue during cooldown and will play when their turn arrives.
 5. Use **Stop audio** to stop the current sound and clear waiting sounds. Redemption history is separate; **Clear** removes the displayed history.
 
 ### 5. Get the sound into your stream
@@ -127,7 +127,7 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 
 ## راه‌اندازی سریع
 
-۱. [نصب‌کنندهٔ ویندوز نسخهٔ ۰.۱.۰](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/download/v0.1.0/Kick-Soundboard-Setup-0.1.0.exe) را از صفحهٔ [نسخه‌های پروژه](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) دریافت و نصب کنید.
+۱. جدیدترین [نسخهٔ ویندوز برنامه](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest) را دریافت و نصب کنید.
 ۲. وارد کیک شوید و [تنظیمات توسعه‌دهندگان کیک](https://kick.com/settings/developer) را باز کنید. یک برنامهٔ شخصی بسازید، نشانی بازگشت را `http://localhost:9000` بگذارید، دسترسی **Read Channel points rewards information on a channel** (`channel:rewards:read`) را فعال کنید و webhook را خاموش بگذارید. برنامه را ذخیره کنید و **Client ID** و **Client Secret** آن را بردارید. **رمز را محرمانه نگه دارید.**
 ۳. در Kick Soundboard وارد **Settings** شوید، شناسه و رمز را وارد کنید و **Save locally** را بزنید. سپس **Connect Kick** را انتخاب و دسترسی فقط‌خواندنی را در صفحهٔ کیک تأیید کنید.
 ۴. برای هر پاداش یک فایل صدا انتخاب کنید و با **Test** آن را بررسی کنید. هنگام استریم برنامه را باز نگه دارید؛ برای شنیده‌شدن صدا در OBS، خروجی صدای ویندوز برنامه را به صداهای استریم اضافه کنید.
@@ -154,7 +154,7 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 
 - پاداش‌های امتیازی کانال کیک را می‌خواند و وضعیت فعال، مکث‌شده یا غیرفعال هر پاداش را نشان می‌دهد.
 - برای هر پاداش می‌توانید یک فایل صدا از رایانه انتخاب کنید. فرمت‌های MP3، WAV، OGG، M4A، AAC و FLAC پشتیبانی می‌شوند.
-- هنگام مشاهدهٔ بازخرید جدید و ردنشده، صدای مربوط را در صف پخش می‌گذارد. دکمهٔ **Stop audio** صدای در حال پخش را متوقف و صف انتظار را پاک می‌کند.
+- هنگام مشاهدهٔ بازخرید جدید و ردنشده، صدای مربوط را به‌ترتیب در صف می‌گذارد؛ حتی اگر چند بازخرید هم‌زمان انجام شوند، یکی‌یکی پخش می‌شوند. شمار کل موارد صف و موارد در انتظار نمایش داده می‌شود. دکمهٔ **Stop audio** صدای در حال پخش را متوقف و صف را پاک می‌کند.
 - بلندی صدای اصلی و جداگانهٔ هر پاداش، مدت وقفه، دکمهٔ آزمایش صدا و تاریخچه دارد.
 - نام بازخریدکننده و پیام او را در صورت ارسال کیک نمایش می‌دهد. در schema فعلی API کیک، بازخریدکننده فقط با شناسهٔ عددی `user_id` معرفی می‌شود و نام کاربری در پاسخ نیست؛ بنابراین معمولاً شناسهٔ بیننده نمایش داده می‌شود.
 - رابط انگلیسی و فارسی دارد و در فارسی از راست به چپ نمایش داده می‌شود.
@@ -163,7 +163,7 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 
 ### ۱. دریافت برنامه
 
-وارد صفحهٔ [نسخه‌های پروژه در GitHub](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) شوید و فایل `Kick-Soundboard-Setup-<version>.exe` را بگیرید. برای نسخهٔ ۰.۱.۰ از [لینک مستقیم نصب‌کننده](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/download/v0.1.0/Kick-Soundboard-Setup-0.1.0.exe) استفاده کنید. نصب‌کننده را اجرا کنید؛ برنامه برای حساب ویندوزی شما نصب می‌شود و میان‌بر منوی Start و دسکتاپ می‌سازد.
+وارد صفحهٔ [نسخه‌های پروژه در GitHub](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest) شوید و جدیدترین فایل `Kick-Soundboard-Setup-<version>.exe` را دانلود کنید. نصب‌کننده را اجرا کنید؛ برنامه برای حساب ویندوزی شما نصب می‌شود و میان‌بر منوی Start و دسکتاپ می‌سازد.
 
 نصب‌کننده را فقط از صفحهٔ رسمی [نسخه‌های GitHub پروژه](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) دریافت کنید. نسخهٔ آزمایشی امضای دیجیتال ندارد؛ ممکن است ویندوز هشدار **Unknown publisher** یا SmartScreen نشان دهد.
 
@@ -195,7 +195,7 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 ۱. در بخش **Reward sounds** پاداش موردنظر را پیدا و **Choose sound** را انتخاب کنید.
 ۲. فایل صدا را از رایانه انتخاب کنید. برنامه فقط مسیر فایل را نگه می‌دارد و آن را کپی یا بارگذاری نمی‌کند. اگر بعداً فایل را جابه‌جا یا تغییرنام دادید، دوباره انتخابش کنید.
 ۳. با **Test** صدا را آزمایش کنید. **Sound volume** فقط برای همان پاداش است و **Master volume** روی همهٔ صداها اثر می‌گذارد.
-۴. اگر لازم است بازخریدهای تکراری پشت‌سرهم صدا پخش نکنند، برای پاداش **Cooldown · sec** بگذارید. بازخریدی که در مدت وقفه باشد از تاریخچه حذف نمی‌شود؛ فقط صدایش پخش نمی‌شود.
+۴. با **Cooldown · sec** حداقل فاصلهٔ پخش صدای یک پاداش را تنظیم کنید. بازخریدها در مدت وقفه هم در صف می‌مانند و وقتی نوبتشان برسد پخش می‌شوند.
 ۵. **Stop audio** صدای جاری را متوقف و صف انتظار را پاک می‌کند. **Clear** تاریخچهٔ نمایش‌داده‌شده را پاک می‌کند.
 
 ### ۵. شنیده‌شدن صدا در استریم

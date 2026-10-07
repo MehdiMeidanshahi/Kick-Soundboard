@@ -7,7 +7,7 @@ const translations = {
   en: {
     appName:'Kick Soundboard', tagline:'Local reward sounds for your stream', settings:'Settings', connect:'Connect Kick', connected:'Connected', polling:'Connected · checking every 10 sec', notConnected:'Not connected',
     setupTitle:'Connect your Kick channel', setupDescription:'Enter your developer app credentials in Settings, then connect Kick. The app checks for reward redemptions and plays mapped sounds on this PC.', openSettings:'Open Settings', localNotice:'Your credentials and sound mappings are stored locally on this computer.',
-    rewardSounds:'Reward sounds', refreshRewards:'Refresh rewards', masterVolume:'Master volume', stopAudio:'Stop audio', redemptionHistory:'Redemption history', clear:'Clear', soundQueue:'Sound queue', waiting:'waiting',
+    rewardSounds:'Reward sounds', refreshRewards:'Refresh rewards', masterVolume:'Master volume', stopAudio:'Stop audio', redemptionHistory:'Redemption history', clear:'Clear', soundQueue:'Sound queue', waiting:'waiting', queuedTotal:'queued',
     connectEmpty:'Connect your Kick account to load your channel rewards.', noRewards:'No rewards found. Create channel point rewards on Kick, then refresh.', emptyHistory:'New reward redemptions will appear here.',
     connectionSettings:'Kick connection settings', clientId:'Client ID', clientIdHelp:'From your Kick Developer app settings.', clientSecret:'Client Secret', secretPlaceholder:'Saved securely on this PC', clientSecretHelp:'Only stored on this PC using Windows secure storage. Never share it.', redirectUrl:'Redirect URL', redirectHelp:'This must match your Kick Developer app redirect URL.', cancel:'Cancel', saveLocally:'Save locally', disconnectKick:'Disconnect Kick', disconnectedKick:'Kick disconnected on this PC. Revoke app access in Kick settings too, if desired.',
     points:'points', noSound:'No sound selected', chooseSound:'Choose sound', change:'Change', test:'Test', removeSound:'Remove sound', cooldown:'Cooldown · sec', cooldownTitle:'Cooldown in seconds',
@@ -22,7 +22,7 @@ const translations = {
   fa: {
     appName:'صندوق صدای کیک', tagline:'پخش صدای محلی برای پاداش‌های استریم', settings:'تنظیمات', connect:'اتصال به کیک', connected:'متصل', polling:'متصل · بررسی هر ۱۰ ثانیه', notConnected:'متصل نیست',
     setupTitle:'کانال کیک خود را وصل کنید', setupDescription:'اطلاعات برنامهٔ توسعه‌دهنده را در تنظیمات وارد کنید و به کیک وصل شوید. برنامه بازخرید پاداش‌ها را بررسی می‌کند و صدای انتخاب‌شده را در همین رایانه پخش می‌کند.', openSettings:'باز کردن تنظیمات', localNotice:'اطلاعات ورود و نگاشت صداها فقط روی همین رایانه ذخیره می‌شوند.',
-    rewardSounds:'صداهای پاداش', refreshRewards:'به‌روزرسانی پاداش‌ها', masterVolume:'بلندی صدای اصلی', stopAudio:'توقف صدا', redemptionHistory:'تاریخچهٔ بازخریدها', clear:'پاک کردن', soundQueue:'صف پخش صدا', waiting:'در انتظار',
+    rewardSounds:'صداهای پاداش', refreshRewards:'به‌روزرسانی پاداش‌ها', masterVolume:'بلندی صدای اصلی', stopAudio:'توقف صدا', redemptionHistory:'تاریخچهٔ بازخریدها', clear:'پاک کردن', soundQueue:'صف پخش صدا', waiting:'در انتظار', queuedTotal:'در صف',
     connectEmpty:'برای دریافت پاداش‌های کانال، حساب کیک را وصل کنید.', noRewards:'پاداشی پیدا نشد. در کیک پاداش بسازید و دوباره به‌روزرسانی کنید.', emptyHistory:'بازخریدهای جدید اینجا نمایش داده می‌شوند.',
     connectionSettings:'تنظیمات اتصال کیک', clientId:'شناسهٔ کلاینت', clientIdHelp:'از تنظیمات برنامهٔ توسعه‌دهندهٔ کیک بردارید.', clientSecret:'رمز کلاینت', secretPlaceholder:'به‌صورت امن روی این رایانه ذخیره می‌شود', clientSecretHelp:'فقط با حافظهٔ امن ویندوز روی این رایانه ذخیره می‌شود. آن را برای کسی نفرستید.', redirectUrl:'نشانی بازگشت', redirectHelp:'این نشانی باید با نشانی بازگشت برنامهٔ کیک یکسان باشد.', cancel:'لغو', saveLocally:'ذخیره روی رایانه', disconnectKick:'قطع اتصال کیک', disconnectedKick:'اتصال این برنامه به کیک قطع شد. در صورت تمایل، دسترسی برنامه را از تنظیمات کیک هم لغو کنید.',
     points:'امتیاز', noSound:'صدایی انتخاب نشده', chooseSound:'انتخاب صدا', change:'تغییر', test:'آزمایش', removeSound:'حذف صدا', cooldown:'وقفه · ثانیه', cooldownTitle:'مدت وقفه به ثانیه',
@@ -42,6 +42,9 @@ let queue = [];
 let activeAudio = null;
 let activeRewardId = '';
 let activeObjectUrl = '';
+let playbackBusy = false;
+let queueTimer = null;
+const lastPlaybackStart = new Map();
 let toastTimeout;
 
 function t(key, values = {}) {
@@ -197,31 +200,58 @@ function renderHistory() {
   }));
 }
 
-function updateQueue() { $('#queue-count').textContent = `${queue.length.toLocaleString(language === 'fa' ? 'fa-IR' : 'en-US')} ${t('waiting')}`; }
+function updateQueue() {
+  const locale = language === 'fa' ? 'fa-IR' : 'en-US';
+  const total = queue.length + (playbackBusy ? 1 : 0);
+  $('#queue-count').textContent = `${total.toLocaleString(locale)} ${t('queuedTotal')} · ${queue.length.toLocaleString(locale)} ${t('waiting')}`;
+}
 function effectiveVolume(rewardId) {
   return (state.volume ?? 0.8) * (state.rewardVolumes?.[rewardId] ?? 1);
 }
 function enqueueSound(rewardId) {
   if (!state.sounds?.[rewardId]) return toast(t('chooseFirst'), true);
-  queue.push(rewardId); updateQueue();
-  if (!activeAudio) playNext();
+  queue.push({ rewardId, cooldownMs: Math.max(0, Number(state.cooldowns?.[rewardId] || 0) * 1000) }); updateQueue();
+  if (!playbackBusy) playNext();
 }
 function playNext() {
-  const rewardId = queue.shift(); updateQueue();
-  if (!rewardId) { activeAudio = null; return; }
+  if (playbackBusy) return;
+  const item = queue.shift(); updateQueue();
+  if (!item) return;
+  const { rewardId, cooldownMs } = item;
+  playbackBusy = true;
+  updateQueue();
+  const waitMs = Math.max(0, (lastPlaybackStart.get(rewardId) || 0) + cooldownMs - Date.now());
+  if (waitMs > 0) {
+    queueTimer = setTimeout(() => { queueTimer = null; startQueuedAudio(rewardId); }, waitMs);
+    return;
+  }
+  startQueuedAudio(rewardId);
+}
+function startQueuedAudio(rewardId) {
   const audio = new Audio();
   activeRewardId = rewardId;
   audio.volume = effectiveVolume(rewardId);
   activeAudio = audio;
+  lastPlaybackStart.set(rewardId, Date.now());
+  updateQueue();
+  let completed = false;
   const finish = () => {
+    if (completed) return;
+    completed = true;
     if (activeAudio !== audio) return;
     activeAudio = null; activeRewardId = '';
     if (activeObjectUrl) URL.revokeObjectURL(activeObjectUrl);
     activeObjectUrl = '';
+    playbackBusy = false;
+    updateQueue();
     playNext();
   };
+  const fail = (message) => { if (activeAudio === audio) toast(message, true); finish(); };
   audio.addEventListener('ended', finish, { once: true });
-  audio.addEventListener('error', finish, { once: true });
+  audio.addEventListener('error', () => {
+    const reason = audio.error?.code === 4 ? 'unsupported format or missing audio file' : 'audio could not be decoded or played';
+    fail(`Could not play this reward sound (${reason}). Check the selected file and try Test.`);
+  }, { once: true });
   (async () => {
     try {
       const sessionToken = await window.kickApp?.getApiSessionToken();
@@ -239,16 +269,18 @@ function playNext() {
       audio.src = objectUrl;
       await audio.play();
     } catch (error) {
-      if (activeAudio === audio) toast(error.message, true);
-      finish();
+      fail(`Could not play this reward sound: ${error.message}`);
     }
   })();
 }
 function stopSounds() {
   queue = []; updateQueue();
+  if (queueTimer) { clearTimeout(queueTimer); queueTimer = null; }
+  playbackBusy = false;
   if (activeAudio) { activeAudio.pause(); activeAudio.currentTime = 0; activeAudio.src = ''; activeAudio = null; activeRewardId = ''; }
   if (activeObjectUrl) URL.revokeObjectURL(activeObjectUrl);
   activeObjectUrl = '';
+  updateQueue();
 }
 
 async function chooseSound(reward) {
@@ -332,10 +364,11 @@ $('#volume').addEventListener('change', async () => {
   try { await request('/api/settings', { method: 'POST', body: JSON.stringify({ volume: Number($('#volume').value) / 100 }) }); }
   catch (error) { toast(error.message, true); }
 });
-window.kickApp?.onPlaySound(({ rewardId, masterVolume, rewardVolume }) => {
+window.kickApp?.onPlaySound(({ rewardId, masterVolume, rewardVolume, cooldownMs }) => {
   state.volume = masterVolume;
   state.rewardVolumes ||= {}; state.rewardVolumes[rewardId] = rewardVolume;
-  enqueueSound(rewardId);
+  queue.push({ rewardId, cooldownMs: Math.max(0, Number(cooldownMs) || 0) }); updateQueue();
+  if (!playbackBusy) playNext();
 });
 window.kickApp?.onStateChanged(() => refreshState().catch((error) => toast(error.message, true)));
 window.kickApp?.onPollError((message) => toast(t('kickCheckFailed', { message }), true));
