@@ -4,9 +4,13 @@
 
 > Early preview · Windows x64 · English and فارسی · The sample screenshots below use fake example data.
 
+**Language / زبان:** [English](#english) · [فارسی](#فارسی)  |  [Repository](https://github.com/MehdiMeidanshahi/Kick-Soundboard) · [Releases](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases)
+
+## English
+
 ## Quick start
 
-1. Download `Kick-Soundboard-Setup-<version>.exe` from this project's **GitHub → Releases** page and install it.
+1. Download the [v0.1.0 Windows installer](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/download/v0.1.0/Kick-Soundboard-Setup-0.1.0.exe) from [Releases](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) and install it.
 2. Sign in to Kick, open [Kick Developer settings](https://kick.com/settings/developer), and create your own app. Set the redirect URL to `http://localhost:9000`, enable **Read Channel points rewards information on a channel** (`channel:rewards:read`), and leave webhooks off. Save and copy that app's Client ID and Client Secret. **Keep the secret private.**
 3. In Kick Soundboard, open **Settings**, enter the Client ID and Client Secret, and choose **Save locally**. Choose **Connect Kick** and approve the read-only access in Kick's browser page.
 4. Choose an audio file for each reward and use **Test** to check it. Keep the app open while streaming; connect its Windows audio output to OBS if you want viewers to hear the sounds.
@@ -36,9 +40,9 @@ Each streamer connects their own Kick Developer app. The app runs locally and do
 
 ### 1. Download the app
 
-After a release is published, open this project's GitHub page, choose **Releases**, and download `Kick-Soundboard-Setup-<version>.exe` from the latest release. Run the installer; it installs for your Windows account and creates Start Menu and desktop shortcuts.
+Open the project's [Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) and download `Kick-Soundboard-Setup-<version>.exe`. For v0.1.0, use the [direct installer link](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/download/v0.1.0/Kick-Soundboard-Setup-0.1.0.exe). Run the installer; it installs for your Windows account and creates Start Menu and desktop shortcuts.
 
-Only download the installer from this project's official GitHub Releases page. The early-preview installer is not code-signed, so Windows may show an **Unknown publisher** or SmartScreen warning.
+Only download the installer from this project's official [GitHub Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases). The early-preview installer is not code-signed, so Windows may show an **Unknown publisher** or SmartScreen warning.
 
 ### 2. Create your own Kick Developer app
 
@@ -113,11 +117,13 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 
 ## فارسی
 
+**زبان / Language:** [فارسی](#فارسی) · [English](#english)  |  [مخزن پروژه](https://github.com/MehdiMeidanshahi/Kick-Soundboard) · [نسخه‌ها و دریافت](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases)
+
 **پخش صدای بازخرید امتیازهای کانال کیک روی رایانهٔ ویندوزی شما.** Kick Soundboard یک برنامهٔ محلی ویندوز است. پاداش‌های کانال و بازخریدها را می‌خواند و هنگام بازخرید هر پاداش، فایل صدایی را که برای آن انتخاب کرده‌اید پخش می‌کند.
 
 ## راه‌اندازی سریع
 
-۱. فایل `Kick-Soundboard-Setup-<version>.exe` را از بخش **Releases** مخزن GitHub همین پروژه دریافت و نصب کنید.
+۱. [نصب‌کنندهٔ ویندوز نسخهٔ ۰.۱.۰](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/download/v0.1.0/Kick-Soundboard-Setup-0.1.0.exe) را از صفحهٔ [نسخه‌های پروژه](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) دریافت و نصب کنید.
 ۲. وارد کیک شوید و [تنظیمات توسعه‌دهندگان کیک](https://kick.com/settings/developer) را باز کنید. یک برنامهٔ شخصی بسازید، نشانی بازگشت را `http://localhost:9000` بگذارید، دسترسی **Read Channel points rewards information on a channel** (`channel:rewards:read`) را فعال کنید و webhook را خاموش بگذارید. برنامه را ذخیره کنید و **Client ID** و **Client Secret** آن را بردارید. **رمز را محرمانه نگه دارید.**
 ۳. در Kick Soundboard وارد **Settings** شوید، شناسه و رمز را وارد کنید و **Save locally** را بزنید. سپس **Connect Kick** را انتخاب و دسترسی فقط‌خواندنی را در صفحهٔ کیک تأیید کنید.
 ۴. برای هر پاداش یک فایل صدا انتخاب کنید و با **Test** آن را بررسی کنید. هنگام استریم برنامه را باز نگه دارید؛ برای شنیده‌شدن صدا در OBS، خروجی صدای ویندوز برنامه را به صداهای استریم اضافه کنید.
@@ -149,9 +155,9 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 
 ### ۱. دریافت برنامه
 
-بعد از انتشار نسخه، در صفحهٔ GitHub پروژه وارد بخش **Releases** شوید و فایل `Kick-Soundboard-Setup-<version>.exe` را از آخرین نسخه بگیرید. نصب‌کننده را اجرا کنید؛ برنامه برای حساب ویندوزی شما نصب می‌شود و میان‌بر منوی Start و دسکتاپ می‌سازد.
+وارد صفحهٔ [نسخه‌های پروژه در GitHub](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) شوید و فایل `Kick-Soundboard-Setup-<version>.exe` را بگیرید. برای نسخهٔ ۰.۱.۰ از [لینک مستقیم نصب‌کننده](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/download/v0.1.0/Kick-Soundboard-Setup-0.1.0.exe) استفاده کنید. نصب‌کننده را اجرا کنید؛ برنامه برای حساب ویندوزی شما نصب می‌شود و میان‌بر منوی Start و دسکتاپ می‌سازد.
 
-نصب‌کننده را فقط از صفحهٔ رسمی GitHub Releases پروژه دریافت کنید. نسخهٔ آزمایشی امضای دیجیتال ندارد؛ ممکن است ویندوز هشدار **Unknown publisher** یا SmartScreen نشان دهد.
+نصب‌کننده را فقط از صفحهٔ رسمی [نسخه‌های GitHub پروژه](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) دریافت کنید. نسخهٔ آزمایشی امضای دیجیتال ندارد؛ ممکن است ویندوز هشدار **Unknown publisher** یا SmartScreen نشان دهد.
 
 ### ۲. ساخت برنامهٔ شخصی در Kick Developer
 
