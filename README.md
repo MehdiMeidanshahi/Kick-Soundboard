@@ -107,7 +107,7 @@ Kick Soundboard plays through your Windows audio output. In OBS or other streami
 ## Technical notes and limitations
 
 - The official [Kick Channel Rewards API](https://docs.kick.com/apis/channel-rewards) provides the reward redemption data used here. The app uses the [Kick OAuth authorization-code flow with PKCE](https://docs.kick.com/getting-started/generating-tokens-oauth2-flow) and requests the read scopes documented by Kick.
-- This version uses local polling every 10 seconds. It does not use Kick webhooks, which would need an internet-reachable receiver.
+- The app polls Kick locally every 10 seconds after a successful check. If Kick or the network returns an error, it waits before retrying and increases the delay up to 5 minutes; when Kick sends a `Retry-After` header, that delay is respected. Polling never overlaps itself. The app does not use Kick webhooks, which would need an internet-reachable receiver.
 - Kick's current redemption schema exposes the redeemer's numeric `user_id` and does not include a username. The app therefore displays the viewer ID; asking for `user:read` would not add other viewers' usernames.
 - If the app cannot start, another program may already be using port `9000`. Close that program or change both the app's redirect URL and its local port configuration before reconnecting.
 
