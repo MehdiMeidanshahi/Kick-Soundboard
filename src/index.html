@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; media-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>Kick Soundboard</title>
   <style>
     :root { color-scheme: dark; --bg:#0d1117; --panel:#151b23; --panel2:#1b222c; --line:#2b3542; --text:#f0f3f6; --muted:#8b98a8; --green:#53fc18; --green-d:#142719; --red:#ff5c64; }
@@ -70,6 +70,9 @@
     .dialog-head { display:flex; justify-content:space-between; align-items:center; padding:17px 20px; border-bottom:1px solid var(--line); }
     .dialog-head h2 { margin:0; font-size:16px; } .dialog-body { padding:18px 20px 20px; }
     .field { margin-bottom:15px; } .field label { display:block; font-weight:650; margin-bottom:6px; } .field-note { margin-top:5px; color:var(--muted); font-size:12px; }
+    .update-area { border-top:1px solid var(--line); margin-top:15px; padding-top:14px; }
+    .update-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .update-status { min-height:18px; }
     .dialog-actions { display:flex; justify-content:flex-end; gap:9px; padding-top:3px; }
     #toast { position:fixed; left:50%; bottom:22px; z-index:5; transform:translate(-50%,18px); opacity:0; pointer-events:none; transition:.2s; padding:10px 14px; border:1px solid var(--line); border-radius:9px; background:#202a35; box-shadow:0 6px 22px #0008; }
     #toast.show { opacity:1; transform:translate(-50%,0); } #toast.error { border-color:#8b3c43; color:#ffd7d9; }
@@ -118,6 +121,11 @@
         <div class="field"><label for="client-secret" data-i18n="clientSecret">Client Secret</label><input id="client-secret" type="password" autocomplete="new-password" placeholder="Saved securely on this PC" data-i18n-placeholder="secretPlaceholder"><div class="field-note" data-i18n="clientSecretHelp">Only stored on this PC using Windows secure storage. Never share it.</div></div>
         <div class="field"><label data-i18n="redirectUrl">Redirect URL</label><input value="http://localhost:9000" readonly><div class="field-note" data-i18n="redirectHelp">This must match your Kick Developer app redirect URL.</div></div>
         <div class="dialog-actions"><button type="button" id="disconnect-btn" class="danger" hidden data-i18n="disconnectKick">Disconnect Kick</button><button type="button" id="cancel-settings" class="ghost" data-i18n="cancel">Cancel</button><button type="submit" class="primary" data-i18n="saveLocally">Save locally</button></div>
+        <div class="update-area">
+          <div class="update-actions"><span id="app-version" class="field-note"></span><button type="button" id="check-updates" class="ghost small" data-i18n="checkUpdates">Check for updates</button></div>
+          <div id="update-status" class="field-note update-status" role="status" aria-live="polite"></div>
+          <button type="button" id="download-update" class="small primary" hidden data-i18n="downloadUpdate">Open download page</button>
+        </div>
       </form>
     </div>
   </div>

@@ -37,6 +37,7 @@ Each streamer connects their own Kick Developer app. The app runs locally and do
 - Lets you choose an audio file on your computer for each reward. Supported formats: MP3, WAV, OGG, M4A, AAC, and FLAC.
 - Plays a mapped sound when it sees a new, non-rejected redemption. Sounds play in arrival order in a queue; ten redemptions close together are kept and played one at a time. The queue shows total queued and waiting counts. **Stop audio** stops the current sound and clears the queue.
 - Includes master and per-reward volume controls, a per-reward cooldown, a test button, and redemption history.
+- Shows the installed app version in Settings and lets you check GitHub Releases for a newer version.
 - Shows the redeemer and their optional message when Kick supplies those fields. Kick's current polling schema supplies the redeemer's numeric ID, not their username, so history normally displays the ID.
 - Has English and Persian interfaces, including right-to-left layout.
 
@@ -46,7 +47,9 @@ Each streamer connects their own Kick Developer app. The app runs locally and do
 
 Open the project's [Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) and download `Kick-Soundboard-Setup-<version>.exe`. Run the installer; it installs for your Windows account and creates Start Menu and desktop shortcuts.
 
-Only download the installer from this project's official [GitHub Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases). The early-preview installer is not code-signed, so Windows may show an **Unknown publisher** or SmartScreen warning.
+Only download the installer from this project's official [GitHub Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases). The early-preview installer is not code-signed, so Windows may show **Windows protected your PC** or an **Unknown publisher** warning. The warning cannot be removed without signing the installer with a trusted code-signing certificate. If you choose to continue, first confirm that the installer came from this repository's Releases page and verify its published SHA-256 checksum.
+
+To update, close the app and run the newer installer. It uses the same app identity as earlier versions and upgrades that installation; local app data is preserved. Windows SmartScreen may still warn because the installer is unsigned. You can review the release and its SHA-256 checksum before running it.
 
 ### 2. Create your own Kick Developer app
 
@@ -156,6 +159,7 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 - برای هر پاداش می‌توانید یک فایل صدا از رایانه انتخاب کنید. فرمت‌های MP3، WAV، OGG، M4A، AAC و FLAC پشتیبانی می‌شوند.
 - هنگام مشاهدهٔ بازخرید جدید و ردنشده، صدای مربوط را به‌ترتیب در صف می‌گذارد؛ حتی اگر چند بازخرید هم‌زمان انجام شوند، یکی‌یکی پخش می‌شوند. شمار کل موارد صف و موارد در انتظار نمایش داده می‌شود. دکمهٔ **Stop audio** صدای در حال پخش را متوقف و صف را پاک می‌کند.
 - بلندی صدای اصلی و جداگانهٔ هر پاداش، مدت وقفه، دکمهٔ آزمایش صدا و تاریخچه دارد.
+- نسخهٔ نصب‌شده را در Settings نشان می‌دهد و می‌توانید وجود نسخهٔ جدید را در GitHub بررسی کنید.
 - نام بازخریدکننده و پیام او را در صورت ارسال کیک نمایش می‌دهد. در schema فعلی API کیک، بازخریدکننده فقط با شناسهٔ عددی `user_id` معرفی می‌شود و نام کاربری در پاسخ نیست؛ بنابراین معمولاً شناسهٔ بیننده نمایش داده می‌شود.
 - رابط انگلیسی و فارسی دارد و در فارسی از راست به چپ نمایش داده می‌شود.
 
@@ -165,7 +169,9 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 
 وارد صفحهٔ [نسخه‌های پروژه در GitHub](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) شوید و جدیدترین فایل `Kick-Soundboard-Setup-<version>.exe` را دانلود کنید. نصب‌کننده را اجرا کنید؛ برنامه برای حساب ویندوزی شما نصب می‌شود و میان‌بر منوی Start و دسکتاپ می‌سازد.
 
-نصب‌کننده را فقط از صفحهٔ رسمی [نسخه‌های GitHub پروژه](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) دریافت کنید. نسخهٔ آزمایشی امضای دیجیتال ندارد؛ ممکن است ویندوز هشدار **Unknown publisher** یا SmartScreen نشان دهد.
+نصب‌کننده را فقط از صفحهٔ رسمی [نسخه‌های GitHub پروژه](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) دریافت کنید. نصب‌کننده امضای دیجیتال ندارد؛ ممکن است ویندوز پیام **Windows protected your PC** یا هشدار **Unknown publisher** نشان دهد. برای حذف این هشدار باید نصب‌کننده با گواهی معتبر امضا شود. اگر تصمیم به ادامه دارید، مطمئن شوید فایل را از صفحهٔ Releases همین مخزن گرفته‌اید و SHA-256 منتشرشده را بررسی کنید.
+
+برای به‌روزرسانی، برنامه را ببندید و نصب‌کنندهٔ نسخهٔ جدید را اجرا کنید. چون شناسهٔ نصب با نسخه‌های قبلی یکسان است، همان نصب به‌روزرسانی می‌شود و اطلاعات محلی برنامه حفظ می‌شود. ممکن است SmartScreen به‌دلیل امضانشدن نصب‌کننده همچنان هشدار دهد. پیش از اجرا می‌توانید نسخه و SHA-256 آن را بررسی کنید.
 
 ### ۲. ساخت برنامهٔ شخصی در Kick Developer
 

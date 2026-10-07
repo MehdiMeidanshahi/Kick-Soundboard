@@ -9,7 +9,7 @@ const translations = {
     setupTitle:'Connect your Kick channel', setupDescription:'Enter your developer app credentials in Settings, then connect Kick. The app checks for reward redemptions and plays mapped sounds on this PC.', openSettings:'Open Settings', localNotice:'Your credentials and sound mappings are stored locally on this computer.',
     rewardSounds:'Reward sounds', refreshRewards:'Refresh rewards', masterVolume:'Master volume', stopAudio:'Stop audio', redemptionHistory:'Redemption history', clear:'Clear', soundQueue:'Sound queue', waiting:'waiting', queuedTotal:'queued',
     connectEmpty:'Connect your Kick account to load your channel rewards.', noRewards:'No rewards found. Create channel point rewards on Kick, then refresh.', emptyHistory:'New reward redemptions will appear here.',
-    connectionSettings:'Kick connection settings', clientId:'Client ID', clientIdHelp:'From your Kick Developer app settings.', clientSecret:'Client Secret', secretPlaceholder:'Saved securely on this PC', clientSecretHelp:'Only stored on this PC using Windows secure storage. Never share it.', redirectUrl:'Redirect URL', redirectHelp:'This must match your Kick Developer app redirect URL.', cancel:'Cancel', saveLocally:'Save locally', disconnectKick:'Disconnect Kick', disconnectedKick:'Kick disconnected on this PC. Revoke app access in Kick settings too, if desired.',
+    connectionSettings:'Kick connection settings', clientId:'Client ID', clientIdHelp:'From your Kick Developer app settings.', clientSecret:'Client Secret', secretPlaceholder:'Saved securely on this PC', clientSecretHelp:'Only stored on this PC using Windows secure storage. Never share it.', redirectUrl:'Redirect URL', redirectHelp:'This must match your Kick Developer app redirect URL.', cancel:'Cancel', saveLocally:'Save locally', disconnectKick:'Disconnect Kick', disconnectedKick:'Kick disconnected on this PC. Revoke app access in Kick settings too, if desired.', appVersion:'Version {version}', checkUpdates:'Check for updates', checkingUpdates:'Checking GitHub for updates…', updateAvailable:'Version {version} is available.', upToDate:'You have the latest version ({version}).', updateError:'Could not check for updates: {message}', downloadUpdate:'Open download page',
     points:'points', noSound:'No sound selected', chooseSound:'Choose sound', change:'Change', test:'Test', removeSound:'Remove sound', cooldown:'Cooldown · sec', cooldownTitle:'Cooldown in seconds',
     pending:'Pending', accepted:'Accepted', rejected:'Rejected', redeemed:'Redeemed', redeemedVerb:'redeemed', unknownViewer:'Unknown viewer', viewerId:'Viewer #{id}', untitledReward:'Untitled reward', channelReward:'Channel reward',
     enabled:'Enabled', paused:'Paused', disabled:'Disabled', perRewardVolume:'Sound volume',
@@ -24,7 +24,7 @@ const translations = {
     setupTitle:'کانال کیک خود را وصل کنید', setupDescription:'اطلاعات برنامهٔ توسعه‌دهنده را در تنظیمات وارد کنید و به کیک وصل شوید. برنامه بازخرید پاداش‌ها را بررسی می‌کند و صدای انتخاب‌شده را در همین رایانه پخش می‌کند.', openSettings:'باز کردن تنظیمات', localNotice:'اطلاعات ورود و نگاشت صداها فقط روی همین رایانه ذخیره می‌شوند.',
     rewardSounds:'صداهای پاداش', refreshRewards:'به‌روزرسانی پاداش‌ها', masterVolume:'بلندی صدای اصلی', stopAudio:'توقف صدا', redemptionHistory:'تاریخچهٔ بازخریدها', clear:'پاک کردن', soundQueue:'صف پخش صدا', waiting:'در انتظار', queuedTotal:'در صف',
     connectEmpty:'برای دریافت پاداش‌های کانال، حساب کیک را وصل کنید.', noRewards:'پاداشی پیدا نشد. در کیک پاداش بسازید و دوباره به‌روزرسانی کنید.', emptyHistory:'بازخریدهای جدید اینجا نمایش داده می‌شوند.',
-    connectionSettings:'تنظیمات اتصال کیک', clientId:'شناسهٔ کلاینت', clientIdHelp:'از تنظیمات برنامهٔ توسعه‌دهندهٔ کیک بردارید.', clientSecret:'رمز کلاینت', secretPlaceholder:'به‌صورت امن روی این رایانه ذخیره می‌شود', clientSecretHelp:'فقط با حافظهٔ امن ویندوز روی این رایانه ذخیره می‌شود. آن را برای کسی نفرستید.', redirectUrl:'نشانی بازگشت', redirectHelp:'این نشانی باید با نشانی بازگشت برنامهٔ کیک یکسان باشد.', cancel:'لغو', saveLocally:'ذخیره روی رایانه', disconnectKick:'قطع اتصال کیک', disconnectedKick:'اتصال این برنامه به کیک قطع شد. در صورت تمایل، دسترسی برنامه را از تنظیمات کیک هم لغو کنید.',
+    connectionSettings:'تنظیمات اتصال کیک', clientId:'شناسهٔ کلاینت', clientIdHelp:'از تنظیمات برنامهٔ توسعه‌دهندهٔ کیک بردارید.', clientSecret:'رمز کلاینت', secretPlaceholder:'به‌صورت امن روی این رایانه ذخیره می‌شود', clientSecretHelp:'فقط با حافظهٔ امن ویندوز روی این رایانه ذخیره می‌شود. آن را برای کسی نفرستید.', redirectUrl:'نشانی بازگشت', redirectHelp:'این نشانی باید با نشانی بازگشت برنامهٔ کیک یکسان باشد.', cancel:'لغو', saveLocally:'ذخیره روی رایانه', disconnectKick:'قطع اتصال کیک', disconnectedKick:'اتصال این برنامه به کیک قطع شد. در صورت تمایل، دسترسی برنامه را از تنظیمات کیک هم لغو کنید.', appVersion:'نسخهٔ {version}', checkUpdates:'بررسی نسخهٔ جدید', checkingUpdates:'در حال بررسی نسخه‌های GitHub…', updateAvailable:'نسخهٔ {version} در دسترس است.', upToDate:'آخرین نسخه را دارید ({version}).', updateError:'بررسی نسخهٔ جدید انجام نشد: {message}', downloadUpdate:'رفتن به صفحهٔ دانلود',
     points:'امتیاز', noSound:'صدایی انتخاب نشده', chooseSound:'انتخاب صدا', change:'تغییر', test:'آزمایش', removeSound:'حذف صدا', cooldown:'وقفه · ثانیه', cooldownTitle:'مدت وقفه به ثانیه',
     pending:'در انتظار', accepted:'پذیرفته‌شده', rejected:'ردشده', redeemed:'بازخرید شد', redeemedVerb:'پاداش', unknownViewer:'بینندهٔ ناشناس', viewerId:'بینندهٔ شمارهٔ {id}', untitledReward:'پاداش بدون نام', channelReward:'پاداش کانال',
     enabled:'فعال', paused:'مکث‌شده', disabled:'غیرفعال', perRewardVolume:'بلندی صدای این پاداش',
@@ -311,6 +311,7 @@ async function refreshState() {
   setConnected(state.connected);
   $('#disconnect-btn').hidden = !state.connected;
   $('#client-id').value = state.clientId || '';
+  $('#app-version').textContent = t('appVersion', { version: state.version || '—' });
   $('#volume').value = Math.round((state.volume ?? 0.8) * 100);
   $('#volume-label').textContent = `${$('#volume').value}%`;
   renderRewards(); renderHistory();
@@ -345,6 +346,23 @@ $('#disconnect-btn').addEventListener('click', async () => {
     await refreshState(); closeSettings(); toast(t('disconnectedKick'));
   } catch (error) { toast(error.message, true); }
 });
+$('#check-updates').addEventListener('click', async () => {
+  const button = $('#check-updates');
+  const status = $('#update-status');
+  button.disabled = true;
+  $('#download-update').hidden = true;
+  status.textContent = t('checkingUpdates');
+  try {
+    const result = await request('/api/updates');
+    status.textContent = result.updateAvailable
+      ? t('updateAvailable', { version: result.latestVersion })
+      : t('upToDate', { version: result.currentVersion });
+    $('#download-update').hidden = !result.updateAvailable;
+  } catch (error) {
+    status.textContent = t('updateError', { message: error.message });
+  } finally { button.disabled = false; }
+});
+$('#download-update').addEventListener('click', () => window.kickApp?.openReleases());
 $('#refresh-btn').addEventListener('click', async () => { try { await loadRewards(); toast(t('rewardsRefreshed')); } catch (error) { toast(error.message, true); } });
 $('#stop-btn').addEventListener('click', stopSounds);
 $('#clear-history').addEventListener('click', async () => { try { await request('/api/history/clear', { method: 'POST', body: '{}' }); await refreshState(); } catch (error) { toast(error.message, true); } });

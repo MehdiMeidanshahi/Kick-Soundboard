@@ -100,13 +100,13 @@ function publicState() {
   }
   if (captureGuideScreenshots) {
     return {
-      configured: true, connected: true, clientId: '', volume: 0.8,
+      configured: true, connected: true, clientId: '', version: app.getVersion(), volume: 0.8,
       rewardVolumes: { 'sample-reward-1': 0.85 }, sounds: { 'sample-reward-1': { name: 'alert.mp3' } },
       cooldowns: { 'sample-reward-1': 5 },
       history: [{ id: 'sample-redemption-1', rewardId: 'sample-reward-1', rewardTitle: 'Play a sound', userName: 'ViewerExample', userInput: 'Hello streamer!', redeemedAt: new Date(Date.now() - 120000).toISOString(), status: 'accepted' }],
     };
   }
-  return { configured: Boolean(config.clientId && config.encryptedClientSecret), connected: Boolean(accessToken), clientId: config.clientId, volume: config.volume ?? 0.8, rewardVolumes: config.rewardVolumes || {}, sounds, cooldowns: config.cooldowns || {}, history: config.history || [] };
+  return { configured: Boolean(config.clientId && config.encryptedClientSecret), connected: Boolean(accessToken), clientId: config.clientId, version: app.getVersion(), volume: config.volume ?? 0.8, rewardVolumes: config.rewardVolumes || {}, sounds, cooldowns: config.cooldowns || {}, history: config.history || [] };
 }
 
 function screenshotRewards() {
@@ -253,6 +253,19 @@ function playMappedSound(rewardId) {
   });
 }
 
+function parseVersion(version) {
+  const match = String(version || '').replace(/^v/i, '').match(/^(\d+)\.(\d+)\.(\d+)/);
+  return match ? match.slice(1).map(Number) : null;
+}
+
+function compareVersions(left, right) {
+  const a = parseVersion(left);
+  const b = parseVersion(right);
+  if (!a || !b) return 0;
+  for (let i = 0; i < 3; i += 1) if (a[i] !== b[i]) return a[i] - b[i];
+  return 0;
+}
+
 async function handleRequest(req, res) {
   if (req.headers.host !== `localhost:${PORT}`) {
     res.writeHead(421, { 'cache-control': 'no-store' });
@@ -271,7 +284,6 @@ async function handleRequest(req, res) {
       oauthAttempt = null;
       startPolling();
       mainWindow?.webContents.send('state-changed');
-      mainWindow?.webContents.send('state-changed');
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
       return res.end('<meta http-equiv="refresh" content="2;url=http://localhost:9000"><h2>Kick connected</h2><p>You can return to the soundboard.</p>');
     } catch (error) {
@@ -284,6 +296,27 @@ async function handleRequest(req, res) {
     const state = publicState();
     state.connected = captureGuideScreenshots || Boolean(accessToken);
     return sendJson(res, 200, state);
+  }
+  if (req.method === 'GET' && url.pathname === '/api/updates') {
+    try {
+      const response = await fetch('https://api.github.com/repos/MehdiMeidanshahi/Kick-Soundboard/releases?per_page=100', {
+        headers: { accept: 'application/vnd.github+json', 'user-agent': 'Kick-Soundboard' },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!response.ok) throw new Error(`GitHub returned HTTP ${response.status}.`);
+      const releases = await response.json();
+      const release = releases.filter((item) => !item.draft && parseVersion(item.tag_name))
+        .sort((a, b) => compareVersions(b.tag_name, a.tag_name))[0];
+      if (!release) throw new Error('No published app releases were found.');
+      const currentVersion = app.getVersion();
+      return sendJson(res, 200, {
+        currentVersion,
+        latestVersion: String(release.tag_name).replace(/^v/i, ''),
+        updateAvailable: compareVersions(release.tag_name, currentVersion) > 0,
+      });
+    } catch (error) {
+      return sendJson(res, 502, { error: error.name === 'TimeoutError' ? 'GitHub update check timed out.' : error.message || 'GitHub update check failed.' });
+    }
   }
   if (req.method === 'POST' && url.pathname === '/api/config') {
     const body = JSON.parse(await readBody(req));
@@ -436,6 +469,10 @@ ipcMain.handle('choose-audio', async (event) => {
 ipcMain.handle('get-api-session-token', (event) => {
   assertTrustedFrame(event);
   return apiSessionToken;
+});
+ipcMain.handle('open-releases', (event) => {
+  assertTrustedFrame(event);
+  return shell.openExternal('https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases');
 });
 
 app.whenReady().then(() => {
