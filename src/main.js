@@ -23,6 +23,8 @@ let consecutivePollFailures = 0;
 let lastPollRetryAfterMs = null;
 let pollingGeneration = 0;
 let lastPollError = '';
+let lastPollSuccessAt = null;
+let nextPollAt = null;
 let config = { clientId: '', encryptedClientSecret: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [], pendingIds: [] };
 let accessToken = '';
 let refreshToken = '';
@@ -41,6 +43,9 @@ function readJson(file, fallback) {
 function loadLocalState() {
   const stored = readJson(configPath(), {});
   config = { ...config, ...stored };
+  lastPollSuccessAt = config.lastPollSuccessAt || null;
+  nextPollAt = null;
+  lastPollError = config.lastPollError || '';
   const tokens = readJson(tokenPath(), {});
   if (tokens.encryptedAccessToken && safeStorage.isEncryptionAvailable()) {
     try { accessToken = safeStorage.decryptString(Buffer.from(tokens.encryptedAccessToken, 'base64')); } catch {}
@@ -103,17 +108,18 @@ function requireAppRequest(req, res) {
 function publicState() {
   const sounds = {};
   for (const [id, sound] of Object.entries(config.sounds || {})) {
-    sounds[id] = { name: path.basename(String(sound?.name || sound?.path || '')) };
+    sounds[id] = { name: path.basename(String(sound?.name || sound?.path || '')), available: Boolean(sound?.path && fs.existsSync(sound.path) && fs.statSync(sound.path).isFile()) };
   }
   if (captureGuideScreenshots) {
     return {
       configured: true, connected: true, clientId: '', version: app.getVersion(), volume: 0.8,
-      rewardVolumes: { 'sample-reward-1': 0.85 }, sounds: { 'sample-reward-1': { name: 'alert.mp3' } },
+      rewardVolumes: { 'sample-reward-1': 0.85 }, sounds: { 'sample-reward-1': { name: 'alert.mp3', available: true } },
       cooldowns: { 'sample-reward-1': 5 },
+      outputDeviceId: config.outputDeviceId || '', streamerMode: Boolean(config.streamerMode), lastPollSuccessAt, nextPollAt, pollError: lastPollError,
       history: [{ id: 'sample-redemption-1', rewardId: 'sample-reward-1', rewardTitle: 'Play a sound', userName: 'ViewerExample', userInput: 'Hello streamer!', redeemedAt: new Date(Date.now() - 120000).toISOString(), status: 'accepted' }],
     };
   }
-  return { configured: Boolean(config.clientId && config.encryptedClientSecret), connected: Boolean(accessToken), clientId: config.clientId, version: app.getVersion(), volume: config.volume ?? 0.8, rewardVolumes: config.rewardVolumes || {}, sounds, cooldowns: config.cooldowns || {}, history: config.history || [] };
+  return { configured: Boolean(config.clientId && config.encryptedClientSecret), connected: Boolean(accessToken), clientId: config.clientId, version: app.getVersion(), volume: config.volume ?? 0.8, rewardVolumes: config.rewardVolumes || {}, sounds, cooldowns: config.cooldowns || {}, history: config.history || [], outputDeviceId: config.outputDeviceId || '', streamerMode: Boolean(config.streamerMode), lastPollSuccessAt, nextPollAt, pollError: lastPollError };
 }
 
 function screenshotRewards() {
@@ -262,10 +268,13 @@ async function pollRedemptions(isInitial = false) {
     }
     config.seenIds = [...seenIds].slice(-1000);
     config.pendingIds = [...pendingIds].slice(-1000);
-    saveConfig();
     lastPollError = '';
+    lastPollSuccessAt = new Date().toISOString();
+    config.lastPollSuccessAt = lastPollSuccessAt;
+    config.lastPollError = '';
     consecutivePollFailures = 0;
     lastPollRetryAfterMs = null;
+    saveConfig();
     mainWindow?.webContents.send('state-changed');
   } catch (error) {
     if (!accessToken) mainWindow?.webContents.send('state-changed');
@@ -273,11 +282,15 @@ async function pollRedemptions(isInitial = false) {
     const retryAfterMs = Number.isFinite(error.retryAfterMs) ? error.retryAfterMs : null;
     lastPollRetryAfterMs = retryAfterMs;
     const retryInSeconds = Math.ceil(getPollDelay({ consecutiveFailures: consecutivePollFailures, retryAfterMs }) / 1000);
+    nextPollAt = new Date(Date.now() + retryInSeconds * 1000).toISOString();
     const message = String(error.message || 'Kick request failed.');
     if (message !== lastPollError) {
       lastPollError = message;
-      mainWindow?.webContents.send('poll-error', { message, retryInSeconds });
     }
+    config.lastPollError = lastPollError;
+    saveConfig();
+    mainWindow?.webContents.send('poll-error', { message, retryInSeconds });
+    mainWindow?.webContents.send('state-changed');
   } finally { polling = false; }
 }
 
@@ -367,6 +380,8 @@ async function handleRequest(req, res) {
   if (req.method === 'POST' && url.pathname === '/api/settings') {
     const body = JSON.parse(await readBody(req));
     if (Number.isFinite(Number(body.volume))) config.volume = Math.min(1, Math.max(0, Number(body.volume)));
+    if (typeof body.outputDeviceId === 'string') config.outputDeviceId = body.outputDeviceId;
+    if (typeof body.streamerMode === 'boolean') config.streamerMode = body.streamerMode;
     if (body.rewardId) {
       config.sounds ||= {}; config.cooldowns ||= {}; config.rewardVolumes ||= {};
       if (typeof body.soundPath === 'string') {
@@ -432,6 +447,10 @@ async function handleRequest(req, res) {
     res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-store' });
     return fs.createReadStream(path.join(__dirname, 'renderer.js')).pipe(res);
   }
+  if (req.method === 'GET' && url.pathname === '/queue-playback.js') {
+    res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-store' });
+    return fs.createReadStream(path.join(__dirname, 'queue-playback.js')).pipe(res);
+  }
   if (req.method === 'GET' && url.pathname === '/icon.svg') {
     res.writeHead(200, { 'content-type': 'image/svg+xml; charset=utf-8', 'cache-control': 'public, max-age=86400' });
     return fs.createReadStream(path.join(__dirname, '..', 'build', 'icon.svg')).pipe(res);
@@ -452,6 +471,8 @@ function startPolling() {
     if (generation !== pollingGeneration || !accessToken) return;
     const delay = getPollDelay({ consecutiveFailures: consecutivePollFailures, retryAfterMs: lastPollRetryAfterMs });
     lastPollRetryAfterMs = null;
+    nextPollAt = new Date(Date.now() + delay).toISOString();
+    mainWindow?.webContents.send('state-changed');
     pollTimer = setTimeout(() => schedulePoll(false), delay);
   };
   schedulePoll(true);
@@ -460,11 +481,12 @@ function stopPolling() {
   pollingGeneration += 1;
   if (pollTimer) clearTimeout(pollTimer);
   pollTimer = null;
+  nextPollAt = null;
 }
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1120, height: 780, minWidth: 900, minHeight: 640,
+    width: 1360, height: 900, minWidth: 1080, minHeight: 700,
     backgroundColor: '#0d1117',
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true },
   });
