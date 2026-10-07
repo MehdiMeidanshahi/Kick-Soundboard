@@ -188,6 +188,15 @@ async function fetchRewards() {
   return result.data || [];
 }
 
+function mergeHistoryRecords(history, currentItems) {
+  const byId = new Map((history || []).map((item) => [item.id, item]));
+  for (const item of currentItems) {
+    const previous = byId.get(item.id);
+    byId.set(item.id, previous ? { ...previous, status: item.status } : item);
+  }
+  return [...byId.values()].sort((a, b) => new Date(b.redeemedAt) - new Date(a.redeemedAt)).slice(0, 100);
+}
+
 async function pollRedemptions(isInitial = false) {
   if (polling || !accessToken) return;
   polling = true;
@@ -219,16 +228,14 @@ async function pollRedemptions(isInitial = false) {
     const seen = new Set(config.seenIds || []);
     const newItems = sorted.filter((item) => !seen.has(item.id));
     if (isInitial) {
-      const uniqueHistory = new Map();
-      for (const item of [...sorted, ...(config.history || [])]) uniqueHistory.set(item.id, item);
-      config.history = [...uniqueHistory.values()].sort((a, b) => new Date(b.redeemedAt) - new Date(a.redeemedAt)).slice(0, 100);
+      config.history = mergeHistoryRecords(config.history, sorted);
     } else {
+      config.history = mergeHistoryRecords(config.history, sorted);
       // The API returns newest-first for history, but sounds should play oldest-first.
       for (const item of [...newItems].reverse()) {
-        config.history.unshift(item);
         if (item.status !== 'rejected') playMappedSound(item.rewardId, item.id);
       }
-      config.history = config.history.slice(0, 100);
+      config.history = mergeHistoryRecords(config.history, newItems);
     }
     config.seenIds = [...new Set([...(config.seenIds || []), ...sorted.map((item) => item.id)])].slice(-1000);
     saveConfig();

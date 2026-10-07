@@ -61,9 +61,13 @@
     .relative-time { color:#c5d1de; font-weight:600; }
     .event-text { grid-column:1/-1; color:#bcc8d5; padding-inline-start:10px; border-inline-start:2px solid #374658; overflow-wrap:anywhere; text-align:start; }
     .tag { font-size:10px; border-radius:99px; padding:3px 7px; color:#bdd0e1; background:#273443; align-self:start; }
-    .tag.pending { color:#f4dea2; background:#3b3321; } .tag.rejected { color:#ffb8bc; background:#3b2025; }
+    .tag.pending { color:#f4dea2; background:#3b3321; } .tag.accepted { color:#a5e891; background:#193421; } .tag.rejected { color:#ffb8bc; background:#3b2025; }
     .queue-bar { display:flex; align-items:center; justify-content:space-between; color:var(--muted); font-size:12px; margin-bottom:10px; }
     .queue-count { color:#d7e0e9; }
+    .history-guide { margin:0 0 10px; color:var(--muted); font-size:12px; }
+    .history-guide summary { cursor:pointer; width:max-content; }
+    .history-guide-list { display:grid; gap:8px; margin-top:10px; }
+    .history-guide-item { display:grid; grid-template-columns:max-content minmax(0,1fr); align-items:start; gap:7px; }
     .settings { position:fixed; inset:0; z-index:3; display:none; place-items:center; padding:22px; background:#000a; }
     .settings.open { display:grid; }
     .dialog { width:min(520px,100%); background:var(--panel); border:1px solid var(--line); border-radius:14px; box-shadow:0 18px 80px #0009; }
@@ -107,6 +111,14 @@
         <div class="panel-head"><h2 data-i18n="redemptionHistory">Redemption history</h2><button id="clear-history" class="ghost small" data-i18n="clear">Clear</button></div>
         <div class="panel-body">
           <div class="queue-bar"><span data-i18n="soundQueue">Sound queue</span><span id="queue-count" class="queue-count">0 waiting</span></div>
+          <details class="history-guide">
+            <summary data-i18n="statusGuideTitle">Redemption status guide</summary>
+            <div class="history-guide-list">
+              <div class="history-guide-item"><span class="tag pending" data-i18n="pending">Pending approval</span><span data-i18n="pendingGuide">Waiting for your decision in Kick’s Reward request queue. Its sound may play while pending.</span></div>
+              <div class="history-guide-item"><span class="tag accepted" data-i18n="accepted">Approved</span><span data-i18n="acceptedGuide">You approved this redemption.</span></div>
+              <div class="history-guide-item"><span class="tag rejected" data-i18n="rejected">Rejected</span><span data-i18n="rejectedGuide">You rejected this redemption.</span></div>
+            </div>
+          </details>
           <div class="log" id="history"><div class="empty">New reward redemptions will appear here.</div></div>
         </div>
       </section>

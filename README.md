@@ -37,6 +37,7 @@ Each streamer connects their own Kick Developer app. The app runs locally and do
 - Lets you choose an audio file on your computer for each reward. Supported formats: MP3, WAV, OGG, M4A, AAC, and FLAC.
 - Plays a mapped sound once for each new, non-rejected redemption ID. Sounds do not loop and play in arrival order in a queue; ten redemptions close together are kept and played one at a time. Duplicate redemption IDs are ignored. The queue shows total queued and waiting counts. **Stop audio** stops the current sound and clears the queue.
 - Includes master and per-reward volume controls, a per-reward cooldown, a test button, and redemption history.
+- History shows live redemption states: **Pending approval** (waiting in Kick's Reward request queue), **Approved**, and **Rejected**. Open the status guide above the history list for details.
 - Shows the installed app version in Settings and lets you check GitHub Releases for a newer version.
 - Shows the redeemer and their optional message when Kick supplies those fields. Kick's current polling schema supplies the redeemer's numeric ID, not their username, so history normally displays the ID.
 - Has English and Persian interfaces, including right-to-left layout.
@@ -159,6 +160,7 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 - برای هر پاداش می‌توانید یک فایل صدا از رایانه انتخاب کنید. فرمت‌های MP3، WAV، OGG، M4A، AAC و FLAC پشتیبانی می‌شوند.
 - هنگام مشاهدهٔ بازخرید جدید و ردنشده، صدا را فقط یک‌بار برای شناسهٔ همان بازخرید به صف می‌فرستد. صدا تکرار نمی‌شود و بازخریدها به‌ترتیب و یکی‌یکی پخش می‌شوند؛ شناسهٔ تکراری نادیده گرفته می‌شود. شمار کل موارد صف و موارد در انتظار نمایش داده می‌شود. دکمهٔ **Stop audio** صدای در حال پخش را متوقف و صف را پاک می‌کند.
 - بلندی صدای اصلی و جداگانهٔ هر پاداش، مدت وقفه، دکمهٔ آزمایش صدا و تاریخچه دارد.
+- وضعیت بازخریدها در تاریخچه به‌روز می‌شود: **در انتظار تأیید** (در Reward request queue کیک)، **تأیید شد** و **رد شد**. راهنمای بالای تاریخچه معنی هر وضعیت را توضیح می‌دهد.
 - نسخهٔ نصب‌شده را در Settings نشان می‌دهد و می‌توانید وجود نسخهٔ جدید را در GitHub بررسی کنید.
 - نام بازخریدکننده و پیام او را در صورت ارسال کیک نمایش می‌دهد. در schema فعلی API کیک، بازخریدکننده فقط با شناسهٔ عددی `user_id` معرفی می‌شود و نام کاربری در پاسخ نیست؛ بنابراین معمولاً شناسهٔ بیننده نمایش داده می‌شود.
 - رابط انگلیسی و فارسی دارد و در فارسی از راست به چپ نمایش داده می‌شود.
