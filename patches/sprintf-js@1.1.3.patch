@@ -1,0 +1,71 @@
+diff --git a/src/sprintf.js b/src/sprintf.js
+index 65d6324645ef1d0133614a71497751009dc5c912..901417701fb509c8752b04220ce64d9ad767636f 100644
+--- a/src/sprintf.js
++++ b/src/sprintf.js
+@@ -81,35 +81,35 @@
+                         arg = JSON.stringify(arg, null, ph.width ? parseInt(ph.width) : 0)
+                         break
+                     case 'e':
+-                        arg = ph.precision ? parseFloat(arg).toExponential(ph.precision) : parseFloat(arg).toExponential()
++                        arg = ph.precision !== undefined ? parseFloat(arg).toExponential(ph.precision) : parseFloat(arg).toExponential()
+                         break
+                     case 'f':
+-                        arg = ph.precision ? parseFloat(arg).toFixed(ph.precision) : parseFloat(arg)
++                        arg = ph.precision !== undefined ? parseFloat(arg).toFixed(ph.precision) : parseFloat(arg)
+                         break
+                     case 'g':
+-                        arg = ph.precision ? String(Number(arg.toPrecision(ph.precision))) : parseFloat(arg)
++                        arg = ph.precision !== undefined ? String(Number(arg.toPrecision(ph.precision))) : parseFloat(arg)
+                         break
+                     case 'o':
+                         arg = (parseInt(arg, 10) >>> 0).toString(8)
+                         break
+                     case 's':
+                         arg = String(arg)
+-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
++                        arg = (ph.precision !== undefined ? arg.substring(0, ph.precision) : arg)
+                         break
+                     case 't':
+                         arg = String(!!arg)
+-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
++                        arg = (ph.precision !== undefined ? arg.substring(0, ph.precision) : arg)
+                         break
+                     case 'T':
+                         arg = Object.prototype.toString.call(arg).slice(8, -1).toLowerCase()
+-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
++                        arg = (ph.precision !== undefined ? arg.substring(0, ph.precision) : arg)
+                         break
+                     case 'u':
+                         arg = parseInt(arg, 10) >>> 0
+                         break
+                     case 'v':
+                         arg = arg.valueOf()
+-                        arg = (ph.precision ? arg.substring(0, ph.precision) : arg)
++                        arg = (ph.precision !== undefined ? arg.substring(0, ph.precision) : arg)
+                         break
+                     case 'x':
+                         arg = (parseInt(arg, 10) >>> 0).toString(16)
+@@ -184,6 +184,14 @@
+                     throw new Error('[sprintf] mixing positional and named placeholders is not (yet) supported')
+                 }
+ 
++                var precision = match[7] === undefined ? undefined : parseInt(match[7], 10)
++                if (precision !== undefined && (precision < 0 || precision > 100)) {
++                    throw new SyntaxError('[sprintf] precision must be between 0 and 100')
++                }
++                if (match[8] === 'g' && precision === 0) {
++                    precision = 1
++                }
++
+                 parse_tree.push(
+                     {
+                         placeholder: match[0],
+@@ -193,7 +201,7 @@
+                         pad_char:    match[4],
+                         align:       match[5],
+                         width:       match[6],
+-                        precision:   match[7],
++                        precision:   precision,
+                         type:        match[8]
+                     }
+                 )

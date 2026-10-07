@@ -1,0 +1,44 @@
+{
+  "name": "kick-soundboard-local",
+  "version": "0.1.0",
+  "description": "Local Kick channel reward soundboard for Windows streamers",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "44.6.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.localvc.kicksoundboard",
+    "productName": "Kick Soundboard",
+    "asar": true,
+    "electronLanguages": ["en-US", "fa"],
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "Kick-Soundboard-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

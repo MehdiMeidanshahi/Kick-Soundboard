@@ -1,0 +1,7 @@
+allowBuilds:
+  electron: true
+  electron-winstaller: false
+minimumReleaseAgeExclude:
+  - electron@44.6.0
+patchedDependencies:
+  sprintf-js@1.1.3: patches/sprintf-js@1.1.3.patch
