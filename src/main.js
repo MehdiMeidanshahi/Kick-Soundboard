@@ -226,7 +226,7 @@ async function pollRedemptions(isInitial = false) {
       // The API returns newest-first for history, but sounds should play oldest-first.
       for (const item of [...newItems].reverse()) {
         config.history.unshift(item);
-        if (item.status !== 'rejected') playMappedSound(item.rewardId);
+        if (item.status !== 'rejected') playMappedSound(item.rewardId, item.id);
       }
       config.history = config.history.slice(0, 100);
     }
@@ -244,9 +244,10 @@ async function pollRedemptions(isInitial = false) {
   } finally { polling = false; }
 }
 
-function playMappedSound(rewardId) {
+function playMappedSound(rewardId, redemptionId) {
   mainWindow?.webContents.send('play-sound', {
     rewardId,
+    redemptionId,
     masterVolume: config.volume ?? 0.8,
     rewardVolume: config.rewardVolumes?.[rewardId] ?? 1,
     cooldownMs: Math.max(0, Number(config.cooldowns?.[rewardId] || 0) * 1000),

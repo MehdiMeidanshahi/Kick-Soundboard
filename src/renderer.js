@@ -39,6 +39,7 @@ let language = localStorage.getItem('kick-soundboard-language') === 'fa' ? 'fa' 
 let state = { connected: false, configured: false, sounds: {}, cooldowns: {}, rewardVolumes: {}, history: [], volume: 0.8 };
 let rewards = [];
 let queue = [];
+const queuedRedemptionIds = new Set();
 let activeAudio = null;
 let activeRewardId = '';
 let activeObjectUrl = '';
@@ -213,6 +214,13 @@ function enqueueSound(rewardId) {
   queue.push({ rewardId, cooldownMs: Math.max(0, Number(state.cooldowns?.[rewardId] || 0) * 1000) }); updateQueue();
   if (!playbackBusy) playNext();
 }
+function enqueueRedemptionSound({ rewardId, redemptionId, cooldownMs }) {
+  if (!rewardId || (redemptionId && queuedRedemptionIds.has(redemptionId))) return;
+  if (!state.sounds?.[rewardId]) return toast(t('chooseFirst'), true);
+  if (redemptionId) queuedRedemptionIds.add(redemptionId);
+  queue.push({ rewardId, redemptionId, cooldownMs: Math.max(0, Number(cooldownMs) || 0) }); updateQueue();
+  if (!playbackBusy) playNext();
+}
 function playNext() {
   if (playbackBusy) return;
   const item = queue.shift(); updateQueue();
@@ -229,6 +237,7 @@ function playNext() {
 }
 function startQueuedAudio(rewardId) {
   const audio = new Audio();
+  audio.loop = false;
   activeRewardId = rewardId;
   audio.volume = effectiveVolume(rewardId);
   activeAudio = audio;
@@ -382,11 +391,10 @@ $('#volume').addEventListener('change', async () => {
   try { await request('/api/settings', { method: 'POST', body: JSON.stringify({ volume: Number($('#volume').value) / 100 }) }); }
   catch (error) { toast(error.message, true); }
 });
-window.kickApp?.onPlaySound(({ rewardId, masterVolume, rewardVolume, cooldownMs }) => {
+window.kickApp?.onPlaySound(({ rewardId, redemptionId, masterVolume, rewardVolume, cooldownMs }) => {
   state.volume = masterVolume;
   state.rewardVolumes ||= {}; state.rewardVolumes[rewardId] = rewardVolume;
-  queue.push({ rewardId, cooldownMs: Math.max(0, Number(cooldownMs) || 0) }); updateQueue();
-  if (!playbackBusy) playNext();
+  enqueueRedemptionSound({ rewardId, redemptionId, cooldownMs });
 });
 window.kickApp?.onStateChanged(() => refreshState().catch((error) => toast(error.message, true)));
 window.kickApp?.onPollError((message) => toast(t('kickCheckFailed', { message }), true));
