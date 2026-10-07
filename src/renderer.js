@@ -18,7 +18,7 @@ const translations = {
     rewardsRefreshed:'Rewards refreshed.', savedCredentials:'Credentials saved securely on this PC.', openedKick:'Kick opened in your browser. Approve the requested access, then return here.',
     authFailed:'Kick connection failed', authStateFailed:'Authorization state did not match. Return to the app and try again.',
     settingsMissing:'Add your Kick Client ID and Client Secret first.', secureStoreUnavailable:'Windows secure storage is unavailable; credentials were not saved.',
-    kickCheckFailed:'Kick check failed: {message}', clearHistory:'Clear redemption history?'
+    kickCheckFailed:'Kick check failed: {message}', pollRetry:'Retrying in {seconds} seconds.', clearHistory:'Clear redemption history?'
   },
   fa: {
     appName:'صندوق صدای کیک', tagline:'پخش صدای محلی برای پاداش‌های استریم', settings:'تنظیمات', connect:'اتصال به کیک', connected:'متصل', polling:'متصل · بررسی هر ۱۰ ثانیه', notConnected:'متصل نیست',
@@ -34,7 +34,7 @@ const translations = {
     rewardsRefreshed:'پاداش‌ها به‌روز شدند.', savedCredentials:'اطلاعات ورود به‌شکل امن روی همین رایانه ذخیره شد.', openedKick:'کیک در مرورگر باز شد. دسترسی درخواستی را تأیید کنید و به برنامه برگردید.',
     authFailed:'اتصال به کیک ناموفق بود', authStateFailed:'تأیید مجوز نامعتبر بود. به برنامه برگردید و دوباره تلاش کنید.',
     settingsMissing:'ابتدا شناسه و رمز کلاینت کیک را وارد کنید.', secureStoreUnavailable:'حافظهٔ امن ویندوز در دسترس نیست؛ اطلاعات ذخیره نشد.',
-    kickCheckFailed:'بررسی کیک ناموفق بود: {message}', clearHistory:'پاک کردن تاریخچهٔ بازخریدها؟'
+    kickCheckFailed:'بررسی کیک ناموفق بود: {message}', pollRetry:'تلاش دوباره تا {seconds} ثانیهٔ دیگر.', clearHistory:'پاک کردن تاریخچهٔ بازخریدها؟'
   }
 };
 let language = localStorage.getItem('kick-soundboard-language') === 'fa' ? 'fa' : 'en';
@@ -399,7 +399,10 @@ window.kickApp?.onPlaySound(({ rewardId, redemptionId, masterVolume, rewardVolum
   enqueueRedemptionSound({ rewardId, redemptionId, cooldownMs });
 });
 window.kickApp?.onStateChanged(() => refreshState().catch((error) => toast(error.message, true)));
-window.kickApp?.onPollError((message) => toast(t('kickCheckFailed', { message }), true));
+window.kickApp?.onPollError(({ message, retryInSeconds }) => toast(
+  `${t('kickCheckFailed', { message })} ${t('pollRetry', { seconds: retryInSeconds })}`,
+  true
+));
 
 applyLanguage();
 setConnected(false);

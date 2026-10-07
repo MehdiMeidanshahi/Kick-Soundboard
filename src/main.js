@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { getApprovedRedemptions } = require('./redemption-playback');
+const { parseRetryAfter, getPollDelay } = require('./polling-backoff');
 
 const PORT = 9000;
 const REDIRECT_URI = `http://localhost:${PORT}`;
@@ -16,6 +17,9 @@ let server;
 let oauthAttempt;
 let pollTimer;
 let polling = false;
+let consecutivePollFailures = 0;
+let lastPollRetryAfterMs = null;
+let pollingGeneration = 0;
 let lastPollError = '';
 let config = { clientId: '', encryptedClientSecret: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [], pendingIds: [] };
 let accessToken = '';
@@ -180,7 +184,12 @@ async function kickGet(endpoint) {
   const token = await ensureToken();
   const response = await fetch(`${API_BASE}${endpoint}`, { headers: { authorization: `Bearer ${token}` } });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.message || `Kick API error (${response.status})`);
+  if (!response.ok) {
+    const error = new Error(data.message || `Kick API error (${response.status})`);
+    error.statusCode = response.status;
+    error.retryAfterMs = parseRetryAfter(response.headers.get('retry-after'));
+    throw error;
+  }
   return data;
 }
 
@@ -247,13 +256,19 @@ async function pollRedemptions(isInitial = false) {
     config.pendingIds = [...pendingIds].slice(-1000);
     saveConfig();
     lastPollError = '';
+    consecutivePollFailures = 0;
+    lastPollRetryAfterMs = null;
     mainWindow?.webContents.send('state-changed');
   } catch (error) {
     if (!accessToken) mainWindow?.webContents.send('state-changed');
+    consecutivePollFailures += 1;
+    const retryAfterMs = Number.isFinite(error.retryAfterMs) ? error.retryAfterMs : null;
+    lastPollRetryAfterMs = retryAfterMs;
+    const retryInSeconds = Math.ceil(getPollDelay({ consecutiveFailures: consecutivePollFailures, retryAfterMs }) / 1000);
     const message = String(error.message || 'Kick request failed.');
     if (message !== lastPollError) {
       lastPollError = message;
-      mainWindow?.webContents.send('poll-error', message);
+      mainWindow?.webContents.send('poll-error', { message, retryInSeconds });
     }
   } finally { polling = false; }
 }
@@ -434,10 +449,24 @@ function escapeHtml(text) { return String(text).replace(/[&<>"']/g, (c) => ({ '&
 
 function startPolling() {
   stopPolling();
-  pollRedemptions(true);
-  pollTimer = setInterval(() => pollRedemptions(false), 10000);
+  const generation = pollingGeneration;
+  consecutivePollFailures = 0;
+  lastPollRetryAfterMs = null;
+  const schedulePoll = async (isInitial = false) => {
+    if (generation !== pollingGeneration || !accessToken) return;
+    await pollRedemptions(isInitial);
+    if (generation !== pollingGeneration || !accessToken) return;
+    const delay = getPollDelay({ consecutiveFailures: consecutivePollFailures, retryAfterMs: lastPollRetryAfterMs });
+    lastPollRetryAfterMs = null;
+    pollTimer = setTimeout(() => schedulePoll(false), delay);
+  };
+  schedulePoll(true);
 }
-function stopPolling() { if (pollTimer) clearInterval(pollTimer); pollTimer = null; }
+function stopPolling() {
+  pollingGeneration += 1;
+  if (pollTimer) clearTimeout(pollTimer);
+  pollTimer = null;
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
