@@ -2,7 +2,7 @@
 
 **Kick channel point rewards → sounds played on your Windows PC.** Kick Soundboard is a local Windows desktop app: it reads your channel rewards and their redemptions, then plays the audio file you assigned to a redeemed reward.
 
-> Early preview · Windows x64 · English and فارسی · The sample screenshots below use fake example data.
+> Early preview · Windows x64 · English and فارسی · The app screenshots use fake data. The Kick Developer setup image is based on the provided screenshots; both credential values are fully covered.
 
 **Language / زبان:** [English](#english) · [فارسی](#فارسی)  |  [Repository](https://github.com/MehdiMeidanshahi/Kick-Soundboard) · [Releases](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases)
 
@@ -16,6 +16,10 @@
 4. Choose an audio file for each reward and use **Test** to check it. Keep the app open while streaming; connect its Windows audio output to OBS if you want viewers to hear the sounds.
 
 Each streamer connects their own Kick Developer app. The app runs locally and does not need your Client Secret sent to anyone else.
+
+![Visual Kick Developer setup guide: create an app, set the localhost redirect, select read-only reward access, and keep credentials private. Client ID and Client Secret are fully hidden.](docs/screenshots/kick-developer-visual-guide.png)
+
+*Visual guide: both credential values are completely covered, and the correct read-only rewards permission is shown.*
 
 ## Screenshots
 
@@ -130,7 +134,11 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 
 هر استریمر برنامهٔ شخصی خودش را در Kick Developer وصل می‌کند. برنامه روی رایانهٔ خودتان اجرا می‌شود و لازم نیست Client Secret را برای کسی بفرستید.
 
-> نسخهٔ آزمایشی · ویندوز ۶۴ بیتی · فارسی و انگلیسی · تصاویر راهنما فقط داده‌های نمونه و ساختگی دارند.
+![راهنمای تصویری ساخت برنامهٔ Kick Developer، تنظیم نشانی localhost و انتخاب دسترسی فقط‌خواندنی پاداش‌ها. مقدار Client ID و Client Secret کاملاً پوشانده شده است.](docs/screenshots/kick-developer-visual-guide.png)
+
+*راهنمای تصویری؛ شناسه و رمز کلاینت کاملاً پوشانده شده‌اند و دسترسی صحیحِ فقط‌خواندنی پاداش‌ها نمایش داده شده است.*
+
+> نسخهٔ آزمایشی · ویندوز ۶۴ بیتی · فارسی و انگلیسی · تصاویر برنامه داده‌های نمونه و ساختگی دارند. تصویر راهنمای Kick Developer از تصویرهای ارسالی ساخته شده و شناسه و رمز کلاینت در آن کاملاً پوشانده شده‌اند.
 
 ## تصاویر برنامه
 
