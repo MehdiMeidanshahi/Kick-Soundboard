@@ -5,6 +5,8 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { getApprovedRedemptions } = require('./redemption-playback');
 const { parseRetryAfter, getPollDelay } = require('./polling-backoff');
+const { shouldClearRefreshTokens, createOAuthError } = require('./oauth-utils');
+const { parseVersion, compareVersions, latestStableRelease } = require('./versions');
 
 const PORT = 9000;
 const REDIRECT_URI = `http://localhost:${PORT}`;
@@ -171,8 +173,14 @@ async function ensureToken() {
   if (!refreshToken) throw new Error('Connect your Kick account first.');
   const body = new URLSearchParams({ grant_type: 'refresh_token', client_id: config.clientId, client_secret: getClientSecret(), refresh_token: refreshToken });
   const response = await fetch(`${OAUTH_BASE}/oauth/token`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
-  const data = await response.json();
-  if (!response.ok) { accessToken = ''; refreshToken = ''; tokenExpiresAt = 0; saveTokens(); throw new Error('Kick login expired. Connect your account again.'); }
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    if (shouldClearRefreshTokens(data)) {
+      accessToken = ''; refreshToken = ''; tokenExpiresAt = 0; saveTokens();
+    }
+    throw createOAuthError(data, response.status, response.headers.get('retry-after'));
+  }
+  if (!data.access_token) throw new Error('Kick did not return an access token. Try connecting again.');
   accessToken = data.access_token;
   refreshToken = data.refresh_token || refreshToken;
   tokenExpiresAt = Date.now() + Number(data.expires_in || 0) * 1000;
@@ -283,19 +291,6 @@ function playMappedSound(rewardId, redemptionId) {
   });
 }
 
-function parseVersion(version) {
-  const match = String(version || '').replace(/^v/i, '').match(/^(\d+)\.(\d+)\.(\d+)/);
-  return match ? match.slice(1).map(Number) : null;
-}
-
-function compareVersions(left, right) {
-  const a = parseVersion(left);
-  const b = parseVersion(right);
-  if (!a || !b) return 0;
-  for (let i = 0; i < 3; i += 1) if (a[i] !== b[i]) return a[i] - b[i];
-  return 0;
-}
-
 async function handleRequest(req, res) {
   if (req.headers.host !== `localhost:${PORT}`) {
     res.writeHead(421, { 'cache-control': 'no-store' });
@@ -335,8 +330,7 @@ async function handleRequest(req, res) {
       });
       if (!response.ok) throw new Error(`GitHub returned HTTP ${response.status}.`);
       const releases = await response.json();
-      const release = releases.filter((item) => !item.draft && parseVersion(item.tag_name))
-        .sort((a, b) => compareVersions(b.tag_name, a.tag_name))[0];
+      const release = latestStableRelease(releases);
       if (!release) throw new Error('No published app releases were found.');
       const currentVersion = app.getVersion();
       return sendJson(res, 200, {
