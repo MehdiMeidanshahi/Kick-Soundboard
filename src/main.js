@@ -3,6 +3,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const { getApprovedRedemptions } = require('./redemption-playback');
 
 const PORT = 9000;
 const REDIRECT_URI = `http://localhost:${PORT}`;
@@ -16,7 +17,7 @@ let oauthAttempt;
 let pollTimer;
 let polling = false;
 let lastPollError = '';
-let config = { clientId: '', encryptedClientSecret: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [] };
+let config = { clientId: '', encryptedClientSecret: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [], pendingIds: [] };
 let accessToken = '';
 let refreshToken = '';
 let tokenExpiresAt = 0;
@@ -225,19 +226,25 @@ async function pollRedemptions(isInitial = false) {
       } while (cursor && pages < 3);
     }
     const sorted = [...all.values()].sort((a, b) => new Date(b.redeemedAt) - new Date(a.redeemedAt));
-    const seen = new Set(config.seenIds || []);
-    const newItems = sorted.filter((item) => !seen.has(item.id));
-    if (isInitial) {
-      config.history = mergeHistoryRecords(config.history, sorted);
-    } else {
-      config.history = mergeHistoryRecords(config.history, sorted);
-      // The API returns newest-first for history, but sounds should play oldest-first.
-      for (const item of [...newItems].reverse()) {
-        if (item.status !== 'rejected') playMappedSound(item.rewardId, item.id);
-      }
-      config.history = mergeHistoryRecords(config.history, newItems);
+    const previousHistory = config.history;
+    config.history = mergeHistoryRecords(config.history, sorted);
+    // Pending requests are silent. Play only when they become approved; also
+    // play a newly observed approval after startup, but never replay old history.
+    const seenIds = new Set(config.seenIds || []);
+    const pendingIds = new Set(config.pendingIds || []);
+    for (const item of getApprovedRedemptions(sorted, previousHistory, seenIds, pendingIds, isInitial)) {
+      playMappedSound(item.rewardId, item.id);
     }
-    config.seenIds = [...new Set([...(config.seenIds || []), ...sorted.map((item) => item.id)])].slice(-1000);
+    for (const item of [...sorted].reverse()) {
+      if (item.status === 'pending') {
+        pendingIds.delete(item.id);
+        pendingIds.add(item.id);
+      } else pendingIds.delete(item.id);
+      seenIds.delete(item.id);
+      seenIds.add(item.id);
+    }
+    config.seenIds = [...seenIds].slice(-1000);
+    config.pendingIds = [...pendingIds].slice(-1000);
     saveConfig();
     lastPollError = '';
     mainWindow?.webContents.send('state-changed');
@@ -415,6 +422,10 @@ async function handleRequest(req, res) {
   if (req.method === 'GET' && url.pathname === '/renderer.js') {
     res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-store' });
     return fs.createReadStream(path.join(__dirname, 'renderer.js')).pipe(res);
+  }
+  if (req.method === 'GET' && url.pathname === '/icon.svg') {
+    res.writeHead(200, { 'content-type': 'image/svg+xml; charset=utf-8', 'cache-control': 'public, max-age=86400' });
+    return fs.createReadStream(path.join(__dirname, '..', 'build', 'icon.svg')).pipe(res);
   }
   res.writeHead(404); res.end('Not found');
 }

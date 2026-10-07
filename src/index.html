@@ -21,6 +21,7 @@
     header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:26px; }
     .brand { display:flex; align-items:center; gap:12px; }
     .logo { width:42px; height:42px; display:grid; place-items:center; border-radius:13px; color:#071506; background:var(--green); font-size:23px; font-weight:900; }
+    .brand-icon { width:42px; height:42px; display:block; border-radius:12px; }
     h1 { font-size:21px; margin:0; letter-spacing:-.3px; } .subbrand { color:var(--muted); font-size:12px; margin-top:1px; }
     .head-actions { display:flex; align-items:center; gap:10px; }
     .status { color:var(--muted); display:flex; align-items:center; gap:8px; padding:8px 11px; border:1px solid var(--line); border-radius:999px; }
@@ -88,7 +89,7 @@
 <body>
   <main class="shell">
     <header>
-      <div class="brand"><div class="logo">♫</div><div><h1 data-i18n="appName">Kick Soundboard</h1><div class="subbrand" data-i18n="tagline">Local reward sounds for your stream</div></div></div>
+      <div class="brand"><img class="brand-icon" src="/icon.svg" alt="" aria-hidden="true"><div><h1 data-i18n="appName">Kick Soundboard</h1><div class="subbrand" data-i18n="tagline">Local reward sounds for your stream</div></div></div>
       <div class="head-actions"><div class="status"><span id="status-dot" class="dot"></span><span id="status-label">Not connected</span></div><button id="lang-toggle" class="ghost" aria-label="Change language">فارسی</button><button id="settings-btn" class="ghost" data-i18n="settings">Settings</button><button id="connect-btn" class="primary">Connect Kick</button></div>
     </header>
 
