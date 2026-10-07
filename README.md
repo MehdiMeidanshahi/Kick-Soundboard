@@ -13,7 +13,7 @@
 1. Download the latest Windows installer from the project's [Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) and install it.
 2. Sign in to Kick, open [Kick Developer settings](https://kick.com/settings/developer), and create your own app. Set the redirect URL to `http://localhost:9000`, enable **Read Channel points rewards information on a channel** (`channel:rewards:read`), and leave webhooks off. Save and copy that app's Client ID and Client Secret. **Keep the secret private.**
 3. In Kick Soundboard, open **Settings**, enter the Client ID and Client Secret, and choose **Save locally**. Choose **Connect Kick** and approve the read-only access in Kick's browser page.
-4. Choose an audio file for each reward and use **Test** to check it. Keep the app open while streaming; connect its Windows audio output to OBS if you want viewers to hear the sounds.
+4. Choose an audio file for each reward and use **Test** to preview it without adding it to the redemption queue. Keep the app open while streaming; connect its Windows audio output to OBS if you want viewers to hear the sounds.
 
 Each streamer connects their own Kick Developer app. The app runs locally and does not need your Client Secret sent to anyone else.
 
@@ -35,8 +35,8 @@ Each streamer connects their own Kick Developer app. The app runs locally and do
 
 - Loads the signed-in streamer's Kick channel point rewards and shows whether each reward is enabled, paused, or disabled.
 - Lets you choose an audio file on your computer for each reward. Supported formats: MP3, WAV, OGG, M4A, AAC, and FLAC.
-- Plays a mapped sound only after the redemption is approved. Pending requests stay silent; rejected requests never play. Each approved redemption ID is queued once. Sounds do not loop and play in approval order, one at a time; multiple approvals close together are kept in the queue. The queue shows total queued and waiting counts. **Stop audio** stops the current sound and clears the queue.
-- Includes master and per-reward volume controls, a per-reward cooldown, a test button, and redemption history.
+- Plays a mapped sound only after the redemption is approved. Pending requests stay silent; rejected requests never play. Each approved redemption ID is queued once. Sounds do not loop and play in approval order, one at a time; multiple approvals close together are kept in the queue. The queue shows total queued and waiting counts. **Stop queue** and **Resume queue** appear one at a time according to the queue state. Stopping pauses playback without clearing queued sounds; new approvals continue to accumulate. If a sound was playing when stopped, it remains first in line. **Skip current** skips the active sound.
+- Includes master and per-reward volume controls, a per-reward cooldown, a **Test** button that previews the mapped file without joining or changing the redemption queue and becomes **Stop test** while that preview plays, and redemption history.
 - History shows live redemption states: **Pending approval** (waiting in Kick's Reward request queue), **Approved** (sound is queued), and **Rejected** (sound is skipped). Open the status guide above the history list for details.
 - Shows the installed app version in Settings and lets you check GitHub Releases for a newer version.
 - Shows the redeemer and their optional message when Kick supplies those fields. Kick's current polling schema supplies the redeemer's numeric ID, not their username, so history normally displays the ID.
@@ -79,9 +79,9 @@ Kick may limit how many Developer apps an account can create. If Kick reports th
 
 1. Find a reward in **Reward sounds** and choose **Choose sound**.
 2. Pick an audio file from your computer. The app stores the file path; it does not copy or upload the audio. If you move or rename the file later, select it again.
-3. Choose **Test** to preview it. Adjust **Sound volume** for that reward and **Master volume** for all sounds.
+3. Choose **Test** to play a preview of the selected file. The button changes to **Stop test** while the preview is playing; choose it again to stop the preview. It plays independently and does not add a test item to the redemption queue, even if that queue is stopped. Adjust **Sound volume** for that reward and **Master volume** for all sounds.
 4. Set **Cooldown · sec** to add a minimum gap between plays of the same reward. Redemptions are kept in the queue during cooldown and will play when their turn arrives.
-5. Use **Stop audio** to stop the current sound and clear waiting sounds. Redemption history is separate; **Clear** removes the displayed history.
+5. Use **Stop queue** to pause playback at any time, including when the queue is empty. It is shown while the queue is running; **Resume queue** replaces it while paused. New approved redemptions continue to be added to the waiting queue, but nothing plays until you choose **Resume queue**. If you stop during a sound, that sound remains first in line and restarts from the beginning when resumed. Use **Skip current** to skip the sound currently playing. **Clear queue** removes waiting sounds; redemption history is separate, and **Clear** removes the displayed history.
 
 ### 5. Get the sound into your stream
 
@@ -90,6 +90,8 @@ Kick Soundboard plays through your Windows audio output. In OBS or other streami
 ## While streaming
 
 - Keep Kick Soundboard open, connected, and online during the stream. Closing the app stops polling and sound playback.
+- The status above the panels shows the last successful Kick check and the next scheduled check, including seconds; polling errors and retry timing remain visible until recovery.
+- The **Stop queue** and **Resume queue** controls appear one at a time in the Sound queue panel, alongside the always-visible **Skip current** control. Stop queue pauses playback but does not stop polling or prevent new approved redemptions from joining the queue.
 - The app only reads rewards and redemptions. It does not approve, reject, edit, or create rewards.
 - Pending redemptions are shown in history but stay silent until approved in Kick. Rejected redemptions never play a sound. Rewards marked paused or disabled remain visible with their status indicator.
 - If you want to disconnect, open **Settings → Disconnect Kick**. This clears the saved OAuth tokens from this PC and stops polling. To revoke Kick's authorization too, remove the app from Kick's connected-app/account settings.
@@ -158,8 +160,8 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 
 - پاداش‌های امتیازی کانال کیک را می‌خواند و وضعیت فعال، مکث‌شده یا غیرفعال هر پاداش را نشان می‌دهد.
 - برای هر پاداش می‌توانید یک فایل صدا از رایانه انتخاب کنید. فرمت‌های MP3، WAV، OGG، M4A، AAC و FLAC پشتیبانی می‌شوند.
-- فایل صدای هر پاداش را فقط پس از تأیید بازخرید پخش می‌کند. بازخریدهای در انتظار بی‌صدا می‌مانند و بازخریدهای ردشده هرگز پخش نمی‌شوند. هر شناسه فقط یک‌بار به صف می‌رود. صدا تکرار نمی‌شود و تأییدهای پیاپی به‌ترتیب و یکی‌یکی پخش می‌شوند. دکمهٔ **Stop audio** صدای در حال پخش را متوقف و صف را پاک می‌کند.
-- بلندی صدای اصلی و جداگانهٔ هر پاداش، مدت وقفه، دکمهٔ آزمایش صدا و تاریخچه دارد.
+- فایل صدای هر پاداش را فقط پس از تأیید بازخرید پخش می‌کند. بازخریدهای در انتظار بی‌صدا می‌مانند و بازخریدهای ردشده هرگز پخش نمی‌شوند. هر شناسه فقط یک‌بار به صف می‌رود. صدا تکرار نمی‌شود و تأییدهای پیاپی به‌ترتیب و یکی‌یکی پخش می‌شوند. دکمه‌های **Stop queue** و **Resume queue** متناسب با وضعیت صف یکی‌یکی نمایش داده می‌شوند و **Skip current** کنار آن‌هاست. توقف صف، پخش را متوقف می‌کند اما صف را پاک نمی‌کند؛ بازخریدهای جدید همچنان وارد صف می‌شوند و تا زمان ادامه‌دادن پخش نمی‌شوند. اگر هنگام توقف صدایی در حال پخش باشد، در ابتدای صف باقی می‌ماند.
+- بلندی صدای اصلی و جداگانهٔ هر پاداش، مدت وقفه، دکمهٔ **Test** برای پیش‌نمایش مستقیم فایل بدون افزودن مورد آزمایشی به صف، و **Stop test** برای توقف پیش‌نمایش در حال پخش، و تاریخچه دارد.
 - وضعیت بازخریدها در تاریخچه به‌روز می‌شود: **در انتظار تأیید** (بی‌صدا تا زمان تأیید در Reward request queue کیک)، **تأیید شد** (صدا وارد صف می‌شود) و **رد شد** (صدا پخش نمی‌شود). راهنمای بالای تاریخچه معنی هر وضعیت را توضیح می‌دهد.
 - نسخهٔ نصب‌شده را در Settings نشان می‌دهد و می‌توانید وجود نسخهٔ جدید را در GitHub بررسی کنید.
 - نام بازخریدکننده و پیام او را در صورت ارسال کیک نمایش می‌دهد. در schema فعلی API کیک، بازخریدکننده فقط با شناسهٔ عددی `user_id` معرفی می‌شود و نام کاربری در پاسخ نیست؛ بنابراین معمولاً شناسهٔ بیننده نمایش داده می‌شود.
@@ -202,9 +204,9 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 
 ۱. در بخش **Reward sounds** پاداش موردنظر را پیدا و **Choose sound** را انتخاب کنید.
 ۲. فایل صدا را از رایانه انتخاب کنید. برنامه فقط مسیر فایل را نگه می‌دارد و آن را کپی یا بارگذاری نمی‌کند. اگر بعداً فایل را جابه‌جا یا تغییرنام دادید، دوباره انتخابش کنید.
-۳. با **Test** صدا را آزمایش کنید. **Sound volume** فقط برای همان پاداش است و **Master volume** روی همهٔ صداها اثر می‌گذارد.
+۳. با **Test** پیش‌نمایش صدا را پخش کنید؛ هنگام پخش، دکمه به **Stop test** تغییر می‌کند و با زدن دوبارهٔ آن، پیش‌نمایش متوقف می‌شود. این پخش مستقل از صف است و مورد آزمایشی به صف اضافه نمی‌کند. **Sound volume** فقط برای همان پاداش است و **Master volume** روی همهٔ صداها اثر می‌گذارد.
 ۴. با **Cooldown · sec** حداقل فاصلهٔ پخش صدای یک پاداش را تنظیم کنید. بازخریدها در مدت وقفه هم در صف می‌مانند و وقتی نوبتشان برسد پخش می‌شوند.
-۵. **Stop audio** صدای جاری را متوقف و صف انتظار را پاک می‌کند. **Clear** تاریخچهٔ نمایش‌داده‌شده را پاک می‌کند.
+۵. هر زمان لازم بود **Stop queue** را بزنید تا پخش متوقف شود؛ این دکمه حتی وقتی صف خالی است فعال است و در حالت توقف با **Resume queue** جایگزین می‌شود. بازخریدهای تأییدشدهٔ جدید همچنان در صف جمع می‌شوند، اما تا زدن **Resume queue** پخش نمی‌شوند. اگر هنگام پخش صدا صف را متوقف کنید، همان صدا در ابتدای صف می‌ماند و پس از ادامه از ابتدا پخش می‌شود. **Skip current** صدای جاری را رد می‌کند و **Clear queue** موارد منتظر را حذف می‌کند. **Test** پیش‌نمایش جداگانه پخش می‌کند و هنگام پخش برای توقف به **Stop test** تبدیل می‌شود. **Clear** تاریخچهٔ نمایش‌داده‌شده را پاک می‌کند.
 
 ### ۵. شنیده‌شدن صدا در استریم
 
@@ -213,6 +215,7 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 ## هنگام استریم
 
 - برنامه را هنگام استریم باز، متصل و آنلاین نگه دارید. با بستن برنامه، بررسی کیک و پخش صدا متوقف می‌شود.
+- وضعیت، زمان آخرین بررسی و بررسی بعدی (با نمایش ثانیه) در بالای برنامه دیده می‌شوند. **Stop queue** یا **Resume queue** و نیز **Skip current** در پنل صف در دسترس‌اند؛ توقف صف، بررسی کیک و دریافت بازخریدهای جدید را متوقف نمی‌کند.
 - برنامه فقط پاداش‌ها و بازخریدها را می‌خواند و آن‌ها را تأیید، رد، ویرایش یا ایجاد نمی‌کند.
 - بازخرید ردشده در تاریخچه می‌ماند ولی صدا پخش نمی‌کند. وضعیت پاداش‌های مکث‌شده یا غیرفعال با نشانگر نمایش داده می‌شود.
 - برای قطع اتصال، به **Settings → Disconnect Kick** بروید. این کار توکن‌های محلی را پاک و بررسی بازخریدها را متوقف می‌کند. برای لغو کامل مجوز کیک، دسترسی برنامه را از تنظیمات حساب کیک هم حذف کنید.

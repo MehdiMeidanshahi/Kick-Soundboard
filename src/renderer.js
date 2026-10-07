@@ -3,6 +3,7 @@ const modal = $('#settings-modal');
 const rewardRoot = $('#rewards');
 const historyRoot = $('#history');
 const toastRoot = $('#toast');
+const { prependInterruptedItem } = window.kickQueuePlayback;
 const translations = {
   en: {
     appName:'Kick Soundboard', tagline:'Local reward sounds for your stream', settings:'Settings', connect:'Connect Kick', connected:'Connected', polling:'Connected · checking every 10 sec', notConnected:'Not connected',
@@ -10,7 +11,7 @@ const translations = {
     rewardSounds:'Reward sounds', refreshRewards:'Refresh rewards', masterVolume:'Master volume', stopAudio:'Stop audio', redemptionHistory:'Redemption history', clear:'Clear', soundQueue:'Sound queue', waiting:'waiting', queuedTotal:'queued',
     connectEmpty:'Connect your Kick account to load your channel rewards.', noRewards:'No rewards found. Create channel point rewards on Kick, then refresh.', emptyHistory:'New reward redemptions will appear here.',
     connectionSettings:'Kick connection settings', clientId:'Client ID', clientIdHelp:'From your Kick Developer app settings.', clientSecret:'Client Secret', secretPlaceholder:'Saved securely on this PC', clientSecretHelp:'Only stored on this PC using Windows secure storage. Never share it.', redirectUrl:'Redirect URL', redirectHelp:'This must match your Kick Developer app redirect URL.', cancel:'Cancel', saveLocally:'Save locally', disconnectKick:'Disconnect Kick', disconnectedKick:'Kick disconnected on this PC. Revoke app access in Kick settings too, if desired.', appVersion:'Version {version}', checkUpdates:'Check for updates', checkingUpdates:'Checking GitHub for updates…', updateAvailable:'Version {version} is available.', upToDate:'You have the latest version ({version}).', updateError:'Could not check for updates: {message}', downloadUpdate:'Open download page',
-    points:'points', noSound:'No sound selected', chooseSound:'Choose sound', change:'Change', test:'Test', removeSound:'Remove sound', cooldown:'Cooldown · sec', cooldownTitle:'Cooldown in seconds',
+    points:'points', noSound:'No sound selected', chooseSound:'Choose sound', change:'Change', test:'Test', stopTest:'Stop test', removeSound:'Remove sound', cooldown:'Cooldown · sec', cooldownTitle:'Cooldown in seconds',
     pending:'Pending approval', accepted:'Approved', rejected:'Rejected', redeemed:'Redeemed', redeemedVerb:'redeemed', unknownViewer:'Unknown viewer', viewerId:'Viewer #{id}', untitledReward:'Untitled reward', channelReward:'Channel reward',
     statusGuideTitle:'Redemption status guide', pendingGuide:'Waiting for your decision in Kick’s Reward request queue. Its sound plays only after you approve it.', acceptedGuide:'You approved this redemption. Its sound is queued for playback.', rejectedGuide:'You rejected this redemption. Its sound is not played.',
     enabled:'Enabled', paused:'Paused', disabled:'Disabled', perRewardVolume:'Sound volume',
@@ -18,7 +19,13 @@ const translations = {
     rewardsRefreshed:'Rewards refreshed.', savedCredentials:'Credentials saved securely on this PC.', openedKick:'Kick opened in your browser. Approve the requested access, then return here.',
     authFailed:'Kick connection failed', authStateFailed:'Authorization state did not match. Return to the app and try again.',
     settingsMissing:'Add your Kick Client ID and Client Secret first.', secureStoreUnavailable:'Windows secure storage is unavailable; credentials were not saved.',
-    kickCheckFailed:'Kick check failed: {message}', pollRetry:'Retrying in {seconds} seconds.', clearHistory:'Clear redemption history?'
+    kickCheckFailed:'Kick check failed: {message}', pollRetry:'Retrying in {seconds} seconds.', clearHistory:'Clear redemption history?',
+    streamMode:'Stream mode',streamReadiness:'Stream readiness',searchRewards:'Search rewards',unassignedOnly:'Unassigned only',searchHistory:'Search history',allStatuses:'All statuses',historyFilter:'Filter history by status',
+    skipCurrent:'Skip current',clearQueue:'Clear queue',resumeQueue:'Resume queue',currentlyPlaying:'Playing: {name}',nothingPlaying:'Nothing playing',removeQueued:'Remove from queue',
+    audioOutput:'Audio output',systemDefault:'System default',refreshDevices:'Refresh devices',deviceUnavailable:'Selected output is unavailable; using system default.',
+    lastChecked:'Last checked: {time}',nextCheck:'Next check: {time}',retrying:'Retrying: {message}',never:'Never',readyConnection:'Kick connected',readySounds:'Rewards mapped',readyFiles:'Sound files available',readyPlayback:'Playback ready',
+    missingFile:'File missing',locateFile:'Locate file',noMatches:'No matching items',pollingIdle:'Kick is not connected',
+    previousPage:'Previous',nextPage:'Next',historyPage:'Page {page} of {pages}',stopQueue:'Stop queue',removeQueueItem:'Remove'
   },
   fa: {
     appName:'صندوق صدای کیک', tagline:'پخش صدای محلی برای پاداش‌های استریم', settings:'تنظیمات', connect:'اتصال به کیک', connected:'متصل', polling:'متصل · بررسی هر ۱۰ ثانیه', notConnected:'متصل نیست',
@@ -26,7 +33,7 @@ const translations = {
     rewardSounds:'صداهای پاداش', refreshRewards:'به‌روزرسانی پاداش‌ها', masterVolume:'بلندی صدای اصلی', stopAudio:'توقف صدا', redemptionHistory:'تاریخچهٔ بازخریدها', clear:'پاک کردن', soundQueue:'صف پخش صدا', waiting:'در انتظار', queuedTotal:'در صف',
     connectEmpty:'برای دریافت پاداش‌های کانال، حساب کیک را وصل کنید.', noRewards:'پاداشی پیدا نشد. در کیک پاداش بسازید و دوباره به‌روزرسانی کنید.', emptyHistory:'بازخریدهای جدید اینجا نمایش داده می‌شوند.',
     connectionSettings:'تنظیمات اتصال کیک', clientId:'شناسهٔ کلاینت', clientIdHelp:'از تنظیمات برنامهٔ توسعه‌دهندهٔ کیک بردارید.', clientSecret:'رمز کلاینت', secretPlaceholder:'به‌صورت امن روی این رایانه ذخیره می‌شود', clientSecretHelp:'فقط با حافظهٔ امن ویندوز روی این رایانه ذخیره می‌شود. آن را برای کسی نفرستید.', redirectUrl:'نشانی بازگشت', redirectHelp:'این نشانی باید با نشانی بازگشت برنامهٔ کیک یکسان باشد.', cancel:'لغو', saveLocally:'ذخیره روی رایانه', disconnectKick:'قطع اتصال کیک', disconnectedKick:'اتصال این برنامه به کیک قطع شد. در صورت تمایل، دسترسی برنامه را از تنظیمات کیک هم لغو کنید.', appVersion:'نسخهٔ {version}', checkUpdates:'بررسی نسخهٔ جدید', checkingUpdates:'در حال بررسی نسخه‌های GitHub…', updateAvailable:'نسخهٔ {version} در دسترس است.', upToDate:'آخرین نسخه را دارید ({version}).', updateError:'بررسی نسخهٔ جدید انجام نشد: {message}', downloadUpdate:'رفتن به صفحهٔ دانلود',
-    points:'امتیاز', noSound:'صدایی انتخاب نشده', chooseSound:'انتخاب صدا', change:'تغییر', test:'آزمایش', removeSound:'حذف صدا', cooldown:'وقفه · ثانیه', cooldownTitle:'مدت وقفه به ثانیه',
+    points:'امتیاز', noSound:'صدایی انتخاب نشده', chooseSound:'انتخاب صدا', change:'تغییر', test:'آزمایش', stopTest:'توقف آزمایش', removeSound:'حذف صدا', cooldown:'وقفه · ثانیه', cooldownTitle:'مدت وقفه به ثانیه',
     pending:'در انتظار تأیید', accepted:'تأیید شد', rejected:'رد شد', redeemed:'بازخرید شد', redeemedVerb:'پاداش', unknownViewer:'بینندهٔ ناشناس', viewerId:'بینندهٔ شمارهٔ {id}', untitledReward:'پاداش بدون نام', channelReward:'پاداش کانال',
     statusGuideTitle:'راهنمای وضعیت بازخرید', pendingGuide:'منتظر تصمیم شما در Reward request queue کیک است. صدا فقط پس از تأیید شما پخش می‌شود.', acceptedGuide:'این بازخرید را تأیید کرده‌اید. صدای آن در صف پخش قرار می‌گیرد.', rejectedGuide:'این بازخرید را رد کرده‌اید. صدای آن پخش نمی‌شود.',
     enabled:'فعال', paused:'مکث‌شده', disabled:'غیرفعال', perRewardVolume:'بلندی صدای این پاداش',
@@ -34,17 +41,35 @@ const translations = {
     rewardsRefreshed:'پاداش‌ها به‌روز شدند.', savedCredentials:'اطلاعات ورود به‌شکل امن روی همین رایانه ذخیره شد.', openedKick:'کیک در مرورگر باز شد. دسترسی درخواستی را تأیید کنید و به برنامه برگردید.',
     authFailed:'اتصال به کیک ناموفق بود', authStateFailed:'تأیید مجوز نامعتبر بود. به برنامه برگردید و دوباره تلاش کنید.',
     settingsMissing:'ابتدا شناسه و رمز کلاینت کیک را وارد کنید.', secureStoreUnavailable:'حافظهٔ امن ویندوز در دسترس نیست؛ اطلاعات ذخیره نشد.',
-    kickCheckFailed:'بررسی کیک ناموفق بود: {message}', pollRetry:'تلاش دوباره تا {seconds} ثانیهٔ دیگر.', clearHistory:'پاک کردن تاریخچهٔ بازخریدها؟'
+    kickCheckFailed:'بررسی کیک ناموفق بود: {message}', pollRetry:'تلاش دوباره تا {seconds} ثانیهٔ دیگر.', clearHistory:'پاک کردن تاریخچهٔ بازخریدها؟',
+    streamMode:'حالت استریم',streamReadiness:'آمادگی استریم',searchRewards:'جست‌وجوی پاداش‌ها',unassignedOnly:'فقط بدون صدا',searchHistory:'جست‌وجوی تاریخچه',allStatuses:'همهٔ وضعیت‌ها',historyFilter:'فیلتر تاریخچه بر اساس وضعیت',
+    skipCurrent:'رد کردن صدای جاری',clearQueue:'پاک کردن صف',resumeQueue:'ادامهٔ صف',currentlyPlaying:'در حال پخش: {name}',nothingPlaying:'صدایی در حال پخش نیست',removeQueued:'حذف از صف',
+    audioOutput:'خروجی صدا',systemDefault:'پیش‌فرض سیستم',refreshDevices:'به‌روزرسانی دستگاه‌ها',deviceUnavailable:'خروجی انتخاب‌شده در دسترس نیست؛ از پیش‌فرض سیستم استفاده می‌شود.',
+    lastChecked:'آخرین بررسی: {time}',nextCheck:'بررسی بعدی: {time}',retrying:'تلاش دوباره: {message}',never:'هرگز',readyConnection:'اتصال کیک',readySounds:'تنظیم صدای پاداش‌ها',readyFiles:'فایل‌های صدا در دسترس',readyPlayback:'پخش آماده است',
+    missingFile:'فایل پیدا نشد',locateFile:'یافتن فایل',noMatches:'موردی پیدا نشد',pollingIdle:'کیک متصل نیست',
+    previousPage:'صفحهٔ قبل',nextPage:'صفحهٔ بعد',historyPage:'صفحهٔ {page} از {pages}',stopQueue:'توقف صف پخش',removeQueueItem:'حذف'
   }
 };
 let language = localStorage.getItem('kick-soundboard-language') === 'fa' ? 'fa' : 'en';
 let state = { connected: false, configured: false, sounds: {}, cooldowns: {}, rewardVolumes: {}, history: [], volume: 0.8 };
 let rewards = [];
 let queue = [];
+let currentItem = null;
+let queuePaused = false;
+let rewardSearch = '';
+let historySearch = '';
+let historyStatus = 'all';
+let historyPage = 1;
+const historyPageSize = 20;
+let outputDevices = [];
+let invalidOutput = false;
 const queuedRedemptionIds = new Set();
 let activeAudio = null;
 let activeRewardId = '';
 let activeObjectUrl = '';
+let previewAudio = null;
+let previewRewardId = '';
+let previewObjectUrl = '';
 let playbackBusy = false;
 let queueTimer = null;
 const lastPlaybackStart = new Map();
@@ -65,7 +90,8 @@ function applyLanguage() {
   $('#lang-toggle').setAttribute('aria-label', language === 'fa' ? 'Change language to English' : 'تغییر زبان به فارسی');
   $('#connect-btn').textContent = state.connected ? t('connected') : t('connect');
   $('#status-label').textContent = state.connected ? t('polling') : t('notConnected');
-  renderRewards(); renderHistory(); updateQueue();
+  $('#history-filter').setAttribute('aria-label', t('historyFilter'));
+  renderRewards(); renderHistory(); updateQueue(); renderPollHealth();
 }
 
 async function request(path, options = {}) {
@@ -102,6 +128,10 @@ function formatTime(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? '' : date.toLocaleString(language === 'fa' ? 'fa-IR' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
+function formatPollTime(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString(language === 'fa' ? 'fa-IR' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' });
+}
 function relativeTime(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
@@ -113,6 +143,48 @@ function relativeTime(value) {
   return formatter.format(-Math.floor(hours / 24), 'day');
 }
 
+function updateReadiness() {
+  const checks = [
+    ['#ready-connection', t('readyConnection'), Boolean(state.connected)],
+    ['#ready-sounds', t('readySounds'), rewards.length > 0 && rewards.every((reward) => Boolean(state.sounds?.[reward.id]))],
+    ['#ready-files', t('readyFiles'), rewards.length > 0 && rewards.every((reward) => Boolean(state.sounds?.[reward.id]?.available))],
+    ['#ready-playback', t('readyPlayback'), !queuePaused && !currentItem],
+  ];
+  for (const [selector, label, ready] of checks) {
+    const node = $(selector); node.textContent = `${ready ? '✓' : '○'} ${label}`; node.classList.toggle('ready', ready);
+  }
+}
+function renderPollHealth() {
+  const last = state.lastPollSuccessAt ? formatPollTime(state.lastPollSuccessAt) : t('never');
+  const next = state.nextPollAt ? formatPollTime(state.nextPollAt) : '—';
+  const retryAt = state.nextPollAt ? new Date(state.nextPollAt).getTime() : NaN;
+  const retryInSeconds = Number.isFinite(retryAt) ? Math.max(0, Math.ceil((retryAt - Date.now()) / 1000)) : null;
+  const parts = [t('lastChecked', { time: last }), t('nextCheck', { time: next })];
+  if (state.pollError) {
+    parts.push(t('kickCheckFailed', { message: state.pollError }));
+    if (retryInSeconds !== null) parts.push(t('pollRetry', { seconds: retryInSeconds }));
+  }
+  else if (!state.connected) parts.push(t('pollingIdle'));
+  const health = $('#poll-health');
+  health.textContent = parts.join(' · ');
+  health.classList.toggle('error', Boolean(state.pollError));
+}
+async function loadAudioDevices() {
+  const select = $('#audio-output');
+  const previousSelection = select.value || state.outputDeviceId || '';
+  try { outputDevices = (await navigator.mediaDevices?.enumerateDevices?.() || []).filter((device) => device.kind === 'audiooutput'); }
+  catch { outputDevices = []; }
+  const selected = previousSelection;
+  select.replaceChildren(new Option(t('systemDefault'), ''));
+  for (const device of outputDevices) select.add(new Option(device.label || device.deviceId, device.deviceId));
+  select.value = selected;
+  if (selected && !outputDevices.some((device) => device.deviceId === selected)) {
+    invalidOutput = true; select.value = ''; $('#audio-warning').textContent = t('deviceUnavailable');
+  } else if (selected && typeof HTMLMediaElement.prototype.setSinkId !== 'function') {
+    invalidOutput = true; $('#audio-warning').textContent = t('deviceUnavailable');
+  } else { invalidOutput = false; $('#audio-warning').textContent = ''; }
+}
+
 function renderRewards() {
   if (!state.connected) {
     rewardRoot.replaceChildren(); const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = t('connectEmpty'); rewardRoot.append(empty);
@@ -122,7 +194,15 @@ function renderRewards() {
     rewardRoot.replaceChildren(); const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = t('noRewards'); rewardRoot.append(empty);
     return;
   }
-  rewardRoot.replaceChildren(...rewards.map((reward) => {
+  const visibleRewards = rewards.filter((reward) => {
+    const hasSound = Boolean(state.sounds?.[reward.id]);
+    return (!$('#unassigned-only').checked || !hasSound) && (!rewardSearch || String(reward.title || '').toLocaleLowerCase().includes(rewardSearch));
+  });
+  if (!visibleRewards.length) {
+    rewardRoot.replaceChildren(); const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = t('noMatches'); rewardRoot.append(empty);
+    return;
+  }
+  rewardRoot.replaceChildren(...visibleRewards.map((reward) => {
     const row = document.createElement('div');
     row.className = 'sound-row';
     const title = document.createElement('div');
@@ -136,15 +216,18 @@ function renderRewards() {
     const details = document.createElement('div'); details.className = 'reward-details'; details.append(subtitle, status);
     title.append(titleText, details);
     const sound = document.createElement('div'); sound.className = 'sound-name';
-    sound.textContent = state.sounds?.[reward.id]?.name || t('noSound');
+    const mappedSound = state.sounds?.[reward.id];
+    sound.textContent = mappedSound?.name || t('noSound');
+    if (mappedSound && mappedSound.available === false) { sound.textContent += ` · ${t('missingFile')}`; sound.classList.add('missing'); }
     sound.title = sound.textContent;
     const actions = document.createElement('div'); actions.className = 'row-actions';
-    const choose = document.createElement('button'); choose.className = 'small'; choose.textContent = state.sounds?.[reward.id] ? t('change') : t('chooseSound');
+    const choose = document.createElement('button'); choose.className = 'small'; choose.textContent = mappedSound?.available === false ? t('locateFile') : mappedSound ? t('change') : t('chooseSound');
     choose.addEventListener('click', () => chooseSound(reward));
     actions.append(choose);
     if (state.sounds?.[reward.id]) {
-      const play = document.createElement('button'); play.className = 'small'; play.textContent = t('test'); play.title = language === 'fa' ? 'پخش آزمایشی' : 'Play a preview';
-      play.addEventListener('click', () => enqueueSound(reward.id));
+      const play = document.createElement('button'); play.className = 'small'; play.dataset.previewRewardId = reward.id; play.textContent = previewAudio && previewRewardId === reward.id ? t('stopTest') : t('test'); play.title = play.textContent;
+      play.setAttribute('aria-label', play.textContent);
+      play.addEventListener('click', () => playPreview(reward.id));
       const clear = document.createElement('button'); clear.className = 'small ghost'; clear.textContent = '×'; clear.title = t('removeSound');
       clear.addEventListener('click', () => clearSound(reward.id));
       actions.append(play, clear);
@@ -159,6 +242,7 @@ function renderRewards() {
       const value = Number(soundVolume.value) / 100;
       state.rewardVolumes ||= {}; state.rewardVolumes[reward.id] = value; soundVolumeValue.textContent = `${soundVolume.value}%`;
       if (activeRewardId === reward.id && activeAudio) activeAudio.volume = effectiveVolume(reward.id);
+      if (previewRewardId === reward.id && previewAudio) previewAudio.volume = effectiveVolume(reward.id);
     });
     soundVolume.addEventListener('change', () => saveRewardSettings(reward.id, { rewardVolume: Number(soundVolume.value) / 100 }));
     volumeControl.append(volumeLabel, soundVolume, soundVolumeValue);
@@ -175,18 +259,32 @@ function renderRewards() {
 }
 
 function renderHistory() {
-  const items = state.history || [];
+  const query = historySearch.trim().toLocaleLowerCase();
+  const items = (state.history || []).filter((item) => {
+    if (historyStatus !== 'all' && item.status !== historyStatus) return false;
+    const redeemer = item.userName || item.username || item.user || item.redeemerUserId || '';
+    return !query || `${redeemer} ${item.rewardTitle || ''} ${item.userInput || ''}`.toLocaleLowerCase().includes(query);
+  });
+  const pageCount = Math.max(1, Math.ceil(items.length / historyPageSize));
+  historyPage = Math.min(Math.max(1, historyPage), pageCount);
+  const pagination = $('#history-pagination');
+  pagination.hidden = items.length === 0;
+  $('#history-page').textContent = t('historyPage', { page: pageCount ? historyPage : 1, pages: pageCount });
+  $('#history-prev').disabled = historyPage <= 1;
+  $('#history-next').disabled = historyPage >= pageCount;
   if (!items.length) {
-    historyRoot.replaceChildren(); const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = t('emptyHistory'); historyRoot.append(empty);
+    historyRoot.replaceChildren(); const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = (state.history || []).length ? t('noMatches') : t('emptyHistory'); historyRoot.append(empty);
     return;
   }
-  historyRoot.replaceChildren(...items.slice(0, 100).map((item) => {
+  const start = (historyPage - 1) * historyPageSize;
+  historyRoot.replaceChildren(...items.slice(start, start + historyPageSize).map((item) => {
     const row = document.createElement('div'); row.className = 'event';
     const info = document.createElement('div'); info.className = 'event-info';
     const oldName = item.user && item.user !== 'Viewer' ? item.user : '';
     const redeemerName = item.userName || item.username || oldName || (item.redeemerUserId ? t('viewerId', { id: item.redeemerUserId }) : t('unknownViewer'));
     const user = document.createElement('div'); user.className = 'event-user';
-    const userBdi = document.createElement('bdi'); userBdi.dir = 'auto'; userBdi.textContent = redeemerName; user.append(userBdi);
+    const privateName = document.createElement('span'); privateName.className = 'private-blur-wrap';
+    const userBdi = document.createElement('bdi'); userBdi.dir = 'auto'; userBdi.className = 'private-blur'; userBdi.textContent = redeemerName; privateName.append(userBdi); user.append(privateName);
     const action = document.createElement('div'); action.className = 'event-action';
     const rewardBdi = document.createElement('bdi'); rewardBdi.dir = 'auto'; rewardBdi.textContent = item.rewardTitle || t('channelReward');
     if (language === 'fa') action.append(document.createTextNode(`${t('redeemedVerb')} «`), rewardBdi, document.createTextNode('» را بازخرید کرد'));
@@ -198,7 +296,7 @@ function renderHistory() {
     info.append(action, user, meta);
     const tag = document.createElement('span'); tag.className = `tag ${item.status || ''}`; tag.textContent = t(item.status || 'redeemed');
     row.append(info, tag);
-    if (item.userInput) { const text = document.createElement('div'); text.className = 'event-text'; const inputBdi = document.createElement('bdi'); inputBdi.dir = 'auto'; inputBdi.textContent = item.userInput; text.append(inputBdi); row.append(text); }
+    if (item.userInput) { const text = document.createElement('div'); text.className = 'event-text'; const privateMessage = document.createElement('span'); privateMessage.className = 'private-blur-wrap'; const inputBdi = document.createElement('bdi'); inputBdi.dir = 'auto'; inputBdi.className = 'private-blur'; inputBdi.textContent = item.userInput; privateMessage.append(inputBdi); text.append(privateMessage); row.append(text); }
     return row;
   }));
 }
@@ -207,37 +305,50 @@ function updateQueue() {
   const locale = language === 'fa' ? 'fa-IR' : 'en-US';
   const total = queue.length + (playbackBusy ? 1 : 0);
   $('#queue-count').textContent = `${total.toLocaleString(locale)} ${t('queuedTotal')} · ${queue.length.toLocaleString(locale)} ${t('waiting')}`;
+  const current = $('#current-sound');
+  const currentName = currentItem ? rewardName(currentItem.rewardId) : t('nothingPlaying');
+  current.replaceChildren();
+  const currentLabel = document.createElement('span'); currentLabel.textContent = currentItem && !queuePaused ? t('currentlyPlaying', { name: currentName }) : currentName; current.append(currentLabel);
+  $('#stop-btn').hidden = queuePaused;
+  $('#resume-queue').hidden = !queuePaused;
+  current.classList.toggle('current', Boolean(currentItem));
+  $('#skip-btn').disabled = !currentItem;
+  $('#queue-list').replaceChildren(...queue.map((item, index) => {
+    const row = document.createElement('div'); row.className = 'queue-item';
+    const name = document.createElement('span'); name.className = 'queue-item-name'; name.textContent = rewardName(item.rewardId); row.append(name);
+    const remove = document.createElement('button'); remove.className = 'ghost small'; remove.textContent = t('removeQueueItem'); remove.title = t('removeQueued'); remove.setAttribute('aria-label', `${t('removeQueued')}: ${rewardName(item.rewardId)}`); remove.addEventListener('click', () => removeQueueItem(index)); row.append(remove);
+    return row;
+  }));
+  updateReadiness();
 }
+function rewardName(id) { return rewards.find((reward) => reward.id === id)?.title || state.sounds?.[id]?.name || t('channelReward'); }
 function effectiveVolume(rewardId) {
   return (state.volume ?? 0.8) * (state.rewardVolumes?.[rewardId] ?? 1);
-}
-function enqueueSound(rewardId) {
-  if (!state.sounds?.[rewardId]) return toast(t('chooseFirst'), true);
-  queue.push({ rewardId, cooldownMs: Math.max(0, Number(state.cooldowns?.[rewardId] || 0) * 1000) }); updateQueue();
-  if (!playbackBusy) playNext();
 }
 function enqueueRedemptionSound({ rewardId, redemptionId, cooldownMs }) {
   if (!rewardId || (redemptionId && queuedRedemptionIds.has(redemptionId))) return;
   if (!state.sounds?.[rewardId]) return toast(t('chooseFirst'), true);
   if (redemptionId) queuedRedemptionIds.add(redemptionId);
   queue.push({ rewardId, redemptionId, cooldownMs: Math.max(0, Number(cooldownMs) || 0) }); updateQueue();
-  if (!playbackBusy) playNext();
+  if (!playbackBusy && !queuePaused) playNext();
 }
 function playNext() {
-  if (playbackBusy) return;
+  if (playbackBusy || queuePaused) return;
   const item = queue.shift(); updateQueue();
   if (!item) return;
   const { rewardId, cooldownMs } = item;
+  currentItem = item;
   playbackBusy = true;
   updateQueue();
   const waitMs = Math.max(0, (lastPlaybackStart.get(rewardId) || 0) + cooldownMs - Date.now());
   if (waitMs > 0) {
-    queueTimer = setTimeout(() => { queueTimer = null; startQueuedAudio(rewardId); }, waitMs);
+    queueTimer = setTimeout(() => { queueTimer = null; startQueuedAudio(item); }, waitMs);
     return;
   }
-  startQueuedAudio(rewardId);
+  startQueuedAudio(item);
 }
-function startQueuedAudio(rewardId) {
+function startQueuedAudio(item) {
+  const { rewardId } = item;
   const audio = new Audio();
   audio.loop = false;
   activeRewardId = rewardId;
@@ -250,12 +361,12 @@ function startQueuedAudio(rewardId) {
     if (completed) return;
     completed = true;
     if (activeAudio !== audio) return;
-    activeAudio = null; activeRewardId = '';
+    activeAudio = null; activeRewardId = ''; currentItem = null;
     if (activeObjectUrl) URL.revokeObjectURL(activeObjectUrl);
     activeObjectUrl = '';
     playbackBusy = false;
     updateQueue();
-    playNext();
+    if (!queuePaused) playNext();
   };
   const fail = (message) => { if (activeAudio === audio) toast(message, true); finish(); };
   audio.addEventListener('ended', finish, { once: true });
@@ -278,21 +389,105 @@ function startQueuedAudio(rewardId) {
       if (activeAudio !== audio) { URL.revokeObjectURL(objectUrl); return; }
       activeObjectUrl = objectUrl;
       audio.src = objectUrl;
+      if (state.outputDeviceId && typeof audio.setSinkId === 'function') {
+        try { await audio.setSinkId(state.outputDeviceId); invalidOutput = false; }
+        catch { invalidOutput = true; try { await audio.setSinkId(''); } catch {} $('#audio-warning').textContent = t('deviceUnavailable'); }
+      }
       await audio.play();
     } catch (error) {
       fail(`Could not play this reward sound: ${error.message}`);
     }
   })();
 }
-function stopSounds() {
-  queue = []; updateQueue();
+async function playPreview(rewardId) {
+  if (!state.sounds?.[rewardId]) return toast(t('chooseFirst'), true);
+  if (previewAudio && previewRewardId === rewardId) {
+    stopPreview();
+    return;
+  }
+  stopPreview();
+  const audio = new Audio();
+  audio.loop = false;
+  audio.volume = effectiveVolume(rewardId);
+  previewAudio = audio;
+  previewRewardId = rewardId;
+  updatePreviewButtons();
+  const finish = () => {
+    if (previewAudio !== audio) return;
+    previewAudio = null;
+    previewRewardId = '';
+    audio.src = '';
+    if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+    previewObjectUrl = '';
+    updatePreviewButtons();
+  };
+  audio.addEventListener('ended', finish, { once: true });
+  audio.addEventListener('error', () => {
+    if (previewAudio === audio) toast('Could not play the preview. Check the selected file and try again.', true);
+    finish();
+  }, { once: true });
+  try {
+    const sessionToken = await window.kickApp?.getApiSessionToken();
+    if (!sessionToken) throw new Error(t('secureStoreUnavailable'));
+    const response = await fetch(`http://localhost:9000/api/audio/${encodeURIComponent(rewardId)}`, {
+      headers: { 'x-kick-app-session': sessionToken },
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || `Audio request failed (${response.status})`);
+    }
+    const objectUrl = URL.createObjectURL(await response.blob());
+    if (previewAudio !== audio) { URL.revokeObjectURL(objectUrl); return; }
+    previewObjectUrl = objectUrl;
+    audio.src = objectUrl;
+    if (state.outputDeviceId && typeof audio.setSinkId === 'function') {
+      try { await audio.setSinkId(state.outputDeviceId); }
+      catch { try { await audio.setSinkId(''); } catch {} $('#audio-warning').textContent = t('deviceUnavailable'); }
+    }
+    await audio.play();
+  } catch (error) {
+    if (previewAudio === audio) toast(`Could not play the preview: ${error.message}`, true);
+    finish();
+  }
+}
+function stopPreview() {
+  if (previewAudio) {
+    previewAudio.pause();
+    previewAudio.src = '';
+    previewAudio = null;
+  }
+  previewRewardId = '';
+  if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+  previewObjectUrl = '';
+  updatePreviewButtons();
+}
+function updatePreviewButtons() {
+  for (const button of document.querySelectorAll('[data-preview-reward-id]')) {
+    const isPreviewing = previewAudio && previewRewardId === button.dataset.previewRewardId;
+    button.textContent = isPreviewing ? t('stopTest') : t('test');
+    button.title = button.textContent;
+    button.setAttribute('aria-label', button.textContent);
+  }
+}
+function stopQueue() {
+  queue = prependInterruptedItem(queue, currentItem);
+  queuePaused = true;
   if (queueTimer) { clearTimeout(queueTimer); queueTimer = null; }
   playbackBusy = false;
   if (activeAudio) { activeAudio.pause(); activeAudio.currentTime = 0; activeAudio.src = ''; activeAudio = null; activeRewardId = ''; }
+  currentItem = null;
   if (activeObjectUrl) URL.revokeObjectURL(activeObjectUrl);
   activeObjectUrl = '';
   updateQueue();
 }
+function skipCurrent() {
+  if (queueTimer) { clearTimeout(queueTimer); queueTimer = null; }
+  if (activeAudio) { activeAudio.pause(); activeAudio.src = ''; activeAudio = null; }
+  if (activeObjectUrl) URL.revokeObjectURL(activeObjectUrl);
+  activeObjectUrl = ''; activeRewardId = ''; currentItem = null; playbackBusy = false;
+  updateQueue(); playNext();
+}
+function removeQueueItem(index) { queue.splice(index, 1); updateQueue(); }
 
 async function chooseSound(reward) {
   try {
@@ -315,6 +510,7 @@ async function loadRewards() {
   const result = await request('/api/rewards');
   rewards = result.data || [];
   renderRewards();
+  updateReadiness();
 }
 async function refreshState() {
   const newState = await request('/api/state');
@@ -325,13 +521,18 @@ async function refreshState() {
   $('#app-version').textContent = t('appVersion', { version: state.version || '—' });
   $('#volume').value = Math.round((state.volume ?? 0.8) * 100);
   $('#volume-label').textContent = `${$('#volume').value}%`;
+  document.body.classList.toggle('stream-mode', Boolean(state.streamerMode));
+  $('#stream-mode-btn').setAttribute('aria-pressed', String(Boolean(state.streamerMode)));
+  $('#stream-mode-btn').classList.toggle('primary', Boolean(state.streamerMode));
+  renderPollHealth();
   renderRewards(); renderHistory();
+  updateReadiness();
   if (state.connected && !rewards.length) {
     try { await loadRewards(); } catch (error) { toast(error.message, true); }
   }
 }
 
-function openSettings() { modal.classList.add('open'); $('#client-secret').value = ''; }
+function openSettings() { modal.classList.add('open'); $('#client-secret').value = ''; loadAudioDevices(); }
 function closeSettings() { modal.classList.remove('open'); }
 async function connectKick() {
   try {
@@ -375,7 +576,42 @@ $('#check-updates').addEventListener('click', async () => {
 });
 $('#download-update').addEventListener('click', () => window.kickApp?.openReleases());
 $('#refresh-btn').addEventListener('click', async () => { try { await loadRewards(); toast(t('rewardsRefreshed')); } catch (error) { toast(error.message, true); } });
-$('#stop-btn').addEventListener('click', stopSounds);
+$('#stop-btn').addEventListener('click', stopQueue);
+$('#skip-btn').addEventListener('click', skipCurrent);
+$('#clear-queue').addEventListener('click', () => { queue = []; updateQueue(); });
+$('#resume-queue').addEventListener('click', () => { queuePaused = false; updateQueue(); playNext(); });
+$('#reward-search').addEventListener('input', () => { rewardSearch = $('#reward-search').value.trim().toLocaleLowerCase(); renderRewards(); });
+$('#unassigned-only').addEventListener('change', renderRewards);
+$('#history-search').addEventListener('input', () => { historyPage = 1; historySearch = $('#history-search').value; renderHistory(); });
+$('#history-filter').addEventListener('change', () => { historyPage = 1; historyStatus = $('#history-filter').value; renderHistory(); });
+$('#history-prev').addEventListener('click', () => { if (historyPage > 1) { historyPage -= 1; renderHistory(); } });
+$('#history-next').addEventListener('click', () => {
+  const query = historySearch.trim().toLocaleLowerCase();
+  const filteredCount = (state.history || []).filter((item) => (historyStatus === 'all' || item.status === historyStatus) &&
+    (!query || `${item.userName || item.username || item.user || item.redeemerUserId || ''} ${item.rewardTitle || ''} ${item.userInput || ''}`.toLocaleLowerCase().includes(query))).length;
+  if (historyPage < Math.ceil(filteredCount / historyPageSize)) { historyPage += 1; renderHistory(); }
+});
+$('#stream-mode-btn').addEventListener('click', async () => {
+  state.streamerMode = !state.streamerMode;
+  document.body.classList.toggle('stream-mode', state.streamerMode);
+  $('#stream-mode-btn').setAttribute('aria-pressed', String(state.streamerMode));
+  $('#stream-mode-btn').classList.toggle('primary', state.streamerMode);
+  try { await request('/api/settings', { method: 'POST', body: JSON.stringify({ streamerMode: state.streamerMode }) }); }
+  catch (error) { toast(error.message, true); }
+});
+$('#audio-output').addEventListener('change', async () => {
+  state.outputDeviceId = $('#audio-output').value;
+  invalidOutput = false; $('#audio-warning').textContent = '';
+  try {
+    await request('/api/settings', { method: 'POST', body: JSON.stringify({ outputDeviceId: state.outputDeviceId }) });
+    if (activeAudio && typeof activeAudio.setSinkId === 'function') await activeAudio.setSinkId(state.outputDeviceId);
+  } catch (error) {
+    invalidOutput = true;
+    if (activeAudio && typeof activeAudio.setSinkId === 'function') { try { await activeAudio.setSinkId(''); } catch {} }
+    $('#audio-warning').textContent = t('deviceUnavailable'); toast(error.message, true);
+  }
+});
+$('#refresh-audio-devices').addEventListener('click', () => loadAudioDevices());
 $('#clear-history').addEventListener('click', async () => { try { await request('/api/history/clear', { method: 'POST', body: '{}' }); await refreshState(); } catch (error) { toast(error.message, true); } });
 $('#settings-form').addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -388,6 +624,7 @@ $('#volume').addEventListener('input', () => {
   $('#volume-label').textContent = `${$('#volume').value}%`;
   state.volume = Number($('#volume').value) / 100;
   if (activeAudio) activeAudio.volume = effectiveVolume(activeRewardId);
+  if (previewAudio) previewAudio.volume = effectiveVolume(previewRewardId);
 });
 $('#volume').addEventListener('change', async () => {
   try { await request('/api/settings', { method: 'POST', body: JSON.stringify({ volume: Number($('#volume').value) / 100 }) }); }
@@ -403,8 +640,9 @@ window.kickApp?.onPollError(({ message, retryInSeconds }) => toast(
   `${t('kickCheckFailed', { message })} ${t('pollRetry', { seconds: retryInSeconds })}`,
   true
 ));
+if (navigator.mediaDevices?.addEventListener) navigator.mediaDevices.addEventListener('devicechange', () => loadAudioDevices());
 
 applyLanguage();
 setConnected(false);
 refreshState().catch((error) => toast(error.message, true));
-setInterval(renderHistory, 60_000);
+setInterval(() => { renderHistory(); renderPollHealth(); }, 60_000);
