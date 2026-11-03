@@ -1,0 +1,10 @@
+{
+  "name": "kick-soundboard-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vercel OAuth 2.0 Bridge for Kick Soundboard",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  }
+}

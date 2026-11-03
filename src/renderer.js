@@ -7,10 +7,10 @@ const { prependInterruptedItem } = window.kickQueuePlayback;
 const translations = {
   en: {
     appName:'Kick Soundboard', tagline:'Local reward sounds for your stream', settings:'Settings', connect:'Connect Kick', connected:'Connected', polling:'Connected · checking every 10 sec', notConnected:'Not connected',
-    setupTitle:'Connect your Kick channel', setupDescription:'Enter your developer app credentials in Settings, then connect Kick. The app checks for reward redemptions and plays mapped sounds on this PC.', openSettings:'Open Settings', localNotice:'Your credentials and sound mappings are stored locally on this computer.',
+    setupTitle:'Connect your Kick channel', setupDescription:'Link your Kick account with 1 click to load your channel rewards and play mapped sounds on this PC.', openSettings:'Open Settings', localNotice:'Your tokens and sound mappings are stored securely on this computer.',
     rewardSounds:'Reward sounds', refreshRewards:'Refresh rewards', masterVolume:'Master volume', stopAudio:'Stop audio', redemptionHistory:'Redemption history', clear:'Clear', soundQueue:'Sound queue', waiting:'waiting', queuedTotal:'queued',
     connectEmpty:'Connect your Kick account to load your channel rewards.', noRewards:'No rewards found. Create channel point rewards on Kick, then refresh.', emptyHistory:'New reward redemptions will appear here.',
-    connectionSettings:'Kick connection settings', clientId:'Client ID', clientIdHelp:'From your Kick Developer app settings.', clientSecret:'Client Secret', secretPlaceholder:'Saved securely on this PC', clientSecretHelp:'Only stored on this PC using Windows secure storage. Never share it.', redirectUrl:'Redirect URL', redirectHelp:'This must match your Kick Developer app redirect URL.', cancel:'Cancel', saveLocally:'Save locally', disconnectKick:'Disconnect Kick', disconnectedKick:'Kick disconnected on this PC. Revoke app access in Kick settings too, if desired.', appVersion:'Version {version}', checkUpdates:'Check for updates', checkingUpdates:'Checking GitHub for updates…', updateAvailable:'Version {version} is available.', upToDate:'You have the latest version ({version}).', updateError:'Could not check for updates: {message}', downloadUpdate:'Open download page',
+    connectionSettings:'Kick Soundboard settings', kickAccount:'Kick account', savedSettings:'Settings saved.', cancel:'Close', saveLocally:'Save', disconnectKick:'Disconnect Kick', disconnectedKick:'Kick disconnected on this PC. You can reconnect anytime.', appVersion:'Version {version}', checkUpdates:'Check for updates', checkingUpdates:'Checking GitHub for updates…', updateAvailable:'Version {version} is available.', upToDate:'You have the latest version ({version}).', updateError:'Could not check for updates: {message}', downloadUpdate:'Open download page',
     points:'points', noSound:'No sound selected', chooseSound:'Choose sound', change:'Change', test:'Test', stopTest:'Stop test', removeSound:'Remove sound', cooldown:'Cooldown · sec', cooldownTitle:'Cooldown in seconds',
     pending:'Pending approval', accepted:'Approved', rejected:'Rejected', redeemed:'Redeemed', redeemedVerb:'redeemed', unknownViewer:'Unknown viewer', viewerId:'Viewer #{id}', untitledReward:'Untitled reward', channelReward:'Channel reward',
     statusGuideTitle:'Redemption status guide', pendingGuide:'Waiting for your decision in Kick’s Reward request queue. Its sound plays only after you approve it.', acceptedGuide:'You approved this redemption. Its sound is queued for playback.', rejectedGuide:'You rejected this redemption. Its sound is not played.',
@@ -29,10 +29,10 @@ const translations = {
   },
   fa: {
     appName:'صندوق صدای کیک', tagline:'پخش صدای محلی برای پاداش‌های استریم', settings:'تنظیمات', connect:'اتصال به کیک', connected:'متصل', polling:'متصل · بررسی هر ۱۰ ثانیه', notConnected:'متصل نیست',
-    setupTitle:'کانال کیک خود را وصل کنید', setupDescription:'اطلاعات برنامهٔ توسعه‌دهنده را در تنظیمات وارد کنید و به کیک وصل شوید. برنامه بازخرید پاداش‌ها را بررسی می‌کند و صدای انتخاب‌شده را در همین رایانه پخش می‌کند.', openSettings:'باز کردن تنظیمات', localNotice:'اطلاعات ورود و نگاشت صداها فقط روی همین رایانه ذخیره می‌شوند.',
+    setupTitle:'اتصال به کانال کیک', setupDescription:'با یک کلیک حساب کیک خود را متصل کنید تا جوایز کانال دریافت شده و صداها روی کامپیوتر شما پخش شوند.', openSettings:'تنظیمات', localNotice:'توکن‌های ورود و تنظیمات صدا به صورت امن روی همین رایانه ذخیره می‌شوند.',
     rewardSounds:'صداهای پاداش', refreshRewards:'به‌روزرسانی پاداش‌ها', masterVolume:'بلندی صدای اصلی', stopAudio:'توقف صدا', redemptionHistory:'تاریخچهٔ بازخریدها', clear:'پاک کردن', soundQueue:'صف پخش صدا', waiting:'در انتظار', queuedTotal:'در صف',
     connectEmpty:'برای دریافت پاداش‌های کانال، حساب کیک را وصل کنید.', noRewards:'پاداشی پیدا نشد. در کیک پاداش بسازید و دوباره به‌روزرسانی کنید.', emptyHistory:'بازخریدهای جدید اینجا نمایش داده می‌شوند.',
-    connectionSettings:'تنظیمات اتصال کیک', clientId:'شناسهٔ کلاینت', clientIdHelp:'از تنظیمات برنامهٔ توسعه‌دهندهٔ کیک بردارید.', clientSecret:'رمز کلاینت', secretPlaceholder:'به‌صورت امن روی این رایانه ذخیره می‌شود', clientSecretHelp:'فقط با حافظهٔ امن ویندوز روی این رایانه ذخیره می‌شود. آن را برای کسی نفرستید.', redirectUrl:'نشانی بازگشت', redirectHelp:'این نشانی باید با نشانی بازگشت برنامهٔ کیک یکسان باشد.', cancel:'لغو', saveLocally:'ذخیره روی رایانه', disconnectKick:'قطع اتصال کیک', disconnectedKick:'اتصال این برنامه به کیک قطع شد. در صورت تمایل، دسترسی برنامه را از تنظیمات کیک هم لغو کنید.', appVersion:'نسخهٔ {version}', checkUpdates:'بررسی نسخهٔ جدید', checkingUpdates:'در حال بررسی نسخه‌های GitHub…', updateAvailable:'نسخهٔ {version} در دسترس است.', upToDate:'آخرین نسخه را دارید ({version}).', updateError:'بررسی نسخهٔ جدید انجام نشد: {message}', downloadUpdate:'رفتن به صفحهٔ دانلود',
+    connectionSettings:'تنظیمات کیک ساندبورد', kickAccount:'حساب کیک', savedSettings:'تنظیمات ذخیره شد.', cancel:'بستن', saveLocally:'ذخیره', disconnectKick:'قطع اتصال کیک', disconnectedKick:'اتصال این برنامه به کیک قطع شد. هر زمان بخواهید می‌توانید دوباره متصل شوید.', appVersion:'نسخهٔ {version}', checkUpdates:'بررسی نسخهٔ جدید', checkingUpdates:'در حال بررسی نسخه‌های GitHub…', updateAvailable:'نسخهٔ {version} در دسترس است.', upToDate:'آخرین نسخه را دارید ({version}).', updateError:'بررسی نسخهٔ جدید انجام نشد: {message}', downloadUpdate:'رفتن به صفحهٔ دانلود',
     points:'امتیاز', noSound:'صدایی انتخاب نشده', chooseSound:'انتخاب صدا', change:'تغییر', test:'آزمایش', stopTest:'توقف آزمایش', removeSound:'حذف صدا', cooldown:'وقفه · ثانیه', cooldownTitle:'مدت وقفه به ثانیه',
     pending:'در انتظار تأیید', accepted:'تأیید شد', rejected:'رد شد', redeemed:'بازخرید شد', redeemedVerb:'پاداش', unknownViewer:'بینندهٔ ناشناس', viewerId:'بینندهٔ شمارهٔ {id}', untitledReward:'پاداش بدون نام', channelReward:'پاداش کانال',
     statusGuideTitle:'راهنمای وضعیت بازخرید', pendingGuide:'منتظر تصمیم شما در Reward request queue کیک است. صدا فقط پس از تأیید شما پخش می‌شود.', acceptedGuide:'این بازخرید را تأیید کرده‌اید. صدای آن در صف پخش قرار می‌گیرد.', rejectedGuide:'این بازخرید را رد کرده‌اید. صدای آن پخش نمی‌شود.',
@@ -516,8 +516,9 @@ async function refreshState() {
   const newState = await request('/api/state');
   state = { ...state, ...newState };
   setConnected(state.connected);
-  $('#disconnect-btn').hidden = !state.connected;
-  $('#client-id').value = state.clientId || '';
+  if ($('#account-status-text')) $('#account-status-text').textContent = state.connected ? t('connected') : t('notConnected');
+  if ($('#modal-connect-btn')) $('#modal-connect-btn').hidden = state.connected;
+  if ($('#disconnect-btn')) $('#disconnect-btn').hidden = !state.connected;
   $('#app-version').textContent = t('appVersion', { version: state.version || '—' });
   $('#volume').value = Math.round((state.volume ?? 0.8) * 100);
   $('#volume-label').textContent = `${$('#volume').value}%`;
@@ -532,7 +533,7 @@ async function refreshState() {
   }
 }
 
-function openSettings() { modal.classList.add('open'); $('#client-secret').value = ''; loadAudioDevices(); }
+function openSettings() { modal.classList.add('open'); loadAudioDevices(); }
 function closeSettings() { modal.classList.remove('open'); }
 async function connectKick() {
   try {
@@ -552,6 +553,7 @@ $('#close-settings').addEventListener('click', closeSettings);
 $('#cancel-settings').addEventListener('click', closeSettings);
 $('#connect-btn').addEventListener('click', connectKick);
 $('#banner-connect').addEventListener('click', connectKick);
+$('#modal-connect-btn')?.addEventListener('click', connectKick);
 $('#disconnect-btn').addEventListener('click', async () => {
   try {
     await request('/api/disconnect', { method: 'POST', body: '{}' });
@@ -616,9 +618,14 @@ $('#clear-history').addEventListener('click', async () => { try { await request(
 $('#settings-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   try {
-    await request('/api/config', { method: 'POST', body: JSON.stringify({ clientId: $('#client-id').value, clientSecret: $('#client-secret').value }) });
-    $('#client-secret').value = ''; closeSettings(); await refreshState(); toast(t('savedCredentials'));
-  } catch (error) { toast(error.message.includes('Client ID') ? t('settingsMissing') : error.message, true); if (error.message.includes('Client ID')) openSettings(); }
+    const selectedDevice = $('#audio-output').value;
+    await request('/api/settings', { method: 'POST', body: JSON.stringify({ outputDeviceId: selectedDevice }) });
+    closeSettings();
+    await refreshState();
+    toast(t('savedSettings'));
+  } catch (error) {
+    toast(error.message, true);
+  }
 });
 $('#volume').addEventListener('input', () => {
   $('#volume-label').textContent = `${$('#volume').value}%`;

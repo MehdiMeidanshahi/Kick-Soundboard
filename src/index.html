@@ -67,7 +67,8 @@
     .tag.pending { color:#f4dea2; background:#3b3321; } .tag.accepted { color:#a5e891; background:#193421; } .tag.rejected { color:#ffb8bc; background:#3b2025; }
     .queue-bar { display:flex; align-items:center; justify-content:space-between; color:var(--muted); font-size:12px; margin-bottom:10px; }
     .queue-count { color:#d7e0e9; }
-    .filter-row,.queue-controls,.queue-item,.health-row,.readiness-list { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .filter-row,.queue-controls,.queue-item,.health-row,.readiness-list,.account-row,.account-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .account-row { justify-content:space-between; padding:10px 12px; background:#0c1117; border:1px solid var(--line); border-radius:8px; margin-top:4px; }
     .filter-row { margin:14px 0 6px; }
     .filter-row input[type=search] { flex:1 1 180px; }
     .filter-row select,.settings select { color:var(--text); background:#0c1117; border:1px solid var(--line); border-radius:8px; padding:9px 10px; }
@@ -131,9 +132,9 @@
 
     <section id="setup-banner" class="welcome no-config">
       <h2 data-i18n="setupTitle">Connect your Kick channel</h2>
-      <p data-i18n="setupDescription">Enter your developer app credentials in Settings, then connect Kick. The app checks for reward redemptions and plays mapped sounds on this PC.</p>
-      <div class="welcome-actions"><button class="primary" id="setup-settings" data-i18n="openSettings">Open Settings</button><button class="ghost" id="banner-connect">Connect Kick</button></div>
-      <div class="notice" data-i18n="localNotice">Your credentials and sound mappings are stored locally on this computer.</div>
+      <p data-i18n="setupDescription">Link your Kick account with 1 click to load your channel rewards and play mapped sounds on this PC.</p>
+      <div class="welcome-actions"><button class="primary" id="banner-connect" data-i18n="connectKick">Connect Kick</button></div>
+      <div class="notice" data-i18n="localNotice">Your session tokens and sound mappings are stored securely on this computer.</div>
     </section>
 
     <section class="panel readiness" id="readiness">
@@ -176,13 +177,20 @@
 
   <div class="settings" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
     <div class="dialog">
-      <div class="dialog-head"><h2 id="settings-title" data-i18n="connectionSettings">Kick connection settings</h2><button id="close-settings" class="ghost small" aria-label="Close">✕</button></div>
+      <div class="dialog-head"><h2 id="settings-title" data-i18n="connectionSettings">Kick Soundboard settings</h2><button id="close-settings" class="ghost small" aria-label="Close">✕</button></div>
       <form class="dialog-body" id="settings-form">
-        <div class="field"><label for="client-id" data-i18n="clientId">Client ID</label><input id="client-id" autocomplete="off" required><div class="field-note" data-i18n="clientIdHelp">From your Kick Developer app settings.</div></div>
-        <div class="field"><label for="client-secret" data-i18n="clientSecret">Client Secret</label><input id="client-secret" type="password" autocomplete="new-password" placeholder="Saved securely on this PC" data-i18n-placeholder="secretPlaceholder"><div class="field-note" data-i18n="clientSecretHelp">Only stored on this PC using Windows secure storage. Never share it.</div></div>
-        <div class="field"><label data-i18n="redirectUrl">Redirect URL</label><input value="http://localhost:9000" readonly><div class="field-note" data-i18n="redirectHelp">This must match your Kick Developer app redirect URL.</div></div>
+        <div class="field">
+          <label data-i18n="kickAccount">Kick account</label>
+          <div class="account-row">
+            <span id="account-status-text" class="field-note">Not connected</span>
+            <div class="account-actions">
+              <button type="button" id="modal-connect-btn" class="primary small" data-i18n="connectKick">Connect Kick</button>
+              <button type="button" id="disconnect-btn" class="danger small" hidden data-i18n="disconnectKick">Disconnect Kick</button>
+            </div>
+          </div>
+        </div>
         <div class="field"><label for="audio-output" data-i18n="audioOutput">Audio output</label><div class="audio-device-picker"><select id="audio-output"><option value="" data-i18n="systemDefault">System default</option></select><button type="button" id="refresh-audio-devices" class="ghost small" data-i18n="refreshDevices">Refresh devices</button></div><div id="audio-warning" class="field-note" role="status"></div></div>
-        <div class="dialog-actions"><button type="button" id="disconnect-btn" class="danger" hidden data-i18n="disconnectKick">Disconnect Kick</button><button type="button" id="cancel-settings" class="ghost" data-i18n="cancel">Cancel</button><button type="submit" class="primary" data-i18n="saveLocally">Save locally</button></div>
+        <div class="dialog-actions"><button type="button" id="cancel-settings" class="ghost" data-i18n="cancel">Close</button><button type="submit" class="primary" data-i18n="saveLocally">Save</button></div>
         <div class="update-area">
           <div class="update-actions"><span id="app-version" class="field-note"></span><button type="button" id="check-updates" class="ghost small" data-i18n="checkUpdates">Check for updates</button></div>
           <div id="update-status" class="field-note update-status" role="status" aria-live="polite"></div>

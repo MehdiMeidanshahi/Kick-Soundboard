@@ -12,6 +12,9 @@ const PORT = 9000;
 const REDIRECT_URI = `http://localhost:${PORT}`;
 const API_BASE = 'https://api.kick.com/public/v1';
 const OAUTH_BASE = 'https://id.kick.com';
+const { parseDeepLinkAuth } = require('./deep-link');
+const DEFAULT_BRIDGE_URL = 'https://kicksoundboard-itsmehdi7.vercel.app';
+const getBridgeUrl = () => process.env.KICK_BRIDGE_URL || config.bridgeUrl || DEFAULT_BRIDGE_URL;
 const captureGuideScreenshots = !app.isPackaged && process.env.KICK_SOUNDBOARD_CAPTURE === '1';
 const screenshotDirectory = path.join(__dirname, '..', 'docs', 'screenshots');
 let mainWindow;
@@ -25,7 +28,7 @@ let pollingGeneration = 0;
 let lastPollError = '';
 let lastPollSuccessAt = null;
 let nextPollAt = null;
-let config = { clientId: '', encryptedClientSecret: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [], pendingIds: [] };
+let config = { clientId: '', encryptedClientSecret: '', bridgeUrl: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [], pendingIds: [] };
 let accessToken = '';
 let refreshToken = '';
 let tokenExpiresAt = 0;
@@ -119,7 +122,7 @@ function publicState() {
       history: [{ id: 'sample-redemption-1', rewardId: 'sample-reward-1', rewardTitle: 'Play a sound', userName: 'ViewerExample', userInput: 'Hello streamer!', redeemedAt: new Date(Date.now() - 120000).toISOString(), status: 'accepted' }],
     };
   }
-  return { configured: Boolean(config.clientId && config.encryptedClientSecret), connected: Boolean(accessToken), clientId: config.clientId, version: app.getVersion(), volume: config.volume ?? 0.8, rewardVolumes: config.rewardVolumes || {}, sounds, cooldowns: config.cooldowns || {}, history: config.history || [], outputDeviceId: config.outputDeviceId || '', streamerMode: Boolean(config.streamerMode), lastPollSuccessAt, nextPollAt, pollError: lastPollError };
+  return { configured: Boolean(accessToken || (config.clientId && config.encryptedClientSecret)), connected: Boolean(accessToken), clientId: config.clientId, bridgeUrl: getBridgeUrl(), version: app.getVersion(), volume: config.volume ?? 0.8, rewardVolumes: config.rewardVolumes || {}, sounds, cooldowns: config.cooldowns || {}, history: config.history || [], outputDeviceId: config.outputDeviceId || '', streamerMode: Boolean(config.streamerMode), lastPollSuccessAt, nextPollAt, pollError: lastPollError };
 }
 
 function screenshotRewards() {
@@ -132,8 +135,25 @@ function screenshotRewards() {
 
 function randomString(bytes = 48) { return crypto.randomBytes(bytes).toString('base64url'); }
 
+function handleDeepLink(urlString) {
+  const result = parseDeepLinkAuth(urlString);
+  if (!result.success) return false;
+  accessToken = result.token;
+  refreshToken = result.refresh || refreshToken;
+  tokenExpiresAt = Date.now() + (Number(result.expiresIn || 3600) * 1000);
+  saveTokens();
+  startPolling();
+  mainWindow?.webContents.send('state-changed');
+  return true;
+}
+
 async function beginOAuth(res) {
-  if (!config.clientId || !getClientSecret()) return sendJson(res, 400, { error: 'Add your Kick Client ID and Client Secret first.' });
+  if (!config.clientId || !getClientSecret()) {
+    const bridgeUrl = getBridgeUrl();
+    const loginUrl = `${bridgeUrl}/api/auth/login`;
+    await shell.openExternal(loginUrl);
+    return sendJson(res, 200, { ok: true, url: loginUrl });
+  }
   const verifier = randomString();
   const challenge = crypto.createHash('sha256').update(verifier).digest('base64url');
   const state = randomString(24);
@@ -177,14 +197,40 @@ async function exchangeCode(code, verifier) {
 async function ensureToken() {
   if (accessToken && tokenExpiresAt - Date.now() > 60_000) return accessToken;
   if (!refreshToken) throw new Error('Connect your Kick account first.');
-  const body = new URLSearchParams({ grant_type: 'refresh_token', client_id: config.clientId, client_secret: getClientSecret(), refresh_token: refreshToken });
-  const response = await fetch(`${OAUTH_BASE}/oauth/token`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
+
+  // If local credentials exist (legacy mode), refresh directly
+  if (config.clientId && getClientSecret()) {
+    const body = new URLSearchParams({ grant_type: 'refresh_token', client_id: config.clientId, client_secret: getClientSecret(), refresh_token: refreshToken });
+    const response = await fetch(`${OAUTH_BASE}/oauth/token`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      if (shouldClearRefreshTokens(data)) {
+        accessToken = ''; refreshToken = ''; tokenExpiresAt = 0; saveTokens();
+      }
+      throw createOAuthError(data, response.status, response.headers.get('retry-after'));
+    }
+    if (!data.access_token) throw new Error('Kick did not return an access token. Try connecting again.');
+    accessToken = data.access_token;
+    refreshToken = data.refresh_token || refreshToken;
+    tokenExpiresAt = Date.now() + Number(data.expires_in || 0) * 1000;
+    saveTokens();
+    return accessToken;
+  }
+
+  // Refresh via Vercel OAuth Bridge
+  const bridgeUrl = getBridgeUrl();
+  const response = await fetch(`${bridgeUrl}/api/auth/refresh`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     if (shouldClearRefreshTokens(data)) {
       accessToken = ''; refreshToken = ''; tokenExpiresAt = 0; saveTokens();
     }
-    throw createOAuthError(data, response.status, response.headers.get('retry-after'));
+    const retryAfter = response.headers?.get ? response.headers.get('retry-after') : null;
+    throw createOAuthError(data, response.status, retryAfter);
   }
   if (!data.access_token) throw new Error('Kick did not return an access token. Try connecting again.');
   accessToken = data.access_token;
@@ -357,7 +403,8 @@ async function handleRequest(req, res) {
   }
   if (req.method === 'POST' && url.pathname === '/api/config') {
     const body = JSON.parse(await readBody(req));
-    config.clientId = String(body.clientId || '').trim();
+    if (typeof body.clientId === 'string') config.clientId = String(body.clientId || '').trim();
+    if (typeof body.bridgeUrl === 'string') config.bridgeUrl = String(body.bridgeUrl || '').trim();
     if (body.clientSecret) {
       if (!safeStorage.isEncryptionAvailable()) return sendJson(res, 500, { error: 'Windows secure storage is unavailable; credentials were not saved.' });
       config.encryptedClientSecret = safeStorage.encryptString(String(body.clientSecret)).toString('base64');
@@ -539,7 +586,39 @@ ipcMain.handle('open-releases', (event) => {
   return shell.openExternal('https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases');
 });
 
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+if (!gotSingleInstanceLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (_event, commandLine) => {
+    const deepLinkUrl = commandLine.find((arg) => typeof arg === 'string' && arg.startsWith('kick-soundboard://'));
+    if (deepLinkUrl) handleDeepLink(deepLinkUrl);
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
+  });
+
+  app.on('open-url', (event, url) => {
+    event.preventDefault();
+    handleDeepLink(url);
+  });
+}
+
 app.whenReady().then(() => {
+  if (process.defaultApp) {
+    if (process.argv.length >= 2) {
+      app.setAsDefaultProtocolClient('kick-soundboard', process.execPath, [path.resolve(process.argv[1])]);
+    }
+  } else {
+    app.setAsDefaultProtocolClient('kick-soundboard');
+  }
+
+  const startupDeepLink = process.argv.find((arg) => typeof arg === 'string' && arg.startsWith('kick-soundboard://'));
+  if (startupDeepLink) {
+    handleDeepLink(startupDeepLink);
+  }
+
   if (captureGuideScreenshots) {
     app.setPath('userData', path.join(app.getPath('temp'), 'kick-soundboard-screenshot-profile'));
   } else {

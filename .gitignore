@@ -4,3 +4,5 @@ release/
 .env
 *.log
 patches/sprintf-js/
+slides/
+

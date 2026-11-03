@@ -1,6 +1,6 @@
 {
   "name": "kick-soundboard-local",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "Local Kick channel reward soundboard for Windows streamers",
   "main": "src/main.js",
   "scripts": {
@@ -17,6 +17,14 @@
     "productName": "Kick Soundboard",
     "asar": true,
     "electronLanguages": ["en-US", "fa"],
+    "protocols": [
+      {
+        "name": "Kick Soundboard Protocol",
+        "schemes": [
+          "kick-soundboard"
+        ]
+      }
+    ],
     "directories": {
       "output": "release"
     },
