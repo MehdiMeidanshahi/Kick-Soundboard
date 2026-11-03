@@ -626,9 +626,9 @@ ipcMain.handle('open-releases', (event) => {
   return shell.openExternal('https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases');
 });
 
-const gotSingleInstanceLock = app.requestSingleInstanceLock();
+const gotSingleInstanceLock = app.requestSingleInstanceLock ? app.requestSingleInstanceLock() : true;
 if (!gotSingleInstanceLock) {
-  app.quit();
+  app.exit(0);
 } else {
   app.on('second-instance', (_event, commandLine) => {
     const deepLinkUrl = commandLine.find((arg) => typeof arg === 'string' && arg.startsWith('kick-soundboard://'));
@@ -643,52 +643,52 @@ if (!gotSingleInstanceLock) {
     event.preventDefault();
     handleDeepLink(url);
   });
-}
 
-app.whenReady().then(() => {
-  if (process.defaultApp) {
-    if (process.argv.length >= 2) {
-      app.setAsDefaultProtocolClient('kick-soundboard', process.execPath, [path.resolve(process.argv[1])]);
+  app.whenReady().then(() => {
+    if (process.defaultApp) {
+      if (process.argv.length >= 2) {
+        app.setAsDefaultProtocolClient('kick-soundboard', process.execPath, [path.resolve(process.argv[1])]);
+      }
+    } else {
+      app.setAsDefaultProtocolClient('kick-soundboard');
     }
-  } else {
-    app.setAsDefaultProtocolClient('kick-soundboard');
-  }
 
-  const startupDeepLink = process.argv.find((arg) => typeof arg === 'string' && arg.startsWith('kick-soundboard://'));
-  if (startupDeepLink) {
-    handleDeepLink(startupDeepLink);
-  }
+    const startupDeepLink = process.argv.find((arg) => typeof arg === 'string' && arg.startsWith('kick-soundboard://'));
+    if (startupDeepLink) {
+      handleDeepLink(startupDeepLink);
+    }
 
-  if (captureGuideScreenshots) {
-    app.setPath('userData', path.join(app.getPath('temp'), 'kick-soundboard-screenshot-profile'));
-  } else {
-    loadLocalState();
-  }
-  server = http.createServer((req, res) => {
-    res.setHeader('x-content-type-options', 'nosniff');
-    res.setHeader('referrer-policy', 'no-referrer');
-    res.setHeader('cross-origin-resource-policy', 'same-origin');
-    res.setHeader('cache-control', 'no-store');
-    handleRequest(req, res).catch((error) => {
-      if (!res.headersSent) sendJson(res, error.statusCode || 500, { error: error.statusCode ? error.message : 'The local request failed.' });
-      else res.destroy();
+    if (captureGuideScreenshots) {
+      app.setPath('userData', path.join(app.getPath('temp'), 'kick-soundboard-screenshot-profile'));
+    } else {
+      loadLocalState();
+    }
+    server = http.createServer((req, res) => {
+      res.setHeader('x-content-type-options', 'nosniff');
+      res.setHeader('referrer-policy', 'no-referrer');
+      res.setHeader('cross-origin-resource-policy', 'same-origin');
+      res.setHeader('cache-control', 'no-store');
+      handleRequest(req, res).catch((error) => {
+        if (!res.headersSent) sendJson(res, error.statusCode || 500, { error: error.statusCode ? error.message : 'The local request failed.' });
+        else res.destroy();
+      });
     });
+    server.once('error', (error) => {
+      dialog.showErrorBox('Kick Soundboard could not start', error.code === 'EADDRINUSE'
+        ? `Port ${PORT} is already in use. Close the other program using it, then restart Kick Soundboard.`
+        : 'The local app server could not start. Restart the app and try again.');
+      app.quit();
+    });
+    server.listen(PORT, 'localhost', () => {
+      createWindow();
+      if (accessToken) startPolling();
+    });
+    app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
   });
-  server.once('error', (error) => {
-    dialog.showErrorBox('Kick Soundboard could not start', error.code === 'EADDRINUSE'
-      ? `Port ${PORT} is already in use. Close the other program using it, then restart Kick Soundboard.`
-      : 'The local app server could not start. Restart the app and try again.');
-    app.quit();
-  });
-  server.listen(PORT, 'localhost', () => {
-    createWindow();
-    if (accessToken) startPolling();
-  });
-  app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
-});
 
-app.on('before-quit', () => { stopPolling(); server?.close(); });
-app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+  app.on('before-quit', () => { stopPolling(); server?.close(); });
+  app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+}
 
 module.exports = {
   handleRequest,
