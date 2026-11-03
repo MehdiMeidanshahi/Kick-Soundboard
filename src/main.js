@@ -681,3 +681,15 @@ app.whenReady().then(() => {
 
 app.on('before-quit', () => { stopPolling(); server?.close(); });
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+
+module.exports = {
+  handleRequest,
+  requireAppRequest,
+  publicState,
+  readBody,
+  sendJson,
+  getApiSessionToken: () => apiSessionToken,
+  getAllowedOrigin: () => allowedOrigin,
+  getConfig: () => config,
+  setConfig: (c) => { config = c; },
+};

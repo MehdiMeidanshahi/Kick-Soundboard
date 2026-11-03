@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
   const url = new URL(req.url, `https://${req.headers.host || 'localhost'}`);
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
-  const errorParam = url.searchParams.get('error') || url.searchParams.get('error_description');
+  const errorParam = url.searchParams.get('error_description') || url.searchParams.get('error');
 
   if (errorParam) {
     res.statusCode = 400;
