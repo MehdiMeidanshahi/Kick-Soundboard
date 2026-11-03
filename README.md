@@ -1,242 +1,229 @@
 # Kick Soundboard
 
-**Kick channel point rewards → sounds played on your Windows PC.** Kick Soundboard is a local Windows desktop app: it reads your channel rewards and their redemptions, then plays the audio file you assigned only after a redemption is approved.
+**1-Click Kick channel point rewards → audio playback on your Windows stream PC.**
 
-> Early preview · Windows x64 · English and فارسی · The app screenshots use fake data. The Kick Developer setup image is based on the provided screenshots; both credential values are fully covered.
+Kick Soundboard is a local Windows desktop application that listens for approved Kick channel point reward redemptions and plays your assigned audio files in real time through your sound card into OBS.
 
-**Language / زبان:** [English](#english) · [فارسی](#فارسی)  |  [Repository](https://github.com/MehdiMeidanshahi/Kick-Soundboard) · [Releases](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases)
+[![Platform: Windows x64](https://img.shields.io/badge/Platform-Windows%20x64-0078D6.svg)](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases)
+[![Version: v0.2.0](https://img.shields.io/badge/Version-v0.2.0-53FC18.svg)](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest)
+[![Kick OAuth: 1--Click Bridge](https://img.shields.io/badge/OAuth-1--Click%20Bridge-brightgreen.svg)](https://github.com/MehdiMeidanshahi/Kick-Soundboard)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+**Languages / زبان‌ها:** [English](#english) · [فارسی](#فارسی)  |  [GitHub Releases](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases)
+
+---
 
 ## English
 
-## Quick start
+### Quick Navigation
+- [⚡ Quick Install (For Streamers)](#-quick-install-for-streamers)
+- [📸 Screenshots](#-screenshots)
+- [🛠️ Detailed Setup (For Developers)](#️-detailed-setup-for-developers)
+- [🔒 Privacy & Security](#-privacy--security)
+- [⚙️ Technical Details](#️-technical-details)
 
-1. Download the latest Windows installer from the project's [Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) and install it.
-2. Launch Kick Soundboard and choose **Connect Kick**. Your browser opens Kick's authorization page. Approve the read-only reward access.
-3. The browser automatically deep-links back to Kick Soundboard. The status changes to **Connected**, and your channel's rewards appear!
-4. Choose an audio file for each reward and use **Test** to preview it without adding it to the redemption queue. Keep the app open while streaming; connect its Windows audio output to OBS if you want viewers to hear the sounds.
+---
 
-No developer app creation or Client Secret is needed for streamers. The app connects in 1 click and stores your session securely on this PC.
+### ⚡ Quick Install (For Streamers)
 
-![Visual Kick Developer setup guide: create an app, set the localhost redirect, select read-only reward access, and keep credentials private. Client ID and Client Secret are fully hidden.](docs/screenshots/kick-developer-visual-guide.png)
+No developer app creation, manual Client ID/Secret entry, or localhost redirect setup is needed. You can connect your Kick account in 1 click!
 
-*Visual guide: both credential values are completely covered, and the correct read-only rewards permission is shown.*
+#### 1. Download & Install
+1. Go to the [**Latest GitHub Releases**](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest).
+2. Download **`Kick-Soundboard-Setup-0.2.0.exe`**.
+3. Run the installer (it creates desktop and Start Menu shortcuts and installs cleanly under your Windows user account).
 
-## Screenshots
+> [!NOTE]
+> As an independent open-source release without an expensive corporate code-signing certificate, Windows SmartScreen may show an *"Unknown publisher"* prompt on first launch. Click **More info** → **Run anyway**. You can verify the published SHA-256 checksum on the Releases page anytime.
 
-![Kick Soundboard overview with example rewards, status indicators, volume controls, and redemption history](docs/screenshots/app-overview.png)
+#### 2. Connect Kick with 1 Click
+1. Open **Kick Soundboard** and click the green **Connect Kick** button.
+2. Your default web browser will open Kick's authorization screen.
+3. Log in to your Kick streamer account (if not already logged in) and click **Approve**.
+4. Your browser will prompt: *"Open Kick Soundboard?"* Click **Open**.
+5. The app automatically catches your secure session tokens via deep-link (`kick-soundboard://auth`).
+6. The status dot turns green (**Connected**), and all your channel rewards load automatically!
 
-*App overview. All displayed rewards, names, and redemption text are examples.*
+#### 3. Assign Sounds & Configure
+1. For each reward, click **Choose sound** and select an audio file from your computer (`.mp3`, `.wav`, `.ogg`, `.flac`, `.aac`, `.m4a`).
+2. Click **Test** to preview the sound at your chosen volume.
+3. Optionally set a **Cooldown (sec)** so spamming a reward doesn't overwhelm your stream.
+4. Adjust **Master volume** or individual **Sound volume** as needed.
 
-![Kick Soundboard connection settings with empty credential fields](docs/screenshots/connection-settings.png)
+#### 4. Route into OBS
+- Kick Soundboard plays audio through your selected Windows audio output device (configured in **Settings** → **Audio output**).
+- In OBS Studio, simply ensure your **Desktop Audio** or an **Audio Output Capture** source captures that device.
 
-*Connection settings. The credential fields are intentionally blank.*
+---
 
-## What it does
+### 📸 Screenshots
 
-- Loads the signed-in streamer's Kick channel point rewards and shows whether each reward is enabled, paused, or disabled.
-- Lets you choose an audio file on your computer for each reward. Supported formats: MP3, WAV, OGG, M4A, AAC, and FLAC.
-- Plays a mapped sound only after the redemption is approved. Pending requests stay silent; rejected requests never play. Each approved redemption ID is queued once. Sounds do not loop and play in approval order, one at a time; multiple approvals close together are kept in the queue. The queue shows total queued and waiting counts. **Stop queue** and **Resume queue** appear one at a time according to the queue state. Stopping pauses playback without clearing queued sounds; new approvals continue to accumulate. If a sound was playing when stopped, it remains first in line. **Skip current** skips the active sound.
-- Includes master and per-reward volume controls, a per-reward cooldown, a **Test** button that previews the mapped file without joining or changing the redemption queue and becomes **Stop test** while that preview plays, and redemption history.
-- History shows live redemption states: **Pending approval** (waiting in Kick's Reward request queue), **Approved** (sound is queued), and **Rejected** (sound is skipped). Open the status guide above the history list for details.
-- Shows the installed app version in Settings and lets you check GitHub Releases for a newer version.
-- Shows the redeemer and their optional message when Kick supplies those fields. Kick's current polling schema supplies the redeemer's numeric ID, not their username, so history normally displays the ID.
-- Has English and Persian interfaces, including right-to-left layout.
+#### Main Soundboard & Reward Mapping
+![Kick Soundboard overview with rewards list, volume controls, queue controls, and redemption history](docs/screenshots/app-overview.png)
+*Live stream readiness status, channel rewards with custom sounds, per-reward cooldowns, master volume, and redemption queue.*
 
-## Download and connect
+#### Connection & Device Settings
+![Kick Soundboard settings dialog showing Kick account status, audio output picker, and update checker](docs/screenshots/connection-settings.png)
+*1-click Kick connection status, Windows output device selection, and automatic update checker.*
 
-### 1. Download the app
+---
 
-Open the project's [Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) and download `Kick-Soundboard-Setup-<version>.exe`. Run the installer; it installs for your Windows account and creates Start Menu and desktop shortcuts.
+### 🛠️ Detailed Setup (For Developers)
 
-Only download the installer from this project's official [GitHub Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases). The early-preview installer is not code-signed, so Windows may show **Windows protected your PC** or an **Unknown publisher** warning. The warning cannot be removed without signing the installer with a trusted code-signing certificate. If you choose to continue, first confirm that the installer came from this repository's Releases page and verify its published SHA-256 checksum.
+If you are a developer looking to contribute, audit the code, or run a self-hosted OAuth bridge:
 
-To update, close the app and run the newer installer. It uses the same app identity as earlier versions and upgrades that installation; local app data is preserved. Windows SmartScreen may still warn because the installer is unsigned. You can review the release and its SHA-256 checksum before running it.
+#### Architecture Overview
+- **Electron Desktop Client (`src/`)**: Built on Electron 44 with Chromium sandboxing, context isolation, and secure IPC.
+- **Local Storage (`safeStorage`)**: Authentication tokens are encrypted on disk via Windows DPAPI before being saved to `%APPDATA%/kick-soundboard-local`.
+- **Stateless Serverless Bridge (`api/` or `bridge/`)**: A zero-dependency Vercel serverless function suite implementing OAuth 2.1 authorization code flow with PKCE (SHA-256 code challenge) and custom protocol deep-linking (`kick-soundboard://auth`).
 
-### 2. Connect Kick in 1 Click
+#### Prerequisites
+- Windows 10/11 x64
+- Node.js 20.x or newer
+- [pnpm](https://pnpm.io/) 9.x or newer
 
-1. Open Kick Soundboard and choose **Connect Kick**.
-2. Your browser opens Kick's authorization screen via the secure OAuth bridge (`https://kicksoundboard-itsmehdi7.vercel.app/api/auth/login`).
-3. Approve the requested read-only permissions (`channel:rewards:read`).
-4. The browser automatically deep-links back to the app via `kick-soundboard://auth`.
-5. The status indicator switches to **Connected**, and your channel's rewards appear. The app checks Kick about every 10 seconds, so new approved redemptions play automatically during stream!
-
-### 3. Deploying Your Own Bridge (Optional for Developers)
-
-If you are self-hosting or want to use your own Kick Developer credentials rather than the default bridge:
-1. Open [Kick Developer settings](https://kick.com/settings/developer) and create an app. Set **Redirect URL** to: `https://<your-vercel-domain>.vercel.app/api/auth/callback`.
-2. Deploy the `bridge` folder to Vercel (or set root directory to `bridge`).
-3. In Vercel Environment Variables, set:
-   - `KICK_CLIENT_ID`: (Your Client ID)
-   - `KICK_CLIENT_SECRET`: (Your Client Secret)
-4. Set the `KICK_BRIDGE_URL` environment variable or `bridgeUrl` in `settings.json` to point your desktop app to your custom Vercel domain.
-
-![The app's Connect Kick button and channel reward configuration](docs/screenshots/app-overview.png)
-
-### 4. Assign and adjust sounds
-
-1. Find a reward in **Reward sounds** and choose **Choose sound**.
-2. Pick an audio file from your computer. The app stores the file path; it does not copy or upload the audio. If you move or rename the file later, select it again.
-3. Choose **Test** to play a preview of the selected file. The button changes to **Stop test** while the preview is playing; choose it again to stop the preview. It plays independently and does not add a test item to the redemption queue, even if that queue is stopped. Adjust **Sound volume** for that reward and **Master volume** for all sounds.
-4. Set **Cooldown · sec** to add a minimum gap between plays of the same reward. Redemptions are kept in the queue during cooldown and will play when their turn arrives.
-5. Use **Stop queue** to pause playback at any time, including when the queue is empty. It is shown while the queue is running; **Resume queue** replaces it while paused. New approved redemptions continue to be added to the waiting queue, but nothing plays until you choose **Resume queue**. If you stop during a sound, that sound remains first in line and restarts from the beginning when resumed. Use **Skip current** to skip the sound currently playing. **Clear queue** removes waiting sounds; redemption history is separate, and **Clear** removes the displayed history.
-
-### 5. Get the sound into your stream
-
-Kick Soundboard plays through your Windows audio output. In OBS or other streaming software, capture the same output device—for example, with **Desktop Audio** or an **Audio Output Capture** source. Check your stream mix so you do not capture your microphone or other sounds unintentionally.
-
-## While streaming
-
-- Keep Kick Soundboard open, connected, and online during the stream. Closing the app stops polling and sound playback.
-- The status above the panels shows the last successful Kick check and the next scheduled check, including seconds; polling errors and retry timing remain visible until recovery.
-- The **Stop queue** and **Resume queue** controls appear one at a time in the Sound queue panel, alongside the always-visible **Skip current** control. Stop queue pauses playback but does not stop polling or prevent new approved redemptions from joining the queue.
-- The app only reads rewards and redemptions. It does not approve, reject, edit, or create rewards.
-- Pending redemptions are shown in history but stay silent until approved in Kick. Rejected redemptions never play a sound. Rewards marked paused or disabled remain visible with their status indicator.
-- If you want to disconnect, open **Settings → Disconnect Kick**. This clears the saved OAuth tokens from this PC and stops polling. To revoke Kick's authorization too, remove the app from Kick's connected-app/account settings.
-
-## Privacy and security
-
-- The local app makes HTTPS requests directly to Kick's OAuth and API services. There is no project-owned server receiving credentials, tokens, redemption history, or audio files, and there is no hosting fee for this local architecture. An internet connection to Kick is still required.
-- The Client Secret and OAuth tokens are encrypted at rest with Electron's Windows secure-storage integration (DPAPI). Encryption at rest does not protect secrets from malware or other code already running as the same Windows user. Never share or commit your credentials.
-- The app stores reward mappings, audio file paths, volume/cooldown settings, up to 100 history entries, and recent redemption IDs in its Windows user-data folder. It does not store copies of the audio files.
-- A small HTTP server on `localhost:9000` serves the app and receives Kick's OAuth redirect. It checks the local app session token for API operations and is not a public server or webhook receiver.
-- The Electron renderer runs with Node integration disabled, context isolation and sandboxing enabled, a restrictive Content Security Policy, and navigation/window-opening restrictions. Local API and audio routes require an app-session token. These measures reduce risk; no desktop app can guarantee safety if the PC itself is compromised.
-- The packaging tool has a transitive `sprintf-js` dependency that `pnpm audit` flags. This repository applies a local input-validation patch; the patched code is build-time only and is not bundled into the Windows app. The audit tool still reports the upstream package version because the maintainer has not published a fixed release yet.
-- Uninstalling preserves local app data. Disconnecting clears OAuth tokens, but the Client ID, encrypted Client Secret, settings, and history remain in the local data folder. To remove all local app data, close the app, open `%APPDATA%` in File Explorer, and remove the app's data folder (identify it by its `settings.json` file).
-
-## Technical notes and limitations
-
-- The official [Kick Channel Rewards API](https://docs.kick.com/apis/channel-rewards) provides the reward redemption data used here. The app uses the [Kick OAuth authorization-code flow with PKCE](https://docs.kick.com/getting-started/generating-tokens-oauth2-flow) and requests the read scopes documented by Kick.
-- The app polls Kick locally every 10 seconds after a successful check. Its version check offers stable releases only. If Kick or the network returns an error, it waits before retrying and increases the delay up to 5 minutes; when Kick sends a `Retry-After` header, that delay is respected. Polling never overlaps itself. The app does not use Kick webhooks, which would need an internet-reachable receiver.
-- Kick's current redemption schema exposes the redeemer's numeric `user_id` and does not include a username. The app therefore displays the viewer ID; asking for `user:read` would not add other viewers' usernames.
-- If the app cannot start, another program may already be using port `9000`. Close that program or change both the app's redirect URL and its local port configuration before reconnecting.
-
-## Build from source (Windows)
-
-Requirements: Windows x64, Node.js 20 or newer, and pnpm.
-
+#### 1. Clone & Install
 ```powershell
+git clone https://github.com/MehdiMeidanshahi/Kick-Soundboard.git
+cd Kick-Soundboard
 pnpm install
-pnpm start
-pnpm build:win
 ```
 
-The Windows installer is written to `release/`. It is an unsigned early-preview build; Windows may show an unknown-publisher warning. See [electron-builder's NSIS guide](https://www.electron.build/docs/nsis/) for installer options.
+#### 2. Run in Development Mode
+```powershell
+npm start
+```
+
+#### 3. Run Automated Tests
+```powershell
+npm test
+```
+*Executes unit tests covering deep-link parsing, FIFO redemption queueing, token lifecycle handling, exponential backoff, and version comparisons.*
+
+#### 4. Package Windows Executables
+```powershell
+npm run build:win
+```
+*Generates the standalone executable under `release/win-unpacked/` and the NSIS installer `release/Kick-Soundboard-Setup-0.2.0.exe`.*
+
+#### 5. Self-Hosting the Vercel OAuth Bridge (Optional)
+If you prefer hosting your own Kick Developer credentials:
+1. Create an application in [Kick Developer Portal](https://kick.com/dashboard/developer):
+   - **Redirect URL:** `https://<your-vercel-domain>.vercel.app/api/auth/callback`
+   - **Scopes:** `user:read`, `channel:rewards:read`, `channel:rewards:write`, `events:subscribe`, `kicks:read`
+2. Deploy the root repository (or the `bridge/` folder) to [Vercel](https://vercel.com).
+3. In Vercel Project Settings → **Environment Variables**, add:
+   - `KICK_CLIENT_ID`: Your Kick application Client ID.
+   - `KICK_CLIENT_SECRET`: Your Kick application Client Secret.
+4. Set the `KICK_BRIDGE_URL` environment variable or specify your custom URL in the app's `DEFAULT_BRIDGE_URL`.
+
+---
+
+### 🔒 Privacy & Security
+
+- **Zero Project Servers**: Your streamer tokens and channel data are never stored on any third-party database.
+- **Windows DPAPI Encryption**: Tokens are encrypted at rest using Windows Data Protection API (`safeStorage`).
+- **Sandboxed Execution**: The Electron renderer runs with `nodeIntegration: false`, `contextIsolation: true`, and a strict Content Security Policy.
+- **Stateless OAuth Bridge**: The Vercel bridge is completely stateless; it stores no logs, databases, or user identities—it exchanges the PKCE code and deep-links directly back into your PC.
+
+---
+
+### ⚙️ Technical Details
+
+- **Polling Engine**: Actively polls Kick's Channel Rewards API every 10 seconds.
+- **Approval-First Playback**: Sounds only trigger once a redemption is in `accepted` status. Pending redemptions stay silent until approved in Kick's moderation dashboard.
+- **Deep-Link Protocol**: Registers Windows protocol client `kick-soundboard://` to pass authorization tokens directly into the running instance via `second-instance` IPC.
+
+---
 
 ## فارسی
 
-**زبان / Language:** [فارسی](#فارسی) · [English](#english)  |  [مخزن پروژه](https://github.com/MehdiMeidanshahi/Kick-Soundboard) · [نسخه‌ها و دریافت](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases)
+### دسترسی سریع
+- [⚡ راه‌اندازی سریع (ویژهٔ استریمرها)](#-راه‌اندازی-سریع-ویژهٔ-استریمرها)
+- [📸 تصاویر برنامه](#-تصاویر-برنامه)
+- [🛠️ راهنمای فنی و توسعه (ویژهٔ برنامه‌نویسان)](#️-راهنمای-فنی-و-توسعه-ویژهٔ-برنامه‌نویسان)
+- [🔒 حریم خصوصی و امنیت](#-حریم-خصوصی-و-امنیت)
 
-**پخش صدای بازخرید امتیازهای کانال کیک روی رایانهٔ ویندوزی شما.** Kick Soundboard یک برنامهٔ محلی ویندوز است. پاداش‌های کانال و بازخریدها را می‌خواند و فایل صدای انتخاب‌شده را فقط پس از تأیید بازخرید پخش می‌کند.
+---
 
-## راه‌اندازی سریع
+### ⚡ راه‌اندازی سریع (ویژهٔ استریمرها)
 
-۱. جدیدترین نسخهٔ ویندوز برنامه را از صفحهٔ [نسخه‌های پروژه](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) دریافت و نصب کنید.
-۲. برنامه را باز کرده و **Connect Kick** را بزنید. مرورگر شما باز می‌شود؛ دسترسی فقط‌خواندنی پاداش‌ها را تأیید کنید.
-۳. مرورگر به‌صورت خودکار شما را به برنامه بازمی‌گرداند. وضعیت به **Connected** تغییر می‌کند و پاداش‌های کانال لود می‌شوند.
-۴. برای هر پاداش یک فایل صدا انتخاب کنید و با **Test** آن را بررسی کنید. هنگام استریم برنامه را باز نگه دارید؛ برای شنیده‌شدن صدا در OBS، خروجی صدای ویندوز برنامه را به صداهای استریم اضافه کنید.
+بدون نیاز به ساخت برنامه در پنل توسعه‌دهندگان، بدون نیاز به کپی کردن Client ID یا Client Secret؛ اتصال به کیک تنها با ۱ کلیک انجام می‌شود!
 
-استریمرها نیازی به ساخت برنامه در پنل توسعه‌دهندگان کیک یا واردکردن Client Secret ندارند. اتصال با یک کلیک انجام می‌شود و اطلاعات ورود به صورت امن روی رایانه ذخیره می‌گردد.
+#### ۱. دریافت و نصب برنامه
+۱. به [**صفحهٔ نسخه‌های منتشرشده در GitHub**](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest) بروید.
+۲. فایل نصب **`Kick-Soundboard-Setup-0.2.0.exe`** را دانلود کنید.
+۳. فایل را اجرا و نصب کنید (میان‌بر برنامه روی دسکتاپ و منوی استارت ایجاد می‌شود).
 
-![راهنمای تصویری ساخت برنامهٔ Kick Developer، تنظیم نشانی localhost و انتخاب دسترسی فقط‌خواندنی پاداش‌ها. مقدار Client ID و Client Secret کاملاً پوشانده شده است.](docs/screenshots/kick-developer-visual-guide.png)
+> [!NOTE]
+> چون برنامه متن‌باز است و گواهی تجاری گران‌قیمت کد را ندارد، ممکن است ویندوز SmartScreen هشدار *"Unknown publisher"* نشان دهد. کافی است روی **More info** و سپس **Run anyway** کلیک کنید.
 
-*راهنمای تصویری؛ شناسه و رمز کلاینت کاملاً پوشانده شده‌اند و دسترسی صحیحِ فقط‌خواندنی پاداش‌ها نمایش داده شده است.*
+#### ۲. اتصال به کیک با یک کلیک
+۱. برنامهٔ **Kick Soundboard** را باز کرده و دکمهٔ سبز رنگ **Connect Kick** را بزنید.
+۲. مرورگر شما باز شده و صفحهٔ تأیید کیک را نمایش می‌دهد.
+۳. وارد حساب کاربری کیک خود شوید و دکمهٔ **Approve** را انتخاب کنید.
+۴. مرورگر از شما اجازهٔ بازگشت به برنامه را می‌خواهد (*"Open Kick Soundboard?"*)؛ آن را تأیید کنید.
+۵. وضعیت به **Connected** تغییر یافته و پاداش‌های کانال شما بلافاصله بارگذاری می‌شوند!
 
-> نسخهٔ آزمایشی · ویندوز ۶۴ بیتی · فارسی و انگلیسی · تصاویر برنامه داده‌های نمونه و ساختگی دارند. تصویر راهنمای Kick Developer از تصویرهای ارسالی ساخته شده و شناسه و رمز کلاینت در آن کاملاً پوشانده شده‌اند.
+#### ۳. تنظیم صداها و استریم
+۱. روبه‌روی هر پاداش، دکمهٔ **Choose sound** را زده و یک فایل صوتی از کامپیوترتان (`.mp3`, `.wav`, `.ogg`, `.flac`, `.m4a`) انتخاب کنید.
+۲. با دکمهٔ **Test** بلندی صدا را بسنجید.
+۳. در صورت تمایل، وقفه برحسب ثانیه (**Cooldown**) تنظیم کنید تا از پخش پشت‌سر‌هم صدا جلوگیری شود.
+۴. در نرم‌افزار OBS خروجی صدای سیستم (Desktop Audio) را فعال کنید تا بینندگان صدای پاداش‌ها را هنگام استریم بشنوند.
 
-## تصاویر برنامه
+---
 
-![نمای کلی برنامه با پاداش‌ها و تاریخچهٔ نمونه](docs/screenshots/app-overview.png)
+### 📸 تصاویر برنامه
 
-*نمای کلی برنامه؛ نام‌ها، پاداش‌ها و بازخریدهای تصویر نمونه هستند.*
+#### نمای کلی و تنظیم صدای پاداش‌ها
+![نمای کلی نرم‌افزار کیک ساندبورد با فهرست جوایز و تاریخچه](docs/screenshots/app-overview.png)
+*بررسی آمادگی استریم، نگاشت صداها، کنترل بلندی صدا، تنظیم وقفه و صف بازخریدها.*
 
-![تنظیمات اتصال با فیلدهای خالی اطلاعات ورود](docs/screenshots/connection-settings.png)
+#### تنظیمات اتصال و دستگاه خروجی
+![پنجرهٔ تنظیمات کیک ساندبورد](docs/screenshots/connection-settings.png)
+*وضعیت اتصال ۱ کلیک کیک، انتخاب دستگاه خروجی صدا در ویندوز و بررسی خودکار نسخه‌های جدید.*
 
-*تنظیمات اتصال؛ فیلدهای اطلاعات ورود عمداً خالی هستند.*
+---
 
-## امکانات
+### 🛠️ راهنمای فنی و توسعه (ویژهٔ برنامه‌نویسان)
 
-- پاداش‌های امتیازی کانال کیک را می‌خواند و وضعیت فعال، مکث‌شده یا غیرفعال هر پاداش را نشان می‌دهد.
-- برای هر پاداش می‌توانید یک فایل صدا از رایانه انتخاب کنید. فرمت‌های MP3، WAV، OGG، M4A، AAC و FLAC پشتیبانی می‌شوند.
-- فایل صدای هر پاداش را فقط پس از تأیید بازخرید پخش می‌کند. بازخریدهای در انتظار بی‌صدا می‌مانند و بازخریدهای ردشده هرگز پخش نمی‌شوند. هر شناسه فقط یک‌بار به صف می‌رود. صدا تکرار نمی‌شود و تأییدهای پیاپی به‌ترتیب و یکی‌یکی پخش می‌شوند. دکمه‌های **Stop queue** و **Resume queue** متناسب با وضعیت صف یکی‌یکی نمایش داده می‌شوند و **Skip current** کنار آن‌هاست. توقف صف، پخش را متوقف می‌کند اما صف را پاک نمی‌کند؛ بازخریدهای جدید همچنان وارد صف می‌شوند و تا زمان ادامه‌دادن پخش نمی‌شوند. اگر هنگام توقف صدایی در حال پخش باشد، در ابتدای صف باقی می‌ماند.
-- بلندی صدای اصلی و جداگانهٔ هر پاداش، مدت وقفه، دکمهٔ **Test** برای پیش‌نمایش مستقیم فایل بدون افزودن مورد آزمایشی به صف، و **Stop test** برای توقف پیش‌نمایش در حال پخش، و تاریخچه دارد.
-- وضعیت بازخریدها در تاریخچه به‌روز می‌شود: **در انتظار تأیید** (بی‌صدا تا زمان تأیید در Reward request queue کیک)، **تأیید شد** (صدا وارد صف می‌شود) و **رد شد** (صدا پخش نمی‌شود). راهنمای بالای تاریخچه معنی هر وضعیت را توضیح می‌دهد.
-- نسخهٔ نصب‌شده را در Settings نشان می‌دهد و می‌توانید وجود نسخهٔ جدید را در GitHub بررسی کنید.
-- نام بازخریدکننده و پیام او را در صورت ارسال کیک نمایش می‌دهد. در schema فعلی API کیک، بازخریدکننده فقط با شناسهٔ عددی `user_id` معرفی می‌شود و نام کاربری در پاسخ نیست؛ بنابراین معمولاً شناسهٔ بیننده نمایش داده می‌شود.
-- رابط انگلیسی و فارسی دارد و در فارسی از راست به چپ نمایش داده می‌شود.
+#### معماری برنامه
+- **بخش کلاینت دسکتاپ (`src/`)**: بر پایهٔ Electron 44 با امنیت ایزوله‌سازی Context و Sandbox.
+- **حافظهٔ امن محلی (`safeStorage`)**: توکن‌ها با استفاده از الگوریتم DPAPI ویندوز به‌صورت رمزنگاری‌شده روی دیسک ذخیره می‌شوند.
+- **پل ارتباطی OAuth سرورلس (`api/` و `bridge/`)**: توابع سرورلس Vercel بدون وابستگی، پیاده‌سازی OAuth 2.1 به‌همراه الگوریتم PKCE S256 و ارسال توکن به دسکتاپ از طریق پروتکل پیوند عمیق `kick-soundboard://auth`.
 
-## دریافت و اتصال برنامه
+#### نیازمندی‌ها
+- ویندوز ۱۰ یا ۱۱ (۶۴ بیتی)
+- Node.js نسخهٔ ۲۰ به بالا
+- pnpm نسخهٔ ۹ به بالا
 
-### ۱. دریافت برنامه
-
-وارد صفحهٔ [نسخه‌های پروژه در GitHub](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) شوید و جدیدترین فایل `Kick-Soundboard-Setup-<version>.exe` را دانلود کنید. نصب‌کننده را اجرا کنید؛ برنامه برای حساب ویندوزی شما نصب می‌شود و میان‌بر منوی Start و دسکتاپ می‌سازد.
-
-نصب‌کننده را فقط از صفحهٔ رسمی [نسخه‌های GitHub پروژه](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) دریافت کنید. نصب‌کننده امضای دیجیتال ندارد؛ ممکن است ویندوز پیام **Windows protected your PC** یا هشدار **Unknown publisher** نشان دهد. برای حذف این هشدار باید نصب‌کننده با گواهی معتبر امضا شود. اگر تصمیم به ادامه دارید، مطمئن شوید فایل را از صفحهٔ Releases همین مخزن گرفته‌اید و SHA-256 منتشرشده را بررسی کنید.
-
-برای به‌روزرسانی، برنامه را ببندید و نصب‌کنندهٔ نسخهٔ جدید را اجرا کنید. چون شناسهٔ نصب با نسخه‌های قبلی یکسان است، همان نصب به‌روزرسانی می‌شود و اطلاعات محلی برنامه حفظ می‌شود. ممکن است SmartScreen به‌دلیل امضانشدن نصب‌کننده همچنان هشدار دهد. پیش از اجرا می‌توانید نسخه و SHA-256 آن را بررسی کنید.
-
-### ۲. اتصال آسان و با ۱ کلیک به کیک
-
-۱. برنامهٔ Kick Soundboard را باز کرده و **Connect Kick** را انتخاب کنید.
-۲. مرورگر شما باز شده و از طریق پل امن OAuth به نشانی `https://kicksoundboard-itsmehdi7.vercel.app/api/auth/login` صفحهٔ تأیید کیک را نمایش می‌دهد.
-۳. دسترسی فقط‌خواندنی پاداش‌ها (`channel:rewards:read`) را تأیید کنید.
-۴. مرورگر از طریق پروتکل پیوند عمیق `kick-soundboard://auth` دوباره برنامه را به پیش‌زمینه آورده و توکن‌ها را به برنامه تحویل می‌دهد.
-۵. وضعیت برنامه به **Connected** تغییر کرده و پاداش‌های کانال شما لود می‌شوند.
-
-### ۳. میزبانی پل شخصی (اختیاری برای توسعه‌دهندگان)
-
-اگر قصد دارید سرور پل OAuth را خودتان میزبانی کنید یا از مشخصات شخصی Kick Developer استفاده نمایید:
-۱. در [تنظیمات توسعه‌دهندگان کیک](https://kick.com/settings/developer) یک برنامه بسازید و نشانی بازگشت را `https://<your-vercel-domain>.vercel.app/api/auth/callback` بگذارید.
-۲. پوشهٔ `bridge` را در Vercel دیپلوی کنید.
-۳. متغیرهای محیطی `KICK_CLIENT_ID` و `KICK_CLIENT_SECRET` را در داشبورد Vercel تنظیم نمایید.
-۴. متغیر محیطی `KICK_BRIDGE_URL` یا فیلد `bridgeUrl` در فایل `settings.json` را روی دامنهٔ سفارشی خود تنظیم کنید.
-
-![دکمهٔ اتصال و فهرست پاداش‌های نمونه](docs/screenshots/app-overview.png)
-
-### ۴. تنظیم صدای پاداش
-
-۱. در بخش **Reward sounds** پاداش موردنظر را پیدا و **Choose sound** را انتخاب کنید.
-۲. فایل صدا را از رایانه انتخاب کنید. برنامه فقط مسیر فایل را نگه می‌دارد و آن را کپی یا بارگذاری نمی‌کند. اگر بعداً فایل را جابه‌جا یا تغییرنام دادید، دوباره انتخابش کنید.
-۳. با **Test** پیش‌نمایش صدا را پخش کنید؛ هنگام پخش، دکمه به **Stop test** تغییر می‌کند و با زدن دوبارهٔ آن، پیش‌نمایش متوقف می‌شود. این پخش مستقل از صف است و مورد آزمایشی به صف اضافه نمی‌کند. **Sound volume** فقط برای همان پاداش است و **Master volume** روی همهٔ صداها اثر می‌گذارد.
-۴. با **Cooldown · sec** حداقل فاصلهٔ پخش صدای یک پاداش را تنظیم کنید. بازخریدها در مدت وقفه هم در صف می‌مانند و وقتی نوبتشان برسد پخش می‌شوند.
-۵. هر زمان لازم بود **Stop queue** را بزنید تا پخش متوقف شود؛ این دکمه حتی وقتی صف خالی است فعال است و در حالت توقف با **Resume queue** جایگزین می‌شود. بازخریدهای تأییدشدهٔ جدید همچنان در صف جمع می‌شوند، اما تا زدن **Resume queue** پخش نمی‌شوند. اگر هنگام پخش صدا صف را متوقف کنید، همان صدا در ابتدای صف می‌ماند و پس از ادامه از ابتدا پخش می‌شود. **Skip current** صدای جاری را رد می‌کند و **Clear queue** موارد منتظر را حذف می‌کند. **Test** پیش‌نمایش جداگانه پخش می‌کند و هنگام پخش برای توقف به **Stop test** تبدیل می‌شود. **Clear** تاریخچهٔ نمایش‌داده‌شده را پاک می‌کند.
-
-### ۵. شنیده‌شدن صدا در استریم
-
-برنامه از خروجی صدای ویندوز استفاده می‌کند. در OBS یا نرم‌افزار استریم، همان خروجی را ضبط کنید؛ مثلاً با **Desktop Audio** یا **Audio Output Capture**. ترکیب صدای استریم را بررسی کنید تا میکروفون یا صداهای ناخواسته ضبط نشوند.
-
-## هنگام استریم
-
-- برنامه را هنگام استریم باز، متصل و آنلاین نگه دارید. با بستن برنامه، بررسی کیک و پخش صدا متوقف می‌شود.
-- وضعیت، زمان آخرین بررسی و بررسی بعدی (با نمایش ثانیه) در بالای برنامه دیده می‌شوند. **Stop queue** یا **Resume queue** و نیز **Skip current** در پنل صف در دسترس‌اند؛ توقف صف، بررسی کیک و دریافت بازخریدهای جدید را متوقف نمی‌کند.
-- برنامه فقط پاداش‌ها و بازخریدها را می‌خواند و آن‌ها را تأیید، رد، ویرایش یا ایجاد نمی‌کند.
-- بازخرید ردشده در تاریخچه می‌ماند ولی صدا پخش نمی‌کند. وضعیت پاداش‌های مکث‌شده یا غیرفعال با نشانگر نمایش داده می‌شود.
-- برای قطع اتصال، به **Settings → Disconnect Kick** بروید. این کار توکن‌های محلی را پاک و بررسی بازخریدها را متوقف می‌کند. برای لغو کامل مجوز کیک، دسترسی برنامه را از تنظیمات حساب کیک هم حذف کنید.
-
-## حریم خصوصی و امنیت
-
-- برنامه درخواست‌های HTTPS را مستقیم به سرویس‌های OAuth و API کیک می‌فرستد. هیچ سروری متعلق به پروژه اطلاعات ورود، توکن‌ها، تاریخچه یا فایل صدا را دریافت نمی‌کند و برای این معماری محلی هزینهٔ میزبانی وجود ندارد. برای ارتباط با کیک همچنان اینترنت لازم است.
-- Client Secret و توکن‌های OAuth با قابلیت ذخیره‌سازی امن ویندوز (DPAPI) در حالت ذخیره‌شده رمزگذاری می‌شوند. این رمزگذاری از اطلاعات در برابر بدافزار یا کدی که با همان حساب ویندوز اجرا شده باشد محافظت نمی‌کند. اطلاعات ورود را به کسی ندهید و در مخزن کد قرار ندهید.
-- نگاشت پاداش به صدا، مسیر فایل‌ها، بلندی صدا، مدت وقفه، حداکثر ۱۰۰ رویداد تاریخچه و شناسه‌های اخیر بازخرید در پوشهٔ اطلاعات کاربر ویندوز ذخیره می‌شوند. فایل صدا کپی نمی‌شود.
-- سرور کوچک برنامه روی `localhost:9000` اجرا می‌شود تا رابط محلی را نشان دهد و بازگشت OAuth کیک را دریافت کند. عملیات API به توکن نشست محلی نیاز دارند؛ این سرور عمومی نیست و webhook دریافت نمی‌کند.
-- بخش رابط Electron با Node غیرفعال، جداسازی context و sandbox فعال، Content Security Policy محدود، و محدودیت در بازکردن پنجره یا رفتن به سایت‌های دیگر اجرا می‌شود. مسیرهای API و صدا هم توکن نشست برنامه را لازم دارند. این موارد ریسک را کاهش می‌دهند اما امنیت هیچ برنامه‌ای در رایانهٔ آلوده تضمین‌شده نیست.
-- وابستگی غیرمستقیم ابزار ساخت، `sprintf-js`، در گزارش `pnpm audit` هشدار دارد. در این مخزن برای اعتبارسنجی ورودی آن وصله‌ای محلی اعمال شده است؛ کد وصله‌شده فقط هنگام ساخت استفاده می‌شود و در برنامهٔ ویندوزی قرار نمی‌گیرد. ابزار audit تا انتشار نسخهٔ اصلاح‌شده از طرف نگه‌دارنده، همچنان نسخهٔ اصلی را هشدار می‌دهد.
-- حذف برنامه اطلاعات محلی را نگه می‌دارد. قطع اتصال توکن‌های OAuth را پاک می‌کند، اما Client ID، Client Secret رمزگذاری‌شده، تنظیمات و تاریخچه باقی می‌مانند. برای حذف همهٔ اطلاعات محلی، برنامه را ببندید، `%APPDATA%` را در File Explorer باز کنید و پوشهٔ دادهٔ برنامه را که فایل `settings.json` دارد پاک کنید.
-
-## نکات فنی و محدودیت‌ها
-
-- برنامه از [API رسمی Channel Rewards کیک](https://docs.kick.com/apis/channel-rewards) و [جریان OAuth به‌همراه PKCE](https://docs.kick.com/getting-started/generating-tokens-oauth2-flow) استفاده می‌کند و فقط دسترسی `channel:rewards:read` را درخواست می‌دهد.
-- این نسخه هر ۱۰ ثانیه با polling کیک را بررسی می‌کند و webhook ندارد. دریافت webhook به یک گیرندهٔ قابل‌دسترسی از اینترنت نیاز دارد.
-- در schema فعلی بازخریدهای کیک، فقط شناسهٔ عددی `user_id` برای بازخریدکننده وجود دارد و نام کاربری ارسال نمی‌شود؛ بنابراین برنامه شناسهٔ بیننده را نمایش می‌دهد. scope `user:read` هم نام کاربری بیننده‌های دیگر را اضافه نمی‌کند.
-- اگر برنامه اجرا نشد، احتمال دارد برنامهٔ دیگری از درگاه `9000` استفاده کند. آن برنامه را ببندید یا درگاه برنامه و Redirect URL را با هم تغییر دهید.
-
-## ساخت از کد منبع (ویندوز)
-
-نیازمندی‌ها: ویندوز ۶۴ بیتی، Node.js نسخهٔ ۲۰ یا جدیدتر و pnpm.
-
+#### ۱. دریافت کد و نصب وابستگی‌ها
 ```powershell
+git clone https://github.com/MehdiMeidanshahi/Kick-Soundboard.git
+cd Kick-Soundboard
 pnpm install
-pnpm start
-pnpm build:win
 ```
 
-نصب‌کنندهٔ ویندوز در پوشهٔ `release/` ساخته می‌شود. نسخهٔ آزمایشی امضای دیجیتال ندارد و ممکن است هشدار ناشر ناشناس نمایش داده شود. تنظیمات نصب‌کننده در [راهنمای NSIS ابزار electron-builder](https://www.electron.build/docs/nsis/) توضیح داده شده‌اند.
+#### ۲. اجرای برنامه در حالت توسعه
+```powershell
+npm start
+```
+
+#### ۳. اجرای آزمون‌های خودکار
+```powershell
+npm test
+```
+
+#### ۴. ساخت فایل نصب ویندوز
+```powershell
+npm run build:win
+```
+*فایل نصبی نهایی در مسیر `release/Kick-Soundboard-Setup-0.2.0.exe` ساخته خواهد شد.*
+
+---
+
+### 🔒 حریم خصوصی و امنیت
+
+- **بدون سرور میانی**: توکن‌ها و فایل‌های صوتی شما به هیچ سرور ذخیره‌سازی واسطه‌ای ارسال نمی‌شوند.
+- **رمزنگاری DPAPI ویندوز**: اطلاعات ذخیره‌شده تنها توسط حساب کاربری ویندوز شما قابل رمزگشایی هستند.
+- **بررسی هوشمند وضعیت بازخرید**: صداها تنها پس از تأیید در کیک پخش می‌شوند و درخواست‌های رد شده یا در انتظار به هیچ وجه صدا پخش نمی‌کنند.

@@ -558,6 +558,7 @@ function createWindow() {
         await mainWindow.webContents.executeJavaScript("document.querySelector('#settings-btn').click()");
         await new Promise((resolve) => setTimeout(resolve, 250));
         await saveShot('connection-settings.png');
+        app.quit();
       } catch (error) {
         console.error('Could not capture guide screenshots:', error.message);
       }

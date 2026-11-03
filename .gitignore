@@ -2,7 +2,13 @@ node_modules/
 dist/
 release/
 .env
+.env.*
+*.env
 *.log
 patches/sprintf-js/
 slides/
-
+tokens.json
+settings.json
+.vercel/
+.DS_Store
+Thumbs.db
