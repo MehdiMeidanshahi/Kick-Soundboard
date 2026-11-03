@@ -11,11 +11,11 @@
 ## Quick start
 
 1. Download the latest Windows installer from the project's [Releases page](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) and install it.
-2. Sign in to Kick, open [Kick Developer settings](https://kick.com/settings/developer), and create your own app. Set the redirect URL to `http://localhost:9000`, enable **Read Channel points rewards information on a channel** (`channel:rewards:read`), and leave webhooks off. Save and copy that app's Client ID and Client Secret. **Keep the secret private.**
-3. In Kick Soundboard, open **Settings**, enter the Client ID and Client Secret, and choose **Save locally**. Choose **Connect Kick** and approve the read-only access in Kick's browser page.
+2. Launch Kick Soundboard and choose **Connect Kick**. Your browser opens Kick's authorization page. Approve the read-only reward access.
+3. The browser automatically deep-links back to Kick Soundboard. The status changes to **Connected**, and your channel's rewards appear!
 4. Choose an audio file for each reward and use **Test** to preview it without adding it to the redemption queue. Keep the app open while streaming; connect its Windows audio output to OBS if you want viewers to hear the sounds.
 
-Each streamer connects their own Kick Developer app. The app runs locally and does not need your Client Secret sent to anyone else.
+No developer app creation or Client Secret is needed for streamers. The app connects in 1 click and stores your session securely on this PC.
 
 ![Visual Kick Developer setup guide: create an app, set the localhost redirect, select read-only reward access, and keep credentials private. Client ID and Client Secret are fully hidden.](docs/screenshots/kick-developer-visual-guide.png)
 
@@ -52,26 +52,23 @@ Only download the installer from this project's official [GitHub Releases page](
 
 To update, close the app and run the newer installer. It uses the same app identity as earlier versions and upgrades that installation; local app data is preserved. Windows SmartScreen may still warn because the installer is unsigned. You can review the release and its SHA-256 checksum before running it.
 
-### 2. Create your own Kick Developer app
+### 2. Connect Kick in 1 Click
 
-Each streamer connects their own Kick Developer app to their own Kick account. This is needed because this version runs entirely on your PC: there is no project-owned sign-in server, and you should never send your Client Secret to the project owner or another streamer.
+1. Open Kick Soundboard and choose **Connect Kick**.
+2. Your browser opens Kick's authorization screen via the secure OAuth bridge (`https://kicksoundboard-itsmehdi7.vercel.app/api/auth/login`).
+3. Approve the requested read-only permissions (`channel:rewards:read`).
+4. The browser automatically deep-links back to the app via `kick-soundboard://auth`.
+5. The status indicator switches to **Connected**, and your channel's rewards appear. The app checks Kick about every 10 seconds, so new approved redemptions play automatically during stream!
 
-1. Sign in to Kick in your browser, then open [Kick Developer settings](https://kick.com/settings/developer) (**Settings → Developer**).
-2. Choose **Create new**. Enter any name and description for your personal integration.
-3. Set **Redirect URL** to this exact address: `http://localhost:9000`.
-4. Leave **Enable webhooks** off. This app polls Kick from your PC and does not use webhooks.
-5. Under **Scopes Requested**, allow **Read Channel points rewards information on a channel** (`channel:rewards:read`). The app asks Kick for this read-only scope only. If the developer page has a required/default user-information checkbox, leave it as Kick requires; the app does not request the `user:read` scope.
-6. Do not select the separate permission that can read, add, edit, and delete channel point rewards. This soundboard only needs the read permission.
-7. Save the app. In its details, copy the **Client ID** and **Client Secret**. Treat the Client Secret like a password; do not post it in GitHub, screenshots, chat, or support requests. If it was exposed, regenerate it in Kick.
+### 3. Deploying Your Own Bridge (Optional for Developers)
 
-Kick may limit how many Developer apps an account can create. If Kick reports that you reached its limit, this local-only version cannot use another streamer's secret safely. A shared sign-in service could avoid that setup, but would require a hosted backend; this app has none.
-
-### 3. Connect Kick Soundboard
-
-1. Open Kick Soundboard and choose **Settings**.
-2. Paste your **Client ID** and **Client Secret** into the fields, then choose **Save locally**. The secret is stored on this PC using Windows secure storage; the app does not send it to the project owner.
-3. Choose **Connect Kick**. Your browser opens Kick's authorization page. Review the requested read-only permissions and approve them.
-4. Return to the app. The status indicator should say **Connected**, and your channel's rewards should appear. The app checks Kick about every 10 seconds, so a redemption may take up to roughly 10 seconds to appear. Pending redemptions play only after you approve them in Kick.
+If you are self-hosting or want to use your own Kick Developer credentials rather than the default bridge:
+1. Open [Kick Developer settings](https://kick.com/settings/developer) and create an app. Set **Redirect URL** to: `https://<your-vercel-domain>.vercel.app/api/auth/callback`.
+2. Deploy the `bridge` folder to Vercel (or set root directory to `bridge`).
+3. In Vercel Environment Variables, set:
+   - `KICK_CLIENT_ID`: (Your Client ID)
+   - `KICK_CLIENT_SECRET`: (Your Client Secret)
+4. Set the `KICK_BRIDGE_URL` environment variable or `bridgeUrl` in `settings.json` to point your desktop app to your custom Vercel domain.
 
 ![The app's Connect Kick button and channel reward configuration](docs/screenshots/app-overview.png)
 
@@ -134,11 +131,11 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 ## راه‌اندازی سریع
 
 ۱. جدیدترین نسخهٔ ویندوز برنامه را از صفحهٔ [نسخه‌های پروژه](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases) دریافت و نصب کنید.
-۲. وارد کیک شوید و [تنظیمات توسعه‌دهندگان کیک](https://kick.com/settings/developer) را باز کنید. یک برنامهٔ شخصی بسازید، نشانی بازگشت را `http://localhost:9000` بگذارید، دسترسی **Read Channel points rewards information on a channel** (`channel:rewards:read`) را فعال کنید و webhook را خاموش بگذارید. برنامه را ذخیره کنید و **Client ID** و **Client Secret** آن را بردارید. **رمز را محرمانه نگه دارید.**
-۳. در Kick Soundboard وارد **Settings** شوید، شناسه و رمز را وارد کنید و **Save locally** را بزنید. سپس **Connect Kick** را انتخاب و دسترسی فقط‌خواندنی را در صفحهٔ کیک تأیید کنید.
+۲. برنامه را باز کرده و **Connect Kick** را بزنید. مرورگر شما باز می‌شود؛ دسترسی فقط‌خواندنی پاداش‌ها را تأیید کنید.
+۳. مرورگر به‌صورت خودکار شما را به برنامه بازمی‌گرداند. وضعیت به **Connected** تغییر می‌کند و پاداش‌های کانال لود می‌شوند.
 ۴. برای هر پاداش یک فایل صدا انتخاب کنید و با **Test** آن را بررسی کنید. هنگام استریم برنامه را باز نگه دارید؛ برای شنیده‌شدن صدا در OBS، خروجی صدای ویندوز برنامه را به صداهای استریم اضافه کنید.
 
-هر استریمر برنامهٔ شخصی خودش را در Kick Developer وصل می‌کند. برنامه روی رایانهٔ خودتان اجرا می‌شود و لازم نیست Client Secret را برای کسی بفرستید.
+استریمرها نیازی به ساخت برنامه در پنل توسعه‌دهندگان کیک یا واردکردن Client Secret ندارند. اتصال با یک کلیک انجام می‌شود و اطلاعات ورود به صورت امن روی رایانه ذخیره می‌گردد.
 
 ![راهنمای تصویری ساخت برنامهٔ Kick Developer، تنظیم نشانی localhost و انتخاب دسترسی فقط‌خواندنی پاداش‌ها. مقدار Client ID و Client Secret کاملاً پوشانده شده است.](docs/screenshots/kick-developer-visual-guide.png)
 
@@ -177,26 +174,21 @@ The Windows installer is written to `release/`. It is an unsigned early-preview 
 
 برای به‌روزرسانی، برنامه را ببندید و نصب‌کنندهٔ نسخهٔ جدید را اجرا کنید. چون شناسهٔ نصب با نسخه‌های قبلی یکسان است، همان نصب به‌روزرسانی می‌شود و اطلاعات محلی برنامه حفظ می‌شود. ممکن است SmartScreen به‌دلیل امضانشدن نصب‌کننده همچنان هشدار دهد. پیش از اجرا می‌توانید نسخه و SHA-256 آن را بررسی کنید.
 
-### ۲. ساخت برنامهٔ شخصی در Kick Developer
+### ۲. اتصال آسان و با ۱ کلیک به کیک
 
-هر استریمر حساب کیک خودش را به برنامهٔ Developer خودش وصل می‌کند. چون این نسخه کاملاً روی رایانهٔ شما اجرا می‌شود، سرور ورود متعلق به پروژه ندارد. **Client Secret را برای سازندهٔ پروژه یا استریمر دیگری نفرستید.**
+۱. برنامهٔ Kick Soundboard را باز کرده و **Connect Kick** را انتخاب کنید.
+۲. مرورگر شما باز شده و از طریق پل امن OAuth به نشانی `https://kicksoundboard-itsmehdi7.vercel.app/api/auth/login` صفحهٔ تأیید کیک را نمایش می‌دهد.
+۳. دسترسی فقط‌خواندنی پاداش‌ها (`channel:rewards:read`) را تأیید کنید.
+۴. مرورگر از طریق پروتکل پیوند عمیق `kick-soundboard://auth` دوباره برنامه را به پیش‌زمینه آورده و توکن‌ها را به برنامه تحویل می‌دهد.
+۵. وضعیت برنامه به **Connected** تغییر کرده و پاداش‌های کانال شما لود می‌شوند.
 
-۱. در مرورگر وارد کیک شوید و [تنظیمات توسعه‌دهندگان کیک](https://kick.com/settings/developer) را باز کنید (**Settings → Developer**).
-۲. **Create new** را بزنید و برای برنامهٔ شخصی خود یک نام و توضیح وارد کنید.
-۳. نشانی **Redirect URL** را دقیقاً این مقدار قرار دهید: `http://localhost:9000`.
-۴. گزینهٔ **Enable webhooks** را خاموش بگذارید. برنامه روی رایانهٔ شما کیک را بررسی می‌کند و webhook ندارد.
-۵. در بخش **Scopes Requested** دسترسی **Read Channel points rewards information on a channel** (`channel:rewards:read`) را فعال کنید. خود برنامه فقط همین دسترسی خواندن را از کیک درخواست می‌کند. اگر کیک گزینهٔ پیش‌فرض اطلاعات کاربر را اجباری کرده، مطابق نیاز خود صفحه عمل کنید؛ برنامه scope به نام `user:read` را درخواست نمی‌کند.
-۶. دسترسی جداگانه‌ای که امکان خواندن، افزودن، ویرایش و حذف پاداش‌های امتیازی را می‌دهد انتخاب نکنید؛ این برنامه فقط به دسترسی خواندن نیاز دارد.
-۷. برنامه را ذخیره کنید. در جزئیات آن **Client ID** و **Client Secret** را بردارید. با Client Secret مثل رمز عبور رفتار کنید: آن را در GitHub، تصویر، چت یا درخواست پشتیبانی قرار ندهید. اگر افشا شد، در Kick آن را دوباره بسازید.
+### ۳. میزبانی پل شخصی (اختیاری برای توسعه‌دهندگان)
 
-ممکن است Kick تعداد برنامه‌هایی را که هر حساب می‌تواند بسازد محدود کند. اگر به سقف رسیدید، این نسخهٔ کاملاً محلی نمی‌تواند با امنیت از Client Secret استریمر دیگری استفاده کند. سرویس ورود مشترک به یک بک‌اند میزبانی‌شده نیاز دارد؛ این پروژه چنین سروری ندارد.
-
-### ۳. اتصال Kick Soundboard
-
-۱. برنامه را باز کنید و **Settings** را بزنید.
-۲. **Client ID** و **Client Secret** را وارد و **Save locally** را انتخاب کنید. رمز با حافظهٔ امن ویندوز روی همین رایانه ذخیره می‌شود و برای سازندهٔ پروژه ارسال نمی‌شود.
-۳. **Connect Kick** را بزنید. صفحهٔ مجوز کیک در مرورگر باز می‌شود. دسترسی‌های فقط‌خواندنی را بررسی و تأیید کنید.
-۴. به برنامه برگردید. وضعیت باید **Connected** شود و پاداش‌های کانال نمایش داده شوند. برنامه تقریباً هر ۱۰ ثانیه کیک را بررسی می‌کند؛ نمایش و پخش صدا ممکن است حدود ۱۰ ثانیه طول بکشد.
+اگر قصد دارید سرور پل OAuth را خودتان میزبانی کنید یا از مشخصات شخصی Kick Developer استفاده نمایید:
+۱. در [تنظیمات توسعه‌دهندگان کیک](https://kick.com/settings/developer) یک برنامه بسازید و نشانی بازگشت را `https://<your-vercel-domain>.vercel.app/api/auth/callback` بگذارید.
+۲. پوشهٔ `bridge` را در Vercel دیپلوی کنید.
+۳. متغیرهای محیطی `KICK_CLIENT_ID` و `KICK_CLIENT_SECRET` را در داشبورد Vercel تنظیم نمایید.
+۴. متغیر محیطی `KICK_BRIDGE_URL` یا فیلد `bridgeUrl` در فایل `settings.json` را روی دامنهٔ سفارشی خود تنظیم کنید.
 
 ![دکمهٔ اتصال و فهرست پاداش‌های نمونه](docs/screenshots/app-overview.png)
 
