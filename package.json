@@ -12,16 +12,14 @@
     "electron": "44.6.0",
     "electron-builder": "^26.0.0"
   },
-  "pnpm": {
-    "patchedDependencies": {
-      "sprintf-js@1.1.3": "patches/sprintf-js@1.1.3.patch"
-    }
-  },
   "build": {
     "appId": "com.localvc.kicksoundboard",
     "productName": "Kick Soundboard",
     "asar": true,
-    "electronLanguages": ["en-US", "fa"],
+    "electronLanguages": [
+      "en-US",
+      "fa"
+    ],
     "protocols": [
       {
         "name": "Kick Soundboard Protocol",
@@ -43,7 +41,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "artifactName": "Kick-Soundboard-Setup-${version}.${ext}"
@@ -58,5 +58,6 @@
       "createStartMenuShortcut": true,
       "deleteAppDataOnUninstall": false
     }
-  }
+  },
+  "packageManager": "pnpm@9.15.4"
 }
