@@ -6,7 +6,7 @@ const toastRoot = $('#toast');
 const { prependInterruptedItem } = window.kickQueuePlayback;
 const translations = {
   en: {
-    appName:'Kick Soundboard', tagline:'Local reward sounds for your stream', settings:'Settings', connect:'Connect Kick', connected:'Connected', polling:'Connected · checking every 10 sec', notConnected:'Not connected',
+    appName:'Kick Soundboard', tagline:'Local reward sounds for your stream', settings:'Settings', connect:'Connect Kick', connected:'Connected', connectedAs:'Connected as {name}', polling:'Connected · checking every 10 sec', notConnected:'Not connected',
     setupTitle:'Connect your Kick channel', setupDescription:'Link your Kick account with 1 click to load your channel rewards and play mapped sounds on this PC.', openSettings:'Open Settings', localNotice:'Your tokens and sound mappings are stored securely on this computer.',
     rewardSounds:'Reward sounds', refreshRewards:'Refresh rewards', masterVolume:'Master volume', stopAudio:'Stop audio', redemptionHistory:'Redemption history', clear:'Clear', soundQueue:'Sound queue', waiting:'waiting', queuedTotal:'queued',
     connectEmpty:'Connect your Kick account to load your channel rewards.', noRewards:'No rewards found. Create channel point rewards on Kick, then refresh.', emptyHistory:'New reward redemptions will appear here.',
@@ -28,7 +28,7 @@ const translations = {
     previousPage:'Previous',nextPage:'Next',historyPage:'Page {page} of {pages}',stopQueue:'Stop queue',removeQueueItem:'Remove'
   },
   fa: {
-    appName:'صندوق صدای کیک', tagline:'پخش صدای محلی برای پاداش‌های استریم', settings:'تنظیمات', connect:'اتصال به کیک', connected:'متصل', polling:'متصل · بررسی هر ۱۰ ثانیه', notConnected:'متصل نیست',
+    appName:'صندوق صدای کیک', tagline:'پخش صدای محلی برای پاداش‌های استریم', settings:'تنظیمات', connect:'اتصال به کیک', connected:'متصل', connectedAs:'متصل به عنوان {name}', polling:'متصل · بررسی هر ۱۰ ثانیه', notConnected:'متصل نیست',
     setupTitle:'اتصال به کانال کیک', setupDescription:'با یک کلیک حساب کیک خود را متصل کنید تا جوایز کانال دریافت شده و صداها روی کامپیوتر شما پخش شوند.', openSettings:'تنظیمات', localNotice:'توکن‌های ورود و تنظیمات صدا به صورت امن روی همین رایانه ذخیره می‌شوند.',
     rewardSounds:'صداهای پاداش', refreshRewards:'به‌روزرسانی پاداش‌ها', masterVolume:'بلندی صدای اصلی', stopAudio:'توقف صدا', redemptionHistory:'تاریخچهٔ بازخریدها', clear:'پاک کردن', soundQueue:'صف پخش صدا', waiting:'در انتظار', queuedTotal:'در صف',
     connectEmpty:'برای دریافت پاداش‌های کانال، حساب کیک را وصل کنید.', noRewards:'پاداشی پیدا نشد. در کیک پاداش بسازید و دوباره به‌روزرسانی کنید.', emptyHistory:'بازخریدهای جدید اینجا نمایش داده می‌شوند.',
@@ -516,7 +516,12 @@ async function refreshState() {
   const newState = await request('/api/state');
   state = { ...state, ...newState };
   setConnected(state.connected);
-  if ($('#account-status-text')) $('#account-status-text').textContent = state.connected ? t('connected') : t('notConnected');
+  if ($('#account-status-text')) {
+    const streamerName = state.streamer?.name || '';
+    $('#account-status-text').textContent = state.connected
+      ? (streamerName ? t('connectedAs', { name: streamerName }) : t('connected'))
+      : t('notConnected');
+  }
   if ($('#modal-connect-btn')) $('#modal-connect-btn').hidden = state.connected;
   if ($('#disconnect-btn')) $('#disconnect-btn').hidden = !state.connected;
   $('#app-version').textContent = t('appVersion', { version: state.version || '—' });

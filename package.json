@@ -1,6 +1,6 @@
 {
   "name": "kick-soundboard-local",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Local Kick channel reward soundboard for Windows streamers",
   "main": "src/main.js",
   "scripts": {

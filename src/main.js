@@ -7,6 +7,12 @@ const { getApprovedRedemptions } = require('./redemption-playback');
 const { parseRetryAfter, getPollDelay } = require('./polling-backoff');
 const { shouldClearRefreshTokens, createOAuthError } = require('./oauth-utils');
 const { parseVersion, compareVersions, latestStableRelease } = require('./versions');
+const {
+  resolveUserNames,
+  resolveCurrentStreamer,
+  enrichHistoryWithUserNames,
+  mergeHistoryRecords,
+} = require('./user-resolver');
 
 const PORT = 9000;
 const REDIRECT_URI = `http://localhost:${PORT}`;
@@ -28,7 +34,7 @@ let pollingGeneration = 0;
 let lastPollError = '';
 let lastPollSuccessAt = null;
 let nextPollAt = null;
-let config = { clientId: '', encryptedClientSecret: '', bridgeUrl: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [], pendingIds: [] };
+let config = { clientId: '', encryptedClientSecret: '', bridgeUrl: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [], pendingIds: [], knownUsers: {}, streamerProfile: null };
 let accessToken = '';
 let refreshToken = '';
 let tokenExpiresAt = 0;
@@ -46,6 +52,8 @@ function readJson(file, fallback) {
 function loadLocalState() {
   const stored = readJson(configPath(), {});
   config = { ...config, ...stored };
+  config.knownUsers = { ...(config.knownUsers || {}), ...(stored.knownUsers || {}) };
+  config.history = enrichHistoryWithUserNames(config.history || [], config.knownUsers);
   lastPollSuccessAt = config.lastPollSuccessAt || null;
   nextPollAt = null;
   lastPollError = config.lastPollError || '';
@@ -120,9 +128,10 @@ function publicState() {
       cooldowns: { 'sample-reward-1': 5 },
       outputDeviceId: config.outputDeviceId || '', streamerMode: Boolean(config.streamerMode), lastPollSuccessAt, nextPollAt, pollError: lastPollError,
       history: [{ id: 'sample-redemption-1', rewardId: 'sample-reward-1', rewardTitle: 'Play a sound', userName: 'ViewerExample', userInput: 'Hello streamer!', redeemedAt: new Date(Date.now() - 120000).toISOString(), status: 'accepted' }],
+      streamer: { name: 'StreamerExample' },
     };
   }
-  return { configured: Boolean(accessToken || (config.clientId && config.encryptedClientSecret)), connected: Boolean(accessToken), clientId: config.clientId, bridgeUrl: getBridgeUrl(), version: app.getVersion(), volume: config.volume ?? 0.8, rewardVolumes: config.rewardVolumes || {}, sounds, cooldowns: config.cooldowns || {}, history: config.history || [], outputDeviceId: config.outputDeviceId || '', streamerMode: Boolean(config.streamerMode), lastPollSuccessAt, nextPollAt, pollError: lastPollError };
+  return { configured: Boolean(accessToken || (config.clientId && config.encryptedClientSecret)), connected: Boolean(accessToken), clientId: config.clientId, bridgeUrl: getBridgeUrl(), version: app.getVersion(), volume: config.volume ?? 0.8, rewardVolumes: config.rewardVolumes || {}, sounds, cooldowns: config.cooldowns || {}, history: config.history || [], outputDeviceId: config.outputDeviceId || '', streamerMode: Boolean(config.streamerMode), lastPollSuccessAt, nextPollAt, pollError: lastPollError, streamer: config.streamerProfile || null };
 }
 
 function screenshotRewards() {
@@ -258,20 +267,15 @@ async function fetchRewards() {
   return result.data || [];
 }
 
-function mergeHistoryRecords(history, currentItems) {
-  const byId = new Map((history || []).map((item) => [item.id, item]));
-  for (const item of currentItems) {
-    const previous = byId.get(item.id);
-    byId.set(item.id, previous ? { ...previous, status: item.status } : item);
-  }
-  return [...byId.values()].sort((a, b) => new Date(b.redeemedAt) - new Date(a.redeemedAt)).slice(0, 100);
-}
-
 async function pollRedemptions(isInitial = false) {
   if (polling || !accessToken) return;
   polling = true;
   try {
+    if (!config.streamerProfile && accessToken) {
+      config.streamerProfile = await resolveCurrentStreamer({ kickGet, cachedUsers: config.knownUsers });
+    }
     const all = new Map();
+    const uncachedUserIds = new Set();
     for (const status of ['pending', 'accepted', 'rejected']) {
       let cursor = '';
       let pages = 0;
@@ -281,10 +285,14 @@ async function pollRedemptions(isInitial = false) {
         const result = await kickGet(`/channels/rewards/redemptions?${qs.toString()}`);
         for (const group of (result.data || [])) {
           for (const redemption of (group.redemptions || [])) {
+            const redeemerId = redemption.redeemer?.user_id ?? null;
+            if (redeemerId && !config.knownUsers?.[String(redeemerId)]) {
+              uncachedUserIds.add(redeemerId);
+            }
             all.set(redemption.id, {
               id: redemption.id, status: redemption.status,
-              userName: redemption.redeemer?.username || '',
-              redeemerUserId: redemption.redeemer?.user_id ?? null,
+              userName: redemption.redeemer?.username || (redeemerId ? config.knownUsers?.[String(redeemerId)] : '') || '',
+              redeemerUserId: redeemerId,
               userInput: redemption.user_input || '', redeemedAt: redemption.redeemed_at,
               rewardId: group.reward?.id, rewardTitle: group.reward?.title || 'Channel reward',
             });
@@ -294,9 +302,28 @@ async function pollRedemptions(isInitial = false) {
         pages += 1;
       } while (cursor && pages < 3);
     }
+    for (const item of (config.history || [])) {
+      if (!item.userName && item.redeemerUserId && !config.knownUsers?.[String(item.redeemerUserId)]) {
+        uncachedUserIds.add(item.redeemerUserId);
+      }
+    }
+    if (uncachedUserIds.size > 0) {
+      config.knownUsers ||= {};
+      await resolveUserNames({
+        userIds: [...uncachedUserIds],
+        cachedUsers: config.knownUsers,
+        kickGet,
+      });
+      for (const item of all.values()) {
+        if (!item.userName && item.redeemerUserId && config.knownUsers[String(item.redeemerUserId)]) {
+          item.userName = config.knownUsers[String(item.redeemerUserId)];
+        }
+      }
+    }
     const sorted = [...all.values()].sort((a, b) => new Date(b.redeemedAt) - new Date(a.redeemedAt));
     const previousHistory = config.history;
     config.history = mergeHistoryRecords(config.history, sorted);
+    config.history = enrichHistoryWithUserNames(config.history, config.knownUsers);
     // Pending requests are silent. Play only when they become approved; also
     // play a newly observed approval after startup, but never replay old history.
     const seenIds = new Set(config.seenIds || []);
@@ -415,6 +442,8 @@ async function handleRequest(req, res) {
   if (req.method === 'POST' && url.pathname === '/api/connect') return beginOAuth(res);
   if (req.method === 'POST' && url.pathname === '/api/disconnect') {
     accessToken = ''; refreshToken = ''; tokenExpiresAt = 0;
+    config.streamerProfile = null;
+    saveConfig();
     fs.rmSync(tokenPath(), { force: true });
     stopPolling();
     return sendJson(res, 200, { ok: true });
