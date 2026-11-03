@@ -148,8 +148,8 @@ function handleDeepLink(urlString) {
 }
 
 async function beginOAuth(res) {
-  if (!config.clientId || !getClientSecret()) {
-    const bridgeUrl = getBridgeUrl();
+  const bridgeUrl = getBridgeUrl();
+  if (bridgeUrl) {
     const loginUrl = `${bridgeUrl}/api/auth/login`;
     await shell.openExternal(loginUrl);
     return sendJson(res, 200, { ok: true, url: loginUrl });
