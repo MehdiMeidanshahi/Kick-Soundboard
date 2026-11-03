@@ -162,7 +162,7 @@ async function beginOAuth(res) {
     client_id: config.clientId,
     response_type: 'code',
     redirect_uri: REDIRECT_URI,
-    scope: 'channel:rewards:read',
+    scope: 'user:read channel:rewards:read channel:rewards:write events:subscribe kicks:read',
     state,
     code_challenge: challenge,
     code_challenge_method: 'S256',

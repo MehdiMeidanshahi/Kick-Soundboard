@@ -27,7 +27,7 @@ module.exports = async function handler(req, res) {
     client_id: clientId,
     response_type: 'code',
     redirect_uri: redirectUri,
-    scope: 'user:read channel:rewards:read',
+    scope: 'user:read channel:rewards:read channel:rewards:write events:subscribe kicks:read',
     state,
     code_challenge: challenge,
     code_challenge_method: 'S256',
