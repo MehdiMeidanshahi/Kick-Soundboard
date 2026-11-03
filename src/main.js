@@ -542,10 +542,8 @@ function createWindow() {
     if (new URL(destination).origin !== allowedOrigin) event.preventDefault();
   });
   mainWindow.loadURL(`http://localhost:${PORT}`);
-  mainWindow.once("ready-to-show", () => {
-    mainWindow.show();
-    mainWindow.focus();
-  });
+  mainWindow.show();
+  mainWindow.focus();
   mainWindow.on('closed', () => { mainWindow = null; });
   if (captureGuideScreenshots) {
     mainWindow.webContents.once('did-finish-load', async () => {
