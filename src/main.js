@@ -3,7 +3,7 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { getApprovedRedemptions } = require('./redemption-playback');
+const { getApprovedRedemptions, getRedemptionsToPlay } = require('./redemption-playback');
 const { parseRetryAfter, getPollDelay } = require('./polling-backoff');
 const { shouldClearRefreshTokens, createOAuthError } = require('./oauth-utils');
 const { parseVersion, compareVersions, latestStableRelease } = require('./versions');
@@ -34,7 +34,7 @@ let pollingGeneration = 0;
 let lastPollError = '';
 let lastPollSuccessAt = null;
 let nextPollAt = null;
-let config = { clientId: '', encryptedClientSecret: '', bridgeUrl: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [], pendingIds: [], knownUsers: {}, streamerProfile: null };
+let config = { clientId: '', encryptedClientSecret: '', bridgeUrl: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [], pendingIds: [], knownUsers: {}, streamerProfile: null, playPending: false, playedIds: [] };
 let accessToken = '';
 let refreshToken = '';
 let tokenExpiresAt = 0;
@@ -131,7 +131,7 @@ function publicState() {
       streamer: { name: 'StreamerExample' },
     };
   }
-  return { configured: Boolean(accessToken || (config.clientId && config.encryptedClientSecret)), connected: Boolean(accessToken), clientId: config.clientId, bridgeUrl: getBridgeUrl(), version: app.getVersion(), volume: config.volume ?? 0.8, rewardVolumes: config.rewardVolumes || {}, sounds, cooldowns: config.cooldowns || {}, history: config.history || [], outputDeviceId: config.outputDeviceId || '', streamerMode: Boolean(config.streamerMode), lastPollSuccessAt, nextPollAt, pollError: lastPollError, streamer: config.streamerProfile || null };
+  return { configured: Boolean(accessToken || (config.clientId && config.encryptedClientSecret)), connected: Boolean(accessToken), clientId: config.clientId, bridgeUrl: getBridgeUrl(), version: app.getVersion(), volume: config.volume ?? 0.8, rewardVolumes: config.rewardVolumes || {}, sounds, cooldowns: config.cooldowns || {}, history: config.history || [], outputDeviceId: config.outputDeviceId || '', streamerMode: Boolean(config.streamerMode), lastPollSuccessAt, nextPollAt, pollError: lastPollError, streamer: config.streamerProfile || null, playPending: Boolean(config.playPending) };
 }
 
 function screenshotRewards() {
@@ -324,12 +324,18 @@ async function pollRedemptions(isInitial = false) {
     const previousHistory = config.history;
     config.history = mergeHistoryRecords(config.history, sorted);
     config.history = enrichHistoryWithUserNames(config.history, config.knownUsers);
-    // Pending requests are silent. Play only when they become approved; also
-    // play a newly observed approval after startup, but never replay old history.
+    // Play approved redemptions, or pending redemptions if playPending toggle is enabled.
+    // Redemptions are played once and never duplicated or replayed from startup backlog.
     const seenIds = new Set(config.seenIds || []);
     const pendingIds = new Set(config.pendingIds || []);
-    for (const item of getApprovedRedemptions(sorted, previousHistory, seenIds, pendingIds, isInitial)) {
+    const playedIds = new Set(config.playedIds || []);
+    const toPlay = getRedemptionsToPlay(sorted, previousHistory, seenIds, pendingIds, isInitial, {
+      playPending: Boolean(config.playPending),
+      playedIds,
+    });
+    for (const item of toPlay) {
       playMappedSound(item.rewardId, item.id);
+      playedIds.add(item.id);
     }
     for (const item of [...sorted].reverse()) {
       if (item.status === 'pending') {
@@ -341,6 +347,7 @@ async function pollRedemptions(isInitial = false) {
     }
     config.seenIds = [...seenIds].slice(-1000);
     config.pendingIds = [...pendingIds].slice(-1000);
+    config.playedIds = [...playedIds].slice(-1000);
     lastPollError = '';
     lastPollSuccessAt = new Date().toISOString();
     config.lastPollSuccessAt = lastPollSuccessAt;
@@ -458,6 +465,7 @@ async function handleRequest(req, res) {
     if (Number.isFinite(Number(body.volume))) config.volume = Math.min(1, Math.max(0, Number(body.volume)));
     if (typeof body.outputDeviceId === 'string') config.outputDeviceId = body.outputDeviceId;
     if (typeof body.streamerMode === 'boolean') config.streamerMode = body.streamerMode;
+    if (typeof body.playPending === 'boolean') config.playPending = body.playPending;
     if (body.rewardId) {
       config.sounds ||= {}; config.cooldowns ||= {}; config.rewardVolumes ||= {};
       if (typeof body.soundPath === 'string') {

@@ -189,6 +189,13 @@
             </div>
           </div>
         </div>
+        <div class="field">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" id="play-pending-toggle">
+            <span data-i18n="playPendingRewards">Play sound for pending rewards</span>
+          </label>
+          <div class="field-note" data-i18n="playPendingRewardsNote">Play mapped sounds immediately when a reward is redeemed, without waiting for manual approval.</div>
+        </div>
         <div class="field"><label for="audio-output" data-i18n="audioOutput">Audio output</label><div class="audio-device-picker"><select id="audio-output"><option value="" data-i18n="systemDefault">System default</option></select><button type="button" id="refresh-audio-devices" class="ghost small" data-i18n="refreshDevices">Refresh devices</button></div><div id="audio-warning" class="field-note" role="status"></div></div>
         <div class="dialog-actions"><button type="button" id="cancel-settings" class="ghost" data-i18n="cancel">Close</button><button type="submit" class="primary" data-i18n="saveLocally">Save</button></div>
         <div class="update-area">

@@ -52,3 +52,38 @@ test('pending approvals are still detected when they fall outside visible histor
   const accepted = [{ id: 'older-pending', status: 'accepted' }];
   assert.deepEqual(getApprovedRedemptions(accepted, [], ['older-pending'], ['older-pending'], false), accepted);
 });
+
+test('when playPending is true, newly observed pending redemptions are queued to play', () => {
+  const items = [{ id: 'pending-1', status: 'pending' }];
+  const result = getApprovedRedemptions(items, [], [], [], false, { playPending: true });
+  assert.deepEqual(result, items);
+});
+
+test('when playPending is true, an item played while pending does not play again when accepted', () => {
+  const items = [{ id: 'pending-1', status: 'accepted' }];
+  const previousHistory = [{ id: 'pending-1', status: 'pending' }];
+  // pending-1 is already in playedIds
+  const result = getApprovedRedemptions(items, previousHistory, ['pending-1'], ['pending-1'], false, {
+    playPending: true,
+    playedIds: ['pending-1'],
+  });
+  assert.deepEqual(result, []);
+});
+
+test('when playPending is false, newly observed pending redemptions are NOT queued to play', () => {
+  const items = [{ id: 'pending-1', status: 'pending' }];
+  const result = getApprovedRedemptions(items, [], [], [], false, { playPending: false });
+  assert.deepEqual(result, []);
+});
+
+test('when playPending is true, startup ignores old pending redemptions (isInitial = true)', () => {
+  const items = [{ id: 'old-pending', status: 'pending' }];
+  const result = getApprovedRedemptions(items, [], [], [], true, { playPending: true });
+  assert.deepEqual(result, []);
+});
+
+test('when playPending is true, rejected redemptions are still ignored', () => {
+  const items = [{ id: 'rejected-1', status: 'rejected' }];
+  const result = getApprovedRedemptions(items, [], [], [], false, { playPending: true });
+  assert.deepEqual(result, []);
+});

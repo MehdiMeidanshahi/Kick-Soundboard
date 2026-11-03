@@ -288,6 +288,7 @@ test('local server: POST /api/settings clamps volume and cooldown bounds', async
       volume: 1.5, // should clamp to 1.0
       outputDeviceId: 'virtual_cable_1',
       streamerMode: true,
+      playPending: true,
       rewardId: 'rew_test',
       cooldown: 5000, // should clamp to 3600
       rewardVolume: 2.0, // should clamp to 1.0
@@ -300,6 +301,7 @@ test('local server: POST /api/settings clamps volume and cooldown bounds', async
   assert.equal(config.volume, 1.0);
   assert.equal(config.outputDeviceId, 'virtual_cable_1');
   assert.equal(config.streamerMode, true);
+  assert.equal(config.playPending, true);
   assert.equal(config.cooldowns['rew_test'], 3600);
   assert.equal(config.rewardVolumes['rew_test'], 1.0);
 });
