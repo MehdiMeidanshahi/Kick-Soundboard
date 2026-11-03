@@ -542,25 +542,25 @@ async function connectKick() {
   } catch (error) { toast(error.message, true); if (error.message.includes('Client ID')) openSettings(); }
 }
 
-$('#lang-toggle').addEventListener('click', () => {
+$('#lang-toggle')?.addEventListener('click', () => {
   language = language === 'en' ? 'fa' : 'en';
   localStorage.setItem('kick-soundboard-language', language);
   applyLanguage();
 });
-$('#settings-btn').addEventListener('click', openSettings);
-$('#setup-settings').addEventListener('click', openSettings);
-$('#close-settings').addEventListener('click', closeSettings);
-$('#cancel-settings').addEventListener('click', closeSettings);
-$('#connect-btn').addEventListener('click', connectKick);
-$('#banner-connect').addEventListener('click', connectKick);
+$('#settings-btn')?.addEventListener('click', openSettings);
+$('#setup-settings')?.addEventListener('click', openSettings);
+$('#close-settings')?.addEventListener('click', closeSettings);
+$('#cancel-settings')?.addEventListener('click', closeSettings);
+$('#connect-btn')?.addEventListener('click', connectKick);
+$('#banner-connect')?.addEventListener('click', connectKick);
 $('#modal-connect-btn')?.addEventListener('click', connectKick);
-$('#disconnect-btn').addEventListener('click', async () => {
+$('#disconnect-btn')?.addEventListener('click', async () => {
   try {
     await request('/api/disconnect', { method: 'POST', body: '{}' });
     await refreshState(); closeSettings(); toast(t('disconnectedKick'));
   } catch (error) { toast(error.message, true); }
 });
-$('#check-updates').addEventListener('click', async () => {
+$('#check-updates')?.addEventListener('click', async () => {
   const button = $('#check-updates');
   const status = $('#update-status');
   button.disabled = true;
@@ -576,24 +576,24 @@ $('#check-updates').addEventListener('click', async () => {
     status.textContent = t('updateError', { message: error.message });
   } finally { button.disabled = false; }
 });
-$('#download-update').addEventListener('click', () => window.kickApp?.openReleases());
-$('#refresh-btn').addEventListener('click', async () => { try { await loadRewards(); toast(t('rewardsRefreshed')); } catch (error) { toast(error.message, true); } });
-$('#stop-btn').addEventListener('click', stopQueue);
-$('#skip-btn').addEventListener('click', skipCurrent);
-$('#clear-queue').addEventListener('click', () => { queue = []; updateQueue(); });
-$('#resume-queue').addEventListener('click', () => { queuePaused = false; updateQueue(); playNext(); });
-$('#reward-search').addEventListener('input', () => { rewardSearch = $('#reward-search').value.trim().toLocaleLowerCase(); renderRewards(); });
-$('#unassigned-only').addEventListener('change', renderRewards);
-$('#history-search').addEventListener('input', () => { historyPage = 1; historySearch = $('#history-search').value; renderHistory(); });
-$('#history-filter').addEventListener('change', () => { historyPage = 1; historyStatus = $('#history-filter').value; renderHistory(); });
-$('#history-prev').addEventListener('click', () => { if (historyPage > 1) { historyPage -= 1; renderHistory(); } });
-$('#history-next').addEventListener('click', () => {
+$('#download-update')?.addEventListener('click', () => window.kickApp?.openReleases());
+$('#refresh-btn')?.addEventListener('click', async () => { try { await loadRewards(); toast(t('rewardsRefreshed')); } catch (error) { toast(error.message, true); } });
+$('#stop-btn')?.addEventListener('click', stopQueue);
+$('#skip-btn')?.addEventListener('click', skipCurrent);
+$('#clear-queue')?.addEventListener('click', () => { queue = []; updateQueue(); });
+$('#resume-queue')?.addEventListener('click', () => { queuePaused = false; updateQueue(); playNext(); });
+$('#reward-search')?.addEventListener('input', () => { rewardSearch = $('#reward-search').value.trim().toLocaleLowerCase(); renderRewards(); });
+$('#unassigned-only')?.addEventListener('change', renderRewards);
+$('#history-search')?.addEventListener('input', () => { historyPage = 1; historySearch = $('#history-search').value; renderHistory(); });
+$('#history-filter')?.addEventListener('change', () => { historyPage = 1; historyStatus = $('#history-filter').value; renderHistory(); });
+$('#history-prev')?.addEventListener('click', () => { if (historyPage > 1) { historyPage -= 1; renderHistory(); } });
+$('#history-next')?.addEventListener('click', () => {
   const query = historySearch.trim().toLocaleLowerCase();
   const filteredCount = (state.history || []).filter((item) => (historyStatus === 'all' || item.status === historyStatus) &&
     (!query || `${item.userName || item.username || item.user || item.redeemerUserId || ''} ${item.rewardTitle || ''} ${item.userInput || ''}`.toLocaleLowerCase().includes(query))).length;
   if (historyPage < Math.ceil(filteredCount / historyPageSize)) { historyPage += 1; renderHistory(); }
 });
-$('#stream-mode-btn').addEventListener('click', async () => {
+$('#stream-mode-btn')?.addEventListener('click', async () => {
   state.streamerMode = !state.streamerMode;
   document.body.classList.toggle('stream-mode', state.streamerMode);
   $('#stream-mode-btn').setAttribute('aria-pressed', String(state.streamerMode));
@@ -601,7 +601,7 @@ $('#stream-mode-btn').addEventListener('click', async () => {
   try { await request('/api/settings', { method: 'POST', body: JSON.stringify({ streamerMode: state.streamerMode }) }); }
   catch (error) { toast(error.message, true); }
 });
-$('#audio-output').addEventListener('change', async () => {
+$('#audio-output')?.addEventListener('change', async () => {
   state.outputDeviceId = $('#audio-output').value;
   invalidOutput = false; $('#audio-warning').textContent = '';
   try {
@@ -613,9 +613,9 @@ $('#audio-output').addEventListener('change', async () => {
     $('#audio-warning').textContent = t('deviceUnavailable'); toast(error.message, true);
   }
 });
-$('#refresh-audio-devices').addEventListener('click', () => loadAudioDevices());
-$('#clear-history').addEventListener('click', async () => { try { await request('/api/history/clear', { method: 'POST', body: '{}' }); await refreshState(); } catch (error) { toast(error.message, true); } });
-$('#settings-form').addEventListener('submit', async (event) => {
+$('#refresh-audio-devices')?.addEventListener('click', () => loadAudioDevices());
+$('#clear-history')?.addEventListener('click', async () => { try { await request('/api/history/clear', { method: 'POST', body: '{}' }); await refreshState(); } catch (error) { toast(error.message, true); } });
+$('#settings-form')?.addEventListener('submit', async (event) => {
   event.preventDefault();
   try {
     const selectedDevice = $('#audio-output').value;
@@ -627,13 +627,13 @@ $('#settings-form').addEventListener('submit', async (event) => {
     toast(error.message, true);
   }
 });
-$('#volume').addEventListener('input', () => {
+$('#volume')?.addEventListener('input', () => {
   $('#volume-label').textContent = `${$('#volume').value}%`;
   state.volume = Number($('#volume').value) / 100;
   if (activeAudio) activeAudio.volume = effectiveVolume(activeRewardId);
   if (previewAudio) previewAudio.volume = effectiveVolume(previewRewardId);
 });
-$('#volume').addEventListener('change', async () => {
+$('#volume')?.addEventListener('change', async () => {
   try { await request('/api/settings', { method: 'POST', body: JSON.stringify({ volume: Number($('#volume').value) / 100 }) }); }
   catch (error) { toast(error.message, true); }
 });
