@@ -1,0 +1,453 @@
+/* Sound Pad & Launchpad Styling */
+.soundpad-container {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 28px;
+  width: 100%;
+}
+
+.soundpad-section {
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+/* Distinct visual separator between Quick Sampler and Channel Point Rewards */
+.soundpad-separator {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 8px 0 16px 0;
+  width: 100%;
+}
+.soundpad-separator-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(83, 252, 24, 0.4) 0%, rgba(157, 92, 255, 0.4) 50%, rgba(25, 38, 52, 0.8) 100%);
+}
+.soundpad-separator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #c4b5fd;
+  background: rgba(157, 92, 255, 0.12);
+  border: 1px solid rgba(157, 92, 255, 0.35);
+  border-radius: var(--radius-pill);
+}
+.soundpad-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.soundpad-section-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.soundpad-section-desc {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.soundpad-section-count {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+.soundpad-section-count.neon {
+  background: rgba(83, 252, 24, 0.12);
+  color: var(--green);
+  border: 1px solid rgba(83, 252, 24, 0.3);
+}
+.soundpad-section-count.purple {
+  background: rgba(157, 92, 255, 0.15);
+  color: var(--purple);
+  border: 1px solid rgba(157, 92, 255, 0.3);
+}
+
+.soundpad-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.soundpad-tile {
+  background: var(--panel-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  padding: 16px 18px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 144px;
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+.soundpad-tile:hover {
+  background: #182232;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.soundpad-tile:active {
+  transform: scale(0.96);
+}
+
+/* Distinct Standalone Quick-Sampler Tiles */
+.soundpad-tile.standalone {
+  border-top: 3px solid var(--green);
+  background: #101620;
+}
+.soundpad-tile.standalone:hover {
+  border-color: var(--green);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(83, 252, 24, 0.18);
+}
+
+/* Distinct Kick Channel Point Reward Tiles */
+.soundpad-tile.reward-point {
+  border-top: 3px solid var(--purple);
+  background: #12141f;
+}
+.soundpad-tile.reward-point:hover {
+  border-color: var(--purple);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(157, 92, 255, 0.2);
+}
+
+.soundpad-tile.retrigger {
+  animation: pad-retrigger 0.18s ease-out;
+}
+@keyframes pad-retrigger {
+  0% { transform: scale(0.93); filter: brightness(1.4); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+.soundpad-tile.active-play {
+  border-color: var(--green) !important;
+  background: linear-gradient(135deg, rgba(83, 252, 24, 0.15) 0%, rgba(19, 25, 36, 0.95) 100%) !important;
+  box-shadow: 0 0 24px rgba(83, 252, 24, 0.35), inset 0 0 16px rgba(83, 252, 24, 0.1) !important;
+}
+
+/* Web Sound Pad trigger button in toolbar */
+.soundpad-web-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(83, 252, 24, 0.1);
+  border: 1px solid rgba(83, 252, 24, 0.3);
+  color: var(--green);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all .16s ease;
+}
+.soundpad-web-btn:hover {
+  background: var(--green);
+  color: #051303;
+  box-shadow: 0 0 14px var(--green-glow);
+  transform: translateY(-1px);
+}
+
+/* Equalizer Bars Animation */
+.equalizer-bars {
+  display: none;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+.soundpad-tile.active-play .equalizer-bars {
+  display: inline-flex;
+}
+.equalizer-bar {
+  width: 3px;
+  background: var(--green);
+  border-radius: 1px;
+  animation: eq-bounce 0.6s ease-in-out infinite alternate;
+}
+.equalizer-bar:nth-child(2) { animation-delay: 0.2s; height: 100%; }
+.equalizer-bar:nth-child(3) { animation-delay: 0.4s; height: 60%; }
+@keyframes eq-bounce {
+  0% { height: 3px; }
+  100% { height: 14px; }
+}
+
+.soundpad-tile.add-tile {
+  border: 2px dashed rgba(255, 255, 255, 0.18);
+  background: rgba(16, 21, 28, 0.45);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+}
+.soundpad-tile.add-tile:hover {
+  border-color: var(--green);
+  background: rgba(83, 252, 24, 0.06);
+  transform: translateY(-2px);
+}
+.soundpad-tile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+.soundpad-tile-title-group {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.soundpad-tile-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.soundpad-tile-title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.soundpad-edit-title-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 11px;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  transition: all .14s ease;
+  flex-shrink: 0;
+}
+.soundpad-edit-title-btn:hover {
+  background: rgba(83, 252, 24, 0.16);
+  border-color: rgba(83, 252, 24, 0.45);
+  color: var(--green);
+  transform: translateY(-1px);
+}
+.soundpad-tile-sub {
+  font-size: 11px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.soundpad-tile-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  width: 100%;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+.soundpad-tile-badge-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-shrink: 0;
+}
+.soundpad-tile-cost {
+  background: rgba(157, 92, 255, 0.15);
+  color: var(--purple);
+  border: 1px solid rgba(157, 92, 255, 0.3);
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+}
+.soundpad-badge-pad {
+  background: rgba(83, 252, 24, 0.12);
+  color: #53fc18;
+  border: 1px solid rgba(83, 252, 24, 0.35);
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-weight: 800;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.soundpad-badge-points {
+  background: rgba(157, 92, 255, 0.15);
+  color: var(--purple);
+  border: 1px solid rgba(157, 92, 255, 0.35);
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 11px;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Tile Action Badges (Keybind & Stream Deck & Change Sound) */
+.soundpad-tile-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  flex-wrap: nowrap;
+}
+.soundpad-keybind-btn {
+  background: rgba(14, 20, 28, 0.9);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .14s ease;
+  backdrop-filter: blur(4px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  line-height: 1;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.soundpad-deck-btn,
+.soundpad-change-btn {
+  background: rgba(14, 20, 28, 0.9);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  padding: 0;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .14s ease;
+  backdrop-filter: blur(4px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  width: 24px;
+  min-width: 24px;
+  line-height: 1;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+.soundpad-keybind-btn:hover,
+.soundpad-deck-btn:hover,
+.soundpad-change-btn:hover {
+  background: #253344;
+  color: var(--text);
+  border-color: var(--line-bright);
+}
+.soundpad-keybind-btn.assigned {
+  background: rgba(83, 252, 24, 0.14);
+  color: var(--green);
+  border-color: rgba(83, 252, 24, 0.5);
+  box-shadow: 0 0 10px rgba(83, 252, 24, 0.15);
+}
+
+/* Dedicated Tactile Stop Button */
+.soundpad-stop-btn {
+  display: none !important;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 92, 100, 0.18);
+  border: 1px solid rgba(255, 92, 100, 0.5);
+  color: #ff9da2;
+  border-radius: var(--radius-sm);
+  padding: 0 9px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+  height: 24px;
+  transition: all .14s ease;
+  box-sizing: border-box;
+}
+.soundpad-tile.active-play .soundpad-stop-btn {
+  display: inline-flex !important;
+}
+.soundpad-stop-btn:hover {
+  background: #ff5c64;
+  color: #051303;
+  border-color: #ff5c64;
+  box-shadow: 0 0 14px rgba(255, 92, 100, 0.5);
+  transform: translateY(-1px);
+}
+.soundpad-stop-btn:active {
+  transform: scale(0.96);
+}
+
+/* Stream Deck Modal Action Rows */
+.streamdeck-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #0d121a;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  transition: border-color .14s ease;
+}
+.streamdeck-row:hover {
+  border-color: rgba(83, 252, 24, 0.3);
+}
+.streamdeck-row-info {
+  flex: 1;
+  min-width: 0;
+}
+.streamdeck-row-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.streamdeck-row-sub {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}

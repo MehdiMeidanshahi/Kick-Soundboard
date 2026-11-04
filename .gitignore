@@ -10,5 +10,6 @@ slides/
 tokens.json
 settings.json
 .vercel/
+.agents/teamwork/
 .DS_Store
 Thumbs.db

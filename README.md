@@ -5,7 +5,7 @@
 Kick Soundboard is a local Windows desktop application that listens for approved Kick channel point reward redemptions and plays your assigned audio files in real time through your sound card into OBS.
 
 [![Platform: Windows x64](https://img.shields.io/badge/Platform-Windows%20x64-0078D6.svg)](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases)
-[![Version: v0.2.0](https://img.shields.io/badge/Version-v0.2.0-53FC18.svg)](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest)
+[![Version: v0.3.0](https://img.shields.io/badge/Version-v0.3.0-53FC18.svg)](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest)
 [![Kick OAuth: 1--Click Bridge](https://img.shields.io/badge/OAuth-1--Click%20Bridge-brightgreen.svg)](https://github.com/MehdiMeidanshahi/Kick-Soundboard)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -17,6 +17,9 @@ Kick Soundboard is a local Windows desktop application that listens for approved
 
 ### Quick Navigation
 - [⚡ Quick Install (For Streamers)](#-quick-install-for-streamers)
+- [🎯 Channel Point Community Goal (OBS Overlay)](#-channel-point-community-goal-obs-overlay)
+- [🎬 OBS Stream Alert Banner Overlay](#-obs-stream-alert-banner-overlay)
+- [🎛️ Sound Pad & Stream Deck Hardware Integration](#-sound-pad--stream-deck-hardware-integration)
 - [📸 Screenshots](#-screenshots)
 - [🛠️ Detailed Setup (For Developers)](#️-detailed-setup-for-developers)
 - [🔒 Privacy & Security](#-privacy--security)
@@ -30,7 +33,7 @@ No developer app creation, manual Client ID/Secret entry, or localhost redirect 
 
 #### 1. Download & Install
 1. Go to the [**Latest GitHub Releases**](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest).
-2. Download **`Kick-Soundboard-Setup-0.2.0.exe`**.
+2. Download **`Kick-Soundboard-Setup-0.3.0.exe`**.
 3. Run the installer (it creates desktop and Start Menu shortcuts and installs cleanly under your Windows user account).
 
 > [!NOTE]
@@ -53,6 +56,60 @@ No developer app creation, manual Client ID/Secret entry, or localhost redirect 
 #### 4. Route into OBS
 - Kick Soundboard plays audio through your selected Windows audio output device (configured in **Settings** → **Audio output**).
 - In OBS Studio, simply ensure your **Desktop Audio** or an **Audio Output Capture** source captures that device.
+
+#### 5. Sound Pad, Global Keybinds & Stream Deck Integration
+- **⚡ Streamer Quick Sampler**: Tactile launchpad tiles with instant retrigger attack (`currentTime = 0`) for rapid spamming, clean interruption, real-time equalizer bars, and dedicated Panic Stop.
+- **✏️ Sound Pad In-App Renaming**: Click the pencil icon (`✏️`) on any manual soundpad tile to customize its display title without modifying or renaming the audio file on disk.
+- **🗗 Floating Pop-out Window**: Click **Pop out** to launch an always-on-top compact sound pad above OBS and game windows.
+- **⌨️ Global Windows Hotkeys & Mouse Support**: Assign any key combination (`F1`–`F24`, `Numpad 0`–`9`, `Ctrl+Shift+S`, `Mouse 4`, `Mouse 5`) to trigger sounds during full-screen gaming without alt-tabbing. Built-in conflict prevention unbinds duplicate pads and protects `Escape`.
+- **🎛️ Elgato Stream Deck & Hardware Sync**: Zero-plugin integration via background HTTP GET triggers (`http://localhost:9000/streamdeck/trigger/<sound_id>`) or custom protocol URIs (`kick-soundboard://trigger/<sound_id>`).
+- **⏹️ Panic Stop**: Dedicated emergency stop via keybind or HTTP (`http://localhost:9000/streamdeck/stop-all`).
+- **📱 Standalone Web App & Touch Deck Mode**: Open `http://localhost:9000/soundpad.html` on any smartphone, tablet, or secondary monitor for a full-screen tactile Stream Deck experience with haptic vibration.
+- 📖 **Comprehensive Guide**: See [**docs/SOUNDPAD_AND_STREAMDECK_GUIDE.md**](docs/SOUNDPAD_AND_STREAMDECK_GUIDE.md) for step-by-step instructions for Elgato Stream Deck, Touch Portal, Loupedeck, and Macro Deck!
+
+---
+
+### 🎯 Channel Point Community Goal (OBS Overlay)
+
+A stream donation-goal progress bar filled entirely by viewer Kick channel point redemptions:
+
+- **Browser Source URL**: `http://localhost:9000/goal` (recommended size: `800 x 220`).
+- **Real-Time Popup Alerts**:
+  - **Viewer Redemptions (`+`)**: Vibrant Kick Neon Green chip popping above the progress bar with `+500 🪙 @ViewerName (Reward Title)`.
+  - **Streamer Deductions (`-`)**: Distinct Crimson Red chip with `🔻 -500 🪙 @Streamer (Deduction)` and downward impact motion when points are deducted or reset.
+- **Full Donation-Goal Controls**:
+  - Quick delta buttons: `+50`, `+100`, `+500`, `+1,000`, `+5,000`, `-50`, `-100`, `-500`, `-1,000`.
+  - Custom Delta input: Add or deduct any custom amount.
+  - Set Exact Progress: Jump straight to any point value.
+  - Reset Goal: One-click confirmation reset back to 0.
+- **In-App Live Mirror**: Desktop app displays a real-time interactive preview card showing exactly what viewers see in OBS.
+
+---
+
+### 🎬 OBS Stream Alert Banner Overlay
+
+A clean 3-second animated banner overlay for OBS Studio:
+
+- **Browser Source URL**: `http://localhost:9000/overlay` (canvas size: `1920 x 1080`).
+- **Centered High-Tech Presentation**: Centered banner appearing automatically on channel point redemptions and soundpad triggers.
+- **Rich Metadata Display**: Shows the viewer username, reward title / soundpad name, cost in channel points, and animated green equalizer bars.
+- **Flexible Alert Filtering**: Toggle in Desktop Settings to display banners exclusively for Kick channel points or for all soundpad triggers.
+
+---
+
+### 🎛️ Sound Pad & Stream Deck Hardware Integration
+
+Kick Soundboard turns your PC or external devices into a hardware sound trigger hub:
+
+| Feature | How It Works | Best For |
+| :--- | :--- | :--- |
+| **Elgato Stream Deck** | Drag **System -> Website** action, paste `http://localhost:9000/streamdeck/trigger/<id>`, check *"GET request in background"*. | Physical Stream Deck hardware (Mini, MK.2, XL, Plus, Mobile). |
+| **Custom Protocol** | Use `kick-soundboard://trigger/<id>` in Stream Deck **System -> Open** (focus-guarded, won't minimize games). | Launchers, scripts, Streamer.bot, Macro Deck. |
+| **Global Windows Hotkeys** | Click `⌨️ +Key` on any pad, press your shortcut (e.g. `F8`, `Num1`), click Save. | Full-screen gamers without a physical Stream Deck. |
+| **Always-on-Top Popout** | Click `🗗 Pop out` in the Sound Pad toolbar. | Streamers using dual monitors or single-screen OBS setups. |
+| **Touchscreen Web Deck** | Click `🌐 Web Sound Pad` and toggle `🎛️ DECK MODE`. | Using an iPhone, iPad, Android tablet, or old phone as a wireless touchscreen Stream Deck. |
+
+For detailed step-by-step setup guides, read the [**Sound Pad & Stream Deck Integration Guide**](docs/SOUNDPAD_AND_STREAMDECK_GUIDE.md).
 
 ---
 
@@ -140,6 +197,9 @@ If you prefer hosting your own Kick Developer credentials:
 
 ### دسترسی سریع
 - [⚡ راه‌اندازی سریع (ویژهٔ استریمرها)](#-راه‌اندازی-سریع-ویژهٔ-استریمرها)
+- [🎯 هدف دونیشن امتیاز کانال (اورلی OBS)](#-هدف-دونیشن-امتیاز-کانال-اورلی-obs)
+- [🎬 بنر اعلان هشدار استریم OBS](#-بنر-اعلان-هشدار-استریم-obs)
+- [🎛️ ساندپد، کلیدهای میانبر و اتصال به استریم دک](#-ساندپد-کلیدهای-میانبر-و-اتصال-به-استریم-دک)
 - [📸 تصاویر برنامه](#-تصاویر-برنامه)
 - [🛠️ راهنمای فنی و توسعه (ویژهٔ برنامه‌نویسان)](#️-راهنمای-فنی-و-توسعه-ویژهٔ-برنامه‌نویسان)
 - [🔒 حریم خصوصی و امنیت](#-حریم-خصوصی-و-امنیت)
@@ -152,7 +212,7 @@ If you prefer hosting your own Kick Developer credentials:
 
 #### ۱. دریافت و نصب برنامه
 ۱. به [**صفحهٔ نسخه‌های منتشرشده در GitHub**](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest) بروید.
-۲. فایل نصب **`Kick-Soundboard-Setup-0.2.0.exe`** را دانلود کنید.
+۲. فایل نصب **`Kick-Soundboard-Setup-0.3.0.exe`** را دانلود کنید.
 ۳. فایل را اجرا و نصب کنید (میان‌بر برنامه روی دسکتاپ و منوی استارت ایجاد می‌شود).
 
 > [!NOTE]
@@ -170,6 +230,60 @@ If you prefer hosting your own Kick Developer credentials:
 ۲. با دکمهٔ **Test** بلندی صدا را بسنجید.
 ۳. در صورت تمایل، وقفه برحسب ثانیه (**Cooldown**) تنظیم کنید تا از پخش پشت‌سر‌هم صدا جلوگیری شود.
 ۴. در نرم‌افزار OBS خروجی صدای سیستم (Desktop Audio) را فعال کنید تا بینندگان صدای پاداش‌ها را هنگام استریم بشنوند.
+
+#### ۴. ساندپد، کلیدهای میانبر و اتصال به استریم دک
+- **⚡ لانچ‌پد سریع استریمر**: پدهای سه‌بعدی با شلیک و اسپم آنی صداها (`currentTime = 0`) بدون تداخل، انیمیشن اکولایزر زنده و دکمهٔ توقف اضطراری (Panic Stop).
+- **✏️ تغییر نام تایل‌های ساندپد در برنامه**: کلیک روی آیکون مداد (`✏️`) روی هر تایل دستی ساندپد برای تنظیم عنوان دلخواه بدون تغییر نام فایل صوتی اصلی روی دیسک.
+- **🗗 پنجرهٔ شناور مستقل (Pop-out)**: باز کردن پنجرهٔ کوچک و همیشه بالا (Always on Top) روی OBS و پنجره‌های بازی.
+- **⌨️ کلیدهای میانبر سراسری و پشتیبانی از دکمه‌های ماوس**: تعیین کلیدهای میانبر دلخواه (مانند `F1` تا `F24`، کلیدهای Numpad، ترکیبات `Ctrl+Shift+S` و دکمه‌های ماوس `Mouse 4` و `Mouse 5`) برای اجرای فوری صداها حین بازی تمام‌صفحه بدون نیاز به Alt+Tab. سیستم جلوگیری از تداخل به‌صورت خودکار تکراری‌ها را باز کرده و کلید `Escape` را محافظت می‌کند.
+- **🎛️ اتصال آسان به استریم دک الگاتو (Elgato Stream Deck)**: اتصال بدون افزونه از طریق تریگرهای پس‌زمینه HTTP (`http://localhost:9000/streamdeck/trigger/<id>`) یا پروتکل اختصاصی `kick-soundboard://trigger/<id>`.
+- **⏹️ دکمهٔ توقف اضطراری (Panic Stop)**: قطع فوری تمام صداهای در حال پخش از طریق کلید میانبر یا آدرس `http://localhost:9000/streamdeck/stop-all`.
+- **📱 وب‌اپ لمسی و حالت دک (Deck Mode)**: اجرای `http://localhost:9000/soundpad.html` روی گوشی موبایل، تبلت یا آیپد و تبدیل آن به یک استریم دک بی‌سیم با ویبرهٔ لمسی.
+- 📖 **راهنمای جامع تصویری**: برای راهنمای کامل گام‌به‌گام اتصال به انواع استریم‌دک، [**docs/SOUNDPAD_AND_STREAMDECK_GUIDE.md**](docs/SOUNDPAD_AND_STREAMDECK_GUIDE.md) را مطالعه کنید!
+
+---
+
+### 🎯 هدف دونیشن امتیاز کانال (اورلی OBS)
+
+نوار پیشرفت شبیه به هدف‌های دونیشن استریم، اما پر شونده با امتیاز کانال کیک بینندگان:
+
+- **آدرس سورس مرورگر OBS**: `http://localhost:9000/goal` (ابعاد پیشنهادی: `800 x 220`).
+- **پاپ‌آپ‌های انیمیشنی لحظه‌ای**:
+  - **بازخرید بینندگان (`+`)**: پاپ‌آپ سبز نئونی کیک بالای نوار با نمایش `+500 🪙 @ViewerName (Reward Title)`.
+  - **کسر دستی توسط استریمر (`-`)**: پاپ‌آپ قرمز آتشین متمایز با نمایش `🔻 -500 🪙 @Streamer (Deduction)` و حرکت فیزیکی به سمت پایین هنگام کسر یا بازنشانی.
+- **امکانات کامل مدیریتی هدف**:
+  - دکمه‌های سریع تغییر امتیاز: `+50`, `+100`, `+500`, `+1,000`, `+5,000`, `-50`, `-100`, `-500`, `-1,000`.
+  - ورودی دلخواه: افزودن یا کسر هر میزان امتیاز دلخواه.
+  - تنظیم مستقیم پیشرفت: پرش مستقیم به عدد دقیق امتیاز.
+  - بازنشانی هدف: بازنشانی صفر کردن نوار با یک کلیک و تأییدیه.
+- **پیش‌نمایش زنده در برنامه**: نمایش کارت پیش‌نمایش کاملاً همگام در نرم‌افزار دسکتاپ دقیقاً همان‌گونه که بینندگان در OBS می‌بینند.
+
+---
+
+### 🎬 بنر اعلان هشدار استریم OBS
+
+اورلی مدرن ۳ ثانیه‌ای با انیمیشن ورود و خروج برای OBS Studio:
+
+- **آدرس سورس مرورگر OBS**: `http://localhost:9000/overlay` (ابعاد بوم: `1920 x 1080`).
+- **طراحی چشم‌نواز و در مرکز کادر**: نمایش بنر شیک در مرکز تصویر با بازخرید پاداش‌ها یا اجرای صداهای ساندپد.
+- **اطلاعات کامل بازخرید**: نمایش نام بیننده، نام پاداش/صدا، هزینهٔ امتیاز و خطوط اکولایزر متحرک سبز نئونی.
+- **فیلتر هوشمند هشدار**: امکان تعیین نمایش اعلان‌ها فقط برای پاداش‌های امتیاز کانال یا برای تمام صداهای ساندپد از منوی تنظیمات.
+
+---
+
+### 🎛️ ساندپد، کلیدهای میانبر و اتصال به استریم دک
+
+کیک ساندبورد کامپیوتر یا دستگاه‌های جانبی شما را به یک مرکز شلیک صدا تبدیل می‌کند:
+
+| قابلیت | نحوهٔ کارکرد | کاربرد اصلی |
+| :--- | :--- | :--- |
+| **استریم دک الگاتو (Elgato)** | افزودن دستور **System -> Website** با آدرس `http://localhost:9000/streamdeck/trigger/<id>` و فعال‌سازی گزینهٔ *"GET request in background"*. | استفاده با کلیدهای فیزیکی استریم دک (Mini, MK.2, XL, Plus, Mobile). |
+| **پروتکل اختصاصی** | استفاده از دستور **System -> Open** با آدرس `kick-soundboard://trigger/<id>` (بدون کوچک کردن بازی). | اتصال به Macro Deck، اسکریپت‌ها و Streamer.bot. |
+| **کلیدهای میانبر سراسری** | کلیک روی `⌨️ +Key`، فشردن کلید دلخواه (مانند `F8` یا `Num1`) و ذخیره. | گیمرهایی که استریم‌دک فیزیکی ندارند و حین بازی صدا پخش می‌کنند. |
+| **پنجرهٔ شناور مستقل** | کلیک روی دکمهٔ `🗗 Pop out` در نوار ابزار ساندپد. | استریمرهایی که مانیتور دوم دارند یا می‌خواهند پد بالای OBS باشد. |
+| **حالت دک لمسی (Deck Mode)** | کلیک روی `🌐 Web Sound Pad` و انتخاب دکمهٔ `🎛️ DECK MODE`. | تبدیل گوشی، تبلت یا آیپد به یک استریم دک لمسی بی‌سیم با ویبره. |
+
+برای مشاهدهٔ راهنمای گام‌به‌گام به زبان فارسی، به [**راهنمای ساندپد و استریم دک**](docs/SOUNDPAD_AND_STREAMDECK_GUIDE.md) مراجعه کنید.
 
 ---
 
@@ -218,7 +332,7 @@ npm test
 ```powershell
 npm run build:win
 ```
-*فایل نصبی نهایی در مسیر `release/Kick-Soundboard-Setup-0.2.0.exe` ساخته خواهد شد.*
+*فایل نصبی نهایی در مسیر `release/Kick-Soundboard-Setup-0.3.0.exe` ساخته خواهد شد.*
 
 ---
 

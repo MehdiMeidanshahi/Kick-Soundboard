@@ -1,0 +1,205 @@
+/* Explicit specificity override so HTML5 [hidden] attribute strictly hides elements */
+[hidden] {
+  display: none !important;
+}
+
+#stop-btn[hidden],
+#resume-queue[hidden],
+#connect-btn[hidden],
+#banner-connect[hidden],
+#modal-connect-btn[hidden],
+#modal-disconnect-btn[hidden] {
+  display: none !important;
+}
+
+* { box-sizing: border-box; }
+::selection { background: rgba(83, 252, 24, 0.3); color: #53fc18; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  background-image: radial-gradient(circle at 50% -10%, #15341a 0%, rgba(9, 12, 16, 0.98) 60%);
+  background-attachment: fixed;
+  color: var(--text);
+  font: 14px/1.45 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select { font: inherit; }
+
+button {
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 9px 15px;
+  color: var(--text);
+  background: #232c3a;
+  cursor: pointer;
+  font-weight: 650;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: background .15s, transform .15s, border-color .15s, box-shadow .15s;
+  user-select: none;
+}
+button:hover { background: #313d4f; transform: translateY(-1px); }
+button:active { transform: translateY(0) scale(0.98); }
+
+button.primary {
+  color: #051303;
+  background: var(--green);
+  box-shadow: 0 4px 18px var(--green-glow);
+}
+button.primary:hover {
+  background: #75ff49;
+  box-shadow: 0 6px 22px rgba(83, 252, 24, 0.45);
+}
+
+button.ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+button.ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--line-bright);
+}
+
+button.danger {
+  color: #ffd7d9;
+  background: var(--red-bg);
+  border: 1px solid rgba(255, 92, 100, 0.25);
+}
+button.danger:hover { background: #4a2128; border-color: var(--red); }
+button:disabled { opacity: .45; cursor: not-allowed; transform: none !important; }
+button.small { padding: 6px 11px; font-size: 12px; border-radius: var(--radius-sm); }
+
+input:not([type=range]) {
+  color: var(--text);
+  background: #0d121a;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 9px 13px;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+input:not([type=range]):focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(83, 252, 24, 0.15);
+}
+input[type=search]::-webkit-search-cancel-button { cursor: pointer; }
+
+/* Range Slider Reset & Custom Neon Progress Track */
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(to right, #53fc18 0%, #53fc18 var(--pct, 80%), #1c2533 var(--pct, 80%), #1c2533 100%) !important;
+  border: none !important;
+  border-radius: 99px !important;
+  height: 6px !important;
+  padding: 0 !important;
+  margin: 0;
+  cursor: pointer;
+  box-shadow: none !important;
+  outline: none !important;
+  vertical-align: middle;
+}
+input[type=range]:focus,
+input[type=range]:focus-visible {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px !important;
+  background: transparent !important;
+  border-radius: 99px !important;
+  border: none !important;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+  background: #53fc18 !important;
+  box-shadow: 0 0 10px rgba(83, 252, 24, 0.85) !important;
+  cursor: pointer;
+  margin-top: -5px !important;
+  border: none !important;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 14px #53fc18 !important;
+}
+
+/* Accessibility: Visually Hidden & Focus Indicators (WCAG 2.1 AA) */
+.visually-hidden:where(:not(:focus-within, :active, :focus)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+.skip-link:focus {
+  position: fixed !important;
+  top: 14px;
+  left: 14px;
+  z-index: 1000;
+  clip-path: none !important;
+  width: auto !important;
+  height: auto !important;
+  padding: 9px 18px;
+  background: var(--green);
+  color: #051303;
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  text-decoration: none;
+}
+:focus-visible:not(input[type=range]) {
+  outline: 2px solid var(--green) !important;
+  outline-offset: 2px !important;
+}
+button:focus-visible, input:not([type=range]):focus-visible, select:focus-visible, a:focus-visible {
+  outline: 2px solid var(--green) !important;
+  outline-offset: 2px !important;
+}
+
+/* Toast */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 200;
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: .22s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 10px 18px;
+  border: 1px solid var(--line-bright);
+  border-radius: var(--radius-pill);
+  background: #17212e;
+  color: var(--text);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  font-size: 13px;
+  font-weight: 600;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+#toast.error { border-color: rgba(255, 92, 100, 0.5); color: #ffd7d9; background: #2f171b; }
+
+.empty { color: var(--muted); text-align: center; padding: 35px 14px; font-size: 13px; }
+.no-config { display: none; }
+.no-config.show { display: block; }

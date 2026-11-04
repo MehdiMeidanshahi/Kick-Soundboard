@@ -1,0 +1,253 @@
+/* Kick Soundboard: OBS Stream Overlay Stylesheet (1920x1080 Transparent Canvas) */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#overlay-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 72px;
+  pointer-events: none;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+#overlay-banner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* Alert Banner Card */
+.overlay-banner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 16px 28px;
+  background: rgba(10, 14, 20, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 18px;
+  min-height: 84px;
+  min-width: 480px;
+  max-width: 780px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
+  animation: banner-lifecycle 3.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  margin: 0 auto;
+}
+
+/* Animated top highlight stripe */
+.overlay-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  animation: stripe-sweep 2.0s linear infinite;
+}
+
+@keyframes stripe-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 1. Kick Channel Point Alert (Purple & Gold Theme) */
+.overlay-banner.channel-point {
+  border: 2px solid rgba(157, 92, 255, 0.65);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8), 0 0 32px rgba(157, 92, 255, 0.45);
+  color: #9d5cff;
+}
+
+.overlay-banner.channel-point .overlay-icon-wrap {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(157, 92, 255, 0.25) 0%, rgba(245, 158, 11, 0.2) 100%);
+  border: 1px solid rgba(157, 92, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 0 16px rgba(157, 92, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.overlay-banner.channel-point .overlay-redeemer {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fbbf24;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.overlay-banner.channel-point .overlay-redeemer-name {
+  color: #ffffff;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+.overlay-banner.channel-point .overlay-cost-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: rgba(157, 92, 255, 0.2);
+  border: 1px solid rgba(157, 92, 255, 0.45);
+  border-radius: 20px;
+  color: #c4b5fd;
+  font-size: 11px;
+  font-weight: 800;
+  margin-left: 8px;
+}
+
+/* 2. Standalone Sound Pad Alert (Kick Neon Green Theme) */
+.overlay-banner.soundpad {
+  border: 2px solid rgba(83, 252, 24, 0.65);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8), 0 0 32px rgba(83, 252, 24, 0.4);
+  color: #53fc18;
+}
+
+.overlay-banner.soundpad .overlay-icon-wrap {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(83, 252, 24, 0.25) 0%, rgba(0, 255, 200, 0.15) 100%);
+  border: 1px solid rgba(83, 252, 24, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 0 16px rgba(83, 252, 24, 0.35);
+  flex-shrink: 0;
+}
+
+.overlay-banner.soundpad .overlay-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: rgba(83, 252, 24, 0.15);
+  border: 1px solid rgba(83, 252, 24, 0.45);
+  border-radius: 20px;
+  color: #53fc18;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Banner Content */
+.overlay-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.overlay-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Audio Equalizer Waves */
+.overlay-equalizer {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 24px;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+.overlay-equalizer-bar {
+  width: 4px;
+  border-radius: 2px;
+  animation: overlay-wave 0.5s ease-in-out infinite alternate;
+}
+
+.overlay-banner.channel-point .overlay-equalizer-bar {
+  background: linear-gradient(180deg, #f59e0b, #9d5cff);
+  box-shadow: 0 0 6px rgba(157, 92, 255, 0.6);
+}
+
+.overlay-banner.soundpad .overlay-equalizer-bar {
+  background: linear-gradient(180deg, #00ffc8, #53fc18);
+  box-shadow: 0 0 6px rgba(83, 252, 24, 0.6);
+}
+
+.overlay-equalizer-bar:nth-child(1) { height: 35%; animation-delay: 0.05s; }
+.overlay-equalizer-bar:nth-child(2) { height: 85%; animation-delay: 0.25s; }
+.overlay-equalizer-bar:nth-child(3) { height: 60%; animation-delay: 0.15s; }
+.overlay-equalizer-bar:nth-child(4) { height: 100%; animation-delay: 0.35s; }
+.overlay-equalizer-bar:nth-child(5) { height: 45%; animation-delay: 0.1s; }
+
+@keyframes overlay-wave {
+  0% { transform: scaleY(0.3); }
+  100% { transform: scaleY(1.0); }
+}
+
+/* 3.0s Precise Lifecycle Animation */
+@keyframes banner-lifecycle {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.92);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.02);
+  }
+  14% {
+    opacity: 1;
+    transform: translateY(0) scale(1.0);
+  }
+  86% {
+    opacity: 1;
+    transform: translateY(0) scale(1.0);
+  }
+  92% {
+    opacity: 0.9;
+    transform: translateY(-2px) scale(0.99);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(35px) scale(0.95);
+  }
+}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kick Soundboard - Channel Point Goal Overlay</title>
+  <link rel="stylesheet" href="/css/goal.css">
+</head>
+<body class="goal-overlay-body">
+  <div id="goal-overlay-viewport">
+    <div class="kick-goal-card" id="goal-card">
+      <div class="goal-popup-container" id="goal-popup-container" aria-live="polite"></div>
+      
+      <div class="goal-header">
+        <div class="goal-title-wrap">
+          <span class="goal-icon" aria-hidden="true">🎯</span>
+          <span class="goal-title" id="goal-title">Community Kick Goal</span>
+        </div>
+        <div class="goal-stats">
+          <span>🪙</span>
+          <span class="goal-current-num" id="goal-current">0</span>
+          <span class="goal-target-num">/ <span id="goal-target">10,000</span> pts</span>
+          <span class="goal-pct-pill" id="goal-pct">0%</span>
+        </div>
+      </div>
+
+      <progress class="kick-goal-progress" id="goal-progress" value="0" max="10000" aria-label="Channel point goal progress">0%</progress>
+
+      <div class="goal-footer">
+        <span id="goal-subtitle">Points added on viewer redemptions</span>
+        <span class="goal-complete-banner" id="goal-complete-banner">🎉 GOAL COMPLETE!</span>
+      </div>
+    </div>
+  </div>
+  <script src="/js/goal-overlay.js"></script>
+</body>
+</html>

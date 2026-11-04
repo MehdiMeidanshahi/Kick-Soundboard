@@ -8,20 +8,24 @@ function parseDeepLinkAuth(urlString) {
   }
 
   try {
-    const parsed = new URL(urlString);
+    const cleanUrl = urlString.trim().replace(/^["']|["']$/g, '');
+    const parsed = new URL(cleanUrl);
     const protocol = parsed.protocol.toLowerCase();
     if (protocol !== 'kick-soundboard:') {
       return { success: false, error: `Unexpected protocol: ${protocol}` };
     }
 
     // In URLs like kick-soundboard://auth?token=..., hostname is 'auth' and pathname is '' or '/'
-    const action = parsed.hostname || parsed.pathname.replace(/^\/+/, '');
-    if (action !== 'auth') {
+    const rawAction = parsed.hostname || parsed.pathname.replace(/^\/+/, '');
+    const action = rawAction.replace(/\/+$/, '').toLowerCase();
+    if (!['auth', 'auth-callback', 'callback', 'oauth'].includes(action)) {
       return { success: false, error: `Unknown deep-link action: ${action}` };
     }
 
-    const token = parsed.searchParams.get('token') || parsed.searchParams.get('access_token');
-    const refresh = parsed.searchParams.get('refresh') || parsed.searchParams.get('refresh_token') || '';
+    let token = parsed.searchParams.get('token') || parsed.searchParams.get('access_token');
+    let refresh = parsed.searchParams.get('refresh') || parsed.searchParams.get('refresh_token') || '';
+    if (token) token = token.replace(/\/+$/, '');
+    if (refresh) refresh = refresh.replace(/\/+$/, '');
     const expiresInParam = parsed.searchParams.get('expires_in');
     const expiresIn = expiresInParam && !isNaN(Number(expiresInParam)) ? Number(expiresInParam) : 3600;
 

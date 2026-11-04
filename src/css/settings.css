@@ -1,0 +1,90 @@
+/* Settings & Dialog Modals */
+.settings,
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  place-items: center;
+  padding: 22px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+}
+.settings.open,
+.dialog-overlay.open { display: grid !important; animation: modal-fade .2s ease; }
+@keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.dialog {
+  width: min(540px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--line-bright);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8), 0 0 30px rgba(83, 252, 24, 0.1);
+  overflow: hidden;
+}
+.dialog-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.15);
+}
+.dialog-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
+.dialog-body { padding: 22px; }
+
+.field { margin-bottom: 18px; }
+.field label { display: block; font-weight: 650; font-size: 13px; margin-bottom: 6px; }
+.field-note { margin-top: 5px; color: var(--muted); font-size: 12px; }
+
+.account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: #0d121a;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  margin-top: 6px;
+}
+.account-actions { display: flex; align-items: center; gap: 8px; }
+.audio-device-picker { display: flex; gap: 8px; align-items: center; }
+.audio-device-picker select { flex: 1; min-width: 0; }
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  margin-top: 20px;
+  padding-top: 16px;
+}
+
+.update-area { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 16px; }
+.update-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.update-buttons { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.update-buttons button { white-space: nowrap; flex-shrink: 0; }
+.update-status { min-height: 18px; display: inline-flex; align-items: center; }
+
+/* Log diagnostics area in settings */
+.logs-section {
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+  padding-top: 16px;
+}
+.logs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.logs-path-display {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--muted);
+  background: #090c10;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  margin-top: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+}

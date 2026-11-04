@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="color-scheme" content="dark">
+  <title>Kick Soundboard - Web Pad</title>
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icon.png">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="shortcut icon" href="./favicon.ico">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    body {
+      padding: 16px;
+      margin: 0;
+      background: #090c10;
+      background-image: radial-gradient(circle at 50% -10%, #15341a 0%, rgba(9, 12, 16, 0.98) 60%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: var(--text, #f0f3f6);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .webpad-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .webpad-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 20px;
+      background: rgba(14, 20, 27, 0.85);
+      border: 1px solid var(--line, #2b3542);
+      border-radius: var(--radius-xl, 16px);
+      backdrop-filter: blur(12px);
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .webpad-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .webpad-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      box-shadow: 0 0 16px rgba(83, 252, 24, 0.35);
+    }
+    .webpad-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .webpad-sub {
+      font-size: 11px;
+      color: var(--muted, #8b98a8);
+      margin-top: 1px;
+    }
+    .webpad-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .webpad-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: #111a14;
+      border: 1px solid rgba(83, 252, 24, 0.3);
+      color: var(--green, #53fc18);
+    }
+    .webpad-status.error {
+      background: #2a1518;
+      border-color: rgba(255, 92, 100, 0.4);
+      color: #ff858a;
+    }
+    .webpad-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+    }
+    .webpad-vol {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 5px 12px;
+      border-radius: 99px;
+      border: 1px solid var(--line, #2b3542);
+    }
+    .webpad-vol input[type=range] {
+      width: 100px;
+      height: 6px;
+    }
+    .webpad-panic-btn {
+      background: #3b191e;
+      border: 1px solid rgba(255, 92, 100, 0.4);
+      color: #ff9da2;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .14s ease;
+    }
+    .webpad-panic-btn:hover {
+      background: #ff5c64;
+      color: #051303;
+      box-shadow: 0 0 16px rgba(255, 92, 100, 0.4);
+    }
+    .webpad-deck-btn {
+      background: rgba(83, 252, 24, 0.12);
+      border: 1px solid rgba(83, 252, 24, 0.4);
+      color: var(--green, #53fc18);
+      font-weight: 700;
+      font-size: 12px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .14s ease;
+    }
+    .webpad-deck-btn:hover {
+      background: var(--green, #53fc18);
+      color: #051303;
+      box-shadow: 0 0 16px rgba(83, 252, 24, 0.4);
+    }
+    body.deck-mode {
+      padding: 10px;
+    }
+    body.deck-mode .webpad-shell {
+      max-width: 100%;
+    }
+    body.deck-mode .webpad-header {
+      padding: 8px 16px;
+      margin-bottom: 12px;
+    }
+    body.deck-mode .soundpad-grid {
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important;
+      gap: 16px !important;
+    }
+    body.deck-mode .soundpad-tile {
+      min-height: 140px;
+      padding: 16px;
+      border-width: 2px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    body.deck-mode .soundpad-tile:active {
+      transform: translateY(4px) scale(0.97);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 24px var(--green, #53fc18);
+    }
+    body.deck-mode .webpad-footer {
+      display: none;
+    }
+    .webpad-tile-large {
+      min-height: 130px;
+      touch-action: manipulation;
+    }
+    .webpad-footer {
+      text-align: center;
+      padding: 30px 10px 40px;
+      color: var(--muted, #8b98a8);
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="webpad-shell">
+    <header class="webpad-header">
+      <div class="webpad-brand">
+        <img class="webpad-logo" src="/icon.svg" alt="Kick Soundboard">
+        <div>
+          <h1 class="webpad-title">Kick Sound Pad (Web)</h1>
+          <div class="webpad-sub">Touch-friendly Stream Sampler & Trigger Board</div>
+        </div>
+      </div>
+
+      <div class="webpad-controls">
+        <div id="webpad-conn-status" class="webpad-status">
+          <span class="webpad-status-dot"></span>
+          <span id="webpad-status-text">Connecting...</span>
+        </div>
+
+        <div class="webpad-vol">
+          <span>🔊</span>
+          <input type="range" id="webpad-volume" min="0" max="100" value="80" style="--pct: 80%;">
+          <span id="webpad-volume-label" style="min-width:32px; color:var(--green, #53fc18);">80%</span>
+        </div>
+
+        <button type="button" id="webpad-deck-mode" class="webpad-deck-btn" title="Toggle full-screen Stream Deck layout">
+          🎛️ DECK MODE
+        </button>
+
+        <button type="button" id="webpad-panic-stop" class="webpad-panic-btn">
+          ⏹ STOP ALL
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Container for Sound Pad Sections -->
+    <main id="soundpad-sections-container">
+      <div class="empty" style="padding: 60px 10px;">Loading sound pads...</div>
+    </main>
+
+    <footer class="webpad-footer">
+      Kick Soundboard Local Web App · Streamer Sampler Engine · Accessible on PC, Mac, iPad, iPhone, Android, or OBS Browser Source
+    </footer>
+  </div>
+
+  <div id="toast" role="status"></div>
+
+  <script src="./js/logger.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/soundpad-web.js"></script>
+</body>
+</html>

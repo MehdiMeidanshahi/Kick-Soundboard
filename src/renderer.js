@@ -1,671 +1,1583 @@
-const $ = (selector) => document.querySelector(selector);
-const modal = $('#settings-modal');
-const rewardRoot = $('#rewards');
-const historyRoot = $('#history');
-const toastRoot = $('#toast');
-const { prependInterruptedItem } = window.kickQueuePlayback;
-const translations = {
-  en: {
-    appName:'Kick Soundboard', tagline:'Local reward sounds for your stream', settings:'Settings', connect:'Connect Kick', connected:'Connected', connectedAs:'Connected as {name}', polling:'Connected · checking every 10 sec', notConnected:'Not connected',
-    setupTitle:'Connect your Kick channel', setupDescription:'Link your Kick account with 1 click to load your channel rewards and play mapped sounds on this PC.', openSettings:'Open Settings', localNotice:'Your tokens and sound mappings are stored securely on this computer.',
-    rewardSounds:'Reward sounds', refreshRewards:'Refresh rewards', masterVolume:'Master volume', stopAudio:'Stop audio', redemptionHistory:'Redemption history', clear:'Clear', soundQueue:'Sound queue', waiting:'waiting', queuedTotal:'queued',
-    connectEmpty:'Connect your Kick account to load your channel rewards.', noRewards:'No rewards found. Create channel point rewards on Kick, then refresh.', emptyHistory:'New reward redemptions will appear here.',
-    connectionSettings:'Kick Soundboard settings', kickAccount:'Kick account', playPendingRewards:'Play sound for pending rewards', playPendingRewardsNote:'Play mapped sounds immediately when a reward is redeemed, without waiting for manual approval.', savedSettings:'Settings saved.', cancel:'Close', saveLocally:'Save', disconnectKick:'Disconnect Kick', disconnectedKick:'Kick disconnected on this PC. You can reconnect anytime.', appVersion:'Version {version}', checkUpdates:'Check for updates', checkingUpdates:'Checking GitHub for updates…', updateAvailable:'Version {version} is available.', upToDate:'You have the latest version ({version}).', updateError:'Could not check for updates: {message}', downloadUpdate:'Open download page',
-    points:'points', noSound:'No sound selected', chooseSound:'Choose sound', change:'Change', test:'Test', stopTest:'Stop test', removeSound:'Remove sound', cooldown:'Cooldown · sec', cooldownTitle:'Cooldown in seconds',
-    pending:'Pending approval', accepted:'Approved', rejected:'Rejected', redeemed:'Redeemed', redeemedVerb:'redeemed', unknownViewer:'Unknown viewer', viewerId:'Viewer #{id}', untitledReward:'Untitled reward', channelReward:'Channel reward',
-    statusGuideTitle:'Redemption status guide', pendingGuide:'Waiting for your decision in Kick’s Reward request queue. Its sound plays only after you approve it.', acceptedGuide:'You approved this redemption. Its sound is queued for playback.', rejectedGuide:'You rejected this redemption. Its sound is not played.',
-    enabled:'Enabled', paused:'Paused', disabled:'Disabled', perRewardVolume:'Sound volume',
-    audioOnlyApp:'Audio file selection is available in the Windows app.', chooseFirst:'Choose a sound for this reward first.', addedSound:'Sound added to {name}.',
-    rewardsRefreshed:'Rewards refreshed.', savedCredentials:'Credentials saved securely on this PC.', openedKick:'Kick opened in your browser. Approve the requested access, then return here.',
-    authFailed:'Kick connection failed', authStateFailed:'Authorization state did not match. Return to the app and try again.',
-    settingsMissing:'Add your Kick Client ID and Client Secret first.', secureStoreUnavailable:'Windows secure storage is unavailable; credentials were not saved.',
-    kickCheckFailed:'Kick check failed: {message}', pollRetry:'Retrying in {seconds} seconds.', clearHistory:'Clear redemption history?',
-    streamMode:'Stream mode',streamReadiness:'Stream readiness',searchRewards:'Search rewards',unassignedOnly:'Unassigned only',searchHistory:'Search history',allStatuses:'All statuses',historyFilter:'Filter history by status',
-    skipCurrent:'Skip current',clearQueue:'Clear queue',resumeQueue:'Resume queue',currentlyPlaying:'Playing: {name}',nothingPlaying:'Nothing playing',removeQueued:'Remove from queue',
-    audioOutput:'Audio output',systemDefault:'System default',refreshDevices:'Refresh devices',deviceUnavailable:'Selected output is unavailable; using system default.',
-    lastChecked:'Last checked: {time}',nextCheck:'Next check: {time}',retrying:'Retrying: {message}',never:'Never',readyConnection:'Kick connected',readySounds:'Rewards mapped',readyFiles:'Sound files available',readyPlayback:'Playback ready',
-    missingFile:'File missing',locateFile:'Locate file',noMatches:'No matching items',pollingIdle:'Kick is not connected',
-    previousPage:'Previous',nextPage:'Next',historyPage:'Page {page} of {pages}',stopQueue:'Stop queue',removeQueueItem:'Remove'
-  },
-  fa: {
-    appName:'صندوق صدای کیک', tagline:'پخش صدای محلی برای پاداش‌های استریم', settings:'تنظیمات', connect:'اتصال به کیک', connected:'متصل', connectedAs:'متصل به عنوان {name}', polling:'متصل · بررسی هر ۱۰ ثانیه', notConnected:'متصل نیست',
-    setupTitle:'اتصال به کانال کیک', setupDescription:'با یک کلیک حساب کیک خود را متصل کنید تا جوایز کانال دریافت شده و صداها روی کامپیوتر شما پخش شوند.', openSettings:'تنظیمات', localNotice:'توکن‌های ورود و تنظیمات صدا به صورت امن روی همین رایانه ذخیره می‌شوند.',
-    rewardSounds:'صداهای پاداش', refreshRewards:'به‌روزرسانی پاداش‌ها', masterVolume:'بلندی صدای اصلی', stopAudio:'توقف صدا', redemptionHistory:'تاریخچهٔ بازخریدها', clear:'پاک کردن', soundQueue:'صف پخش صدا', waiting:'در انتظار', queuedTotal:'در صف',
-    connectEmpty:'برای دریافت پاداش‌های کانال، حساب کیک را وصل کنید.', noRewards:'پاداشی پیدا نشد. در کیک پاداش بسازید و دوباره به‌روزرسانی کنید.', emptyHistory:'بازخریدهای جدید اینجا نمایش داده می‌شوند.',
-    connectionSettings:'تنظیمات کیک ساندبورد', kickAccount:'حساب کیک', playPendingRewards:'پخش صدا برای پاداش‌های در انتظار تأیید', playPendingRewardsNote:'پخش فوری صدا به محض ثبت پاداش توسط بیننده، بدون نیاز به صبر برای تأیید دستی.', savedSettings:'تنظیمات ذخیره شد.', cancel:'بستن', saveLocally:'ذخیره', disconnectKick:'قطع اتصال کیک', disconnectedKick:'اتصال این برنامه به کیک قطع شد. هر زمان بخواهید می‌توانید دوباره متصل شوید.', appVersion:'نسخهٔ {version}', checkUpdates:'بررسی نسخهٔ جدید', checkingUpdates:'در حال بررسی نسخه‌های GitHub…', updateAvailable:'نسخهٔ {version} در دسترس است.', upToDate:'آخرین نسخه را دارید ({version}).', updateError:'بررسی نسخهٔ جدید انجام نشد: {message}', downloadUpdate:'رفتن به صفحهٔ دانلود',
-    points:'امتیاز', noSound:'صدایی انتخاب نشده', chooseSound:'انتخاب صدا', change:'تغییر', test:'آزمایش', stopTest:'توقف آزمایش', removeSound:'حذف صدا', cooldown:'وقفه · ثانیه', cooldownTitle:'مدت وقفه به ثانیه',
-    pending:'در انتظار تأیید', accepted:'تأیید شد', rejected:'رد شد', redeemed:'بازخرید شد', redeemedVerb:'پاداش', unknownViewer:'بینندهٔ ناشناس', viewerId:'بینندهٔ شمارهٔ {id}', untitledReward:'پاداش بدون نام', channelReward:'پاداش کانال',
-    statusGuideTitle:'راهنمای وضعیت بازخرید', pendingGuide:'منتظر تصمیم شما در Reward request queue کیک است. صدا فقط پس از تأیید شما پخش می‌شود.', acceptedGuide:'این بازخرید را تأیید کرده‌اید. صدای آن در صف پخش قرار می‌گیرد.', rejectedGuide:'این بازخرید را رد کرده‌اید. صدای آن پخش نمی‌شود.',
-    enabled:'فعال', paused:'مکث‌شده', disabled:'غیرفعال', perRewardVolume:'بلندی صدای این پاداش',
-    audioOnlyApp:'انتخاب فایل صدا در برنامهٔ ویندوز انجام می‌شود.', chooseFirst:'ابتدا برای این پاداش یک صدا انتخاب کنید.', addedSound:'صدا برای «{name}» تنظیم شد.',
-    rewardsRefreshed:'پاداش‌ها به‌روز شدند.', savedCredentials:'اطلاعات ورود به‌شکل امن روی همین رایانه ذخیره شد.', openedKick:'کیک در مرورگر باز شد. دسترسی درخواستی را تأیید کنید و به برنامه برگردید.',
-    authFailed:'اتصال به کیک ناموفق بود', authStateFailed:'تأیید مجوز نامعتبر بود. به برنامه برگردید و دوباره تلاش کنید.',
-    settingsMissing:'ابتدا شناسه و رمز کلاینت کیک را وارد کنید.', secureStoreUnavailable:'حافظهٔ امن ویندوز در دسترس نیست؛ اطلاعات ذخیره نشد.',
-    kickCheckFailed:'بررسی کیک ناموفق بود: {message}', pollRetry:'تلاش دوباره تا {seconds} ثانیهٔ دیگر.', clearHistory:'پاک کردن تاریخچهٔ بازخریدها؟',
-    streamMode:'حالت استریم',streamReadiness:'آمادگی استریم',searchRewards:'جست‌وجوی پاداش‌ها',unassignedOnly:'فقط بدون صدا',searchHistory:'جست‌وجوی تاریخچه',allStatuses:'همهٔ وضعیت‌ها',historyFilter:'فیلتر تاریخچه بر اساس وضعیت',
-    skipCurrent:'رد کردن صدای جاری',clearQueue:'پاک کردن صف',resumeQueue:'ادامهٔ صف',currentlyPlaying:'در حال پخش: {name}',nothingPlaying:'صدایی در حال پخش نیست',removeQueued:'حذف از صف',
-    audioOutput:'خروجی صدا',systemDefault:'پیش‌فرض سیستم',refreshDevices:'به‌روزرسانی دستگاه‌ها',deviceUnavailable:'خروجی انتخاب‌شده در دسترس نیست؛ از پیش‌فرض سیستم استفاده می‌شود.',
-    lastChecked:'آخرین بررسی: {time}',nextCheck:'بررسی بعدی: {time}',retrying:'تلاش دوباره: {message}',never:'هرگز',readyConnection:'اتصال کیک',readySounds:'تنظیم صدای پاداش‌ها',readyFiles:'فایل‌های صدا در دسترس',readyPlayback:'پخش آماده است',
-    missingFile:'فایل پیدا نشد',locateFile:'یافتن فایل',noMatches:'موردی پیدا نشد',pollingIdle:'کیک متصل نیست',
-    previousPage:'صفحهٔ قبل',nextPage:'صفحهٔ بعد',historyPage:'صفحهٔ {page} از {pages}',stopQueue:'توقف صف پخش',removeQueueItem:'حذف'
-  }
-};
-let language = localStorage.getItem('kick-soundboard-language') === 'fa' ? 'fa' : 'en';
-let state = { connected: false, configured: false, sounds: {}, cooldowns: {}, rewardVolumes: {}, history: [], volume: 0.8 };
-let rewards = [];
-let queue = [];
-let currentItem = null;
-let queuePaused = false;
-let rewardSearch = '';
-let historySearch = '';
-let historyStatus = 'all';
-let historyPage = 1;
-const historyPageSize = 20;
-let outputDevices = [];
-let invalidOutput = false;
-const queuedRedemptionIds = new Set();
-let activeAudio = null;
-let activeRewardId = '';
-let activeObjectUrl = '';
-let previewAudio = null;
-let previewRewardId = '';
-let previewObjectUrl = '';
-let playbackBusy = false;
-let queueTimer = null;
-const lastPlaybackStart = new Map();
-let toastTimeout;
+(function () {
+/**
+ * Kick Soundboard - Main Renderer Orchestrator
+ * Coordinates modular components: i18n, Logger, State, API, SoundPad, Analytics, Studio, Queue, Settings, Navigation.
+ */
 
-function t(key, values = {}) {
-  let result = translations[language][key] || translations.en[key] || key;
-  for (const [name, value] of Object.entries(values)) result = result.replaceAll(`{${name}}`, String(value));
-  return result;
-}
-function applyLanguage() {
-  document.documentElement.lang = language;
-  document.documentElement.dir = language === 'fa' ? 'rtl' : 'ltr';
-  document.title = t('appName');
-  document.querySelectorAll('[data-i18n]').forEach((node) => { node.textContent = t(node.dataset.i18n); });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => { node.placeholder = t(node.dataset.i18nPlaceholder); });
-  $('#lang-toggle').textContent = language === 'fa' ? 'English' : 'فارسی';
-  $('#lang-toggle').setAttribute('aria-label', language === 'fa' ? 'Change language to English' : 'تغییر زبان به فارسی');
-  $('#connect-btn').textContent = state.connected ? t('connected') : t('connect');
-  $('#status-label').textContent = state.connected ? t('polling') : t('notConnected');
-  $('#history-filter').setAttribute('aria-label', t('historyFilter'));
-  renderRewards(); renderHistory(); updateQueue(); renderPollHealth();
+// Load or import modules (supports both browser window globals and Node require in tests)
+const isNode = typeof module !== 'undefined' && module.exports;
+
+const i18nModule = isNode ? require('./js/i18n') : window.i18n;
+const stateModule = isNode ? require('./js/state') : window.appState;
+const apiModule = isNode ? require('./js/api') : window.apiClient;
+const loggerModule = isNode ? require('./js/logger') : window.clientLogger;
+const soundpadModule = isNode ? require('./js/components/soundpad') : window.soundpadComponent;
+const analyticsModule = isNode ? require('./js/components/analytics') : window.analyticsComponent;
+const studioModule = isNode ? require('./js/components/studio') : window.studioComponent;
+const queueModule = isNode ? require('./js/components/queue') : window.queueComponent;
+const settingsModule = isNode ? require('./js/components/settings') : window.settingsComponent;
+const navModule = isNode ? require('./js/components/navigation') : window.navigationComponent;
+if (typeof window !== 'undefined') {
+  window.soundpadModule = soundpadModule;
+  window.queueModule = queueModule;
 }
 
-async function request(path, options = {}) {
-  const sessionToken = await window.kickApp?.getApiSessionToken();
-  if (!sessionToken) throw new Error('The secure app session is unavailable. Restart the app and try again.');
-  const response = await fetch(`http://localhost:9000${path}`, {
-    ...options,
-    headers: { 'content-type': 'application/json', 'x-kick-app-session': sessionToken, ...(options.headers || {}) },
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.error || data.message || `Request failed (${response.status})`);
-  return data;
-}
+// Core singletons
+const state = stateModule.state;
+const translations = i18nModule.translations;
+const t = i18nModule.t;
+const applyLanguage = i18nModule.applyLanguage;
+const request = apiModule.request;
+const getTimelineBuckets = analyticsModule.getTimelineBuckets;
+const renderTimelineChart = analyticsModule.renderTimelineChart;
+
+// DOM shorthand
+const $ = (s) => document.querySelector(s);
+let toastTimer = null;
 
 function toast(message, isError = false) {
-  toastRoot.textContent = message;
-  toastRoot.classList.toggle('error', isError);
-  toastRoot.classList.add('show');
-  clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => toastRoot.classList.remove('show'), 3000);
-}
+  const el = $('#toast');
+  if (!el) return;
+  clearTimeout(toastTimer);
+  el.textContent = message;
+  el.classList.toggle('error', isError);
+  el.classList.add('show');
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
 
-function setConnected(connected) {
-  state.connected = connected;
-  $('#status-dot').classList.toggle('live', connected);
-  $('#status-label').textContent = connected ? t('polling') : t('notConnected');
-  $('#connect-btn').textContent = connected ? t('connected') : t('connect');
-  $('#connect-btn').disabled = connected;
-  $('#setup-banner').classList.toggle('show', !state.configured);
-}
-
-function safeText(value) { return String(value ?? ''); }
-function formatTime(value) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString(language === 'fa' ? 'fa-IR' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-}
-function formatPollTime(value) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString(language === 'fa' ? 'fa-IR' : 'en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' });
-}
-function relativeTime(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  const minutes = Math.max(1, Math.floor((Date.now() - date.getTime()) / 60_000));
-  const formatter = new Intl.RelativeTimeFormat(language === 'fa' ? 'fa-IR' : 'en', { numeric: 'auto' });
-  if (minutes < 60) return formatter.format(-minutes, 'minute');
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return formatter.format(-hours, 'hour');
-  return formatter.format(-Math.floor(hours / 24), 'day');
-}
-
-function updateReadiness() {
-  const checks = [
-    ['#ready-connection', t('readyConnection'), Boolean(state.connected)],
-    ['#ready-sounds', t('readySounds'), rewards.length > 0 && rewards.every((reward) => Boolean(state.sounds?.[reward.id]))],
-    ['#ready-files', t('readyFiles'), rewards.length > 0 && rewards.every((reward) => Boolean(state.sounds?.[reward.id]?.available))],
-    ['#ready-playback', t('readyPlayback'), !queuePaused && !currentItem],
-  ];
-  for (const [selector, label, ready] of checks) {
-    const node = $(selector); node.textContent = `${ready ? '✓' : '○'} ${label}`; node.classList.toggle('ready', ready);
+  if (isError && loggerModule) {
+    loggerModule.logError('UI Toast Alert', new Error(message), { isError: true });
   }
 }
-function renderPollHealth() {
-  const last = state.lastPollSuccessAt ? formatPollTime(state.lastPollSuccessAt) : t('never');
-  const next = state.nextPollAt ? formatPollTime(state.nextPollAt) : '—';
-  const retryAt = state.nextPollAt ? new Date(state.nextPollAt).getTime() : NaN;
-  const retryInSeconds = Number.isFinite(retryAt) ? Math.max(0, Math.ceil((retryAt - Date.now()) / 1000)) : null;
-  const parts = [t('lastChecked', { time: last }), t('nextCheck', { time: next })];
-  if (state.pollError) {
-    parts.push(t('kickCheckFailed', { message: state.pollError }));
-    if (retryInSeconds !== null) parts.push(t('pollRetry', { seconds: retryInSeconds }));
-  }
-  else if (!state.connected) parts.push(t('pollingIdle'));
-  const health = $('#poll-health');
-  health.textContent = parts.join(' · ');
-  health.classList.toggle('error', Boolean(state.pollError));
-}
-async function loadAudioDevices() {
-  const select = $('#audio-output');
-  const previousSelection = select.value || state.outputDeviceId || '';
-  try { outputDevices = (await navigator.mediaDevices?.enumerateDevices?.() || []).filter((device) => device.kind === 'audiooutput'); }
-  catch { outputDevices = []; }
-  const selected = previousSelection;
-  select.replaceChildren(new Option(t('systemDefault'), ''));
-  for (const device of outputDevices) select.add(new Option(device.label || device.deviceId, device.deviceId));
-  select.value = selected;
-  if (selected && !outputDevices.some((device) => device.deviceId === selected)) {
-    invalidOutput = true; select.value = ''; $('#audio-warning').textContent = t('deviceUnavailable');
-  } else if (selected && typeof HTMLMediaElement.prototype.setSinkId !== 'function') {
-    invalidOutput = true; $('#audio-warning').textContent = t('deviceUnavailable');
-  } else { invalidOutput = false; $('#audio-warning').textContent = ''; }
+
+// Effective volume calculation
+function effectiveVolume(rewardId) {
+  return queueModule.effectiveVolume(rewardId, state);
 }
 
-function renderRewards() {
-  if (!state.connected) {
-    rewardRoot.replaceChildren(); const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = t('connectEmpty'); rewardRoot.append(empty);
-    return;
-  }
-  if (!rewards.length) {
-    rewardRoot.replaceChildren(); const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = t('noRewards'); rewardRoot.append(empty);
-    return;
-  }
-  const visibleRewards = rewards.filter((reward) => {
-    const hasSound = Boolean(state.sounds?.[reward.id]);
-    return (!$('#unassigned-only').checked || !hasSound) && (!rewardSearch || String(reward.title || '').toLocaleLowerCase().includes(rewardSearch));
+// Queue delegation
+function enqueueRedemptionSound(payload) {
+  return queueModule.enqueueRedemptionSound(payload, state, () => queueModule.updateQueueUI(state, t));
+}
+function stopQueue() {
+  queueModule.stopQueue(state, () => queueModule.updateQueueUI(state, t));
+}
+function resumeQueue() {
+  queueModule.resumeQueue(state, () => queueModule.updateQueueUI(state, t));
+}
+function skipCurrent() {
+  queueModule.skipCurrent(state, () => queueModule.updateQueueUI(state, t));
+}
+function clearQueue() {
+  queueModule.clearQueue(state, () => queueModule.updateQueueUI(state, t));
+}
+function stopPreview() {
+  queueModule.stopPreview(() => updatePreviewButtons());
+}
+async function playPreview(rewardId) {
+  await queueModule.playPreview(rewardId, state, () => updatePreviewButtons());
+}
+
+function updatePreviewButtons() {
+  document.querySelectorAll('[data-preview-sound]').forEach((btn) => {
+    const rid = btn.dataset.previewSound;
+    const isPlaying = queueModule.getCurrentPlayingPreviewRewardId() === rid;
+    btn.textContent = isPlaying ? `■ ${t('stopPreview')}` : `▶ ${t('previewSound')}`;
   });
-  if (!visibleRewards.length) {
-    rewardRoot.replaceChildren(); const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = t('noMatches'); rewardRoot.append(empty);
-    return;
-  }
-  rewardRoot.replaceChildren(...visibleRewards.map((reward) => {
-    const row = document.createElement('div');
-    row.className = 'sound-row';
-    const title = document.createElement('div');
-    const titleText = document.createElement('div'); titleText.className = 'reward-title'; titleText.textContent = reward.title || t('untitledReward');
-    const subtitle = document.createElement('div'); subtitle.className = 'reward-sub'; subtitle.textContent = `${Number(reward.cost || 0).toLocaleString(language === 'fa' ? 'fa-IR' : 'en-US')} ${t('points')}`;
-    const statusKind = reward.is_enabled === false ? 'disabled' : reward.is_paused === true ? 'paused' : 'enabled';
-    const status = document.createElement('span'); status.className = `reward-status ${statusKind}`;
-    const statusDot = document.createElement('span'); statusDot.className = 'reward-status-dot';
-    const statusText = document.createElement('span'); statusText.textContent = t(statusKind);
-    status.title = t(statusKind); status.setAttribute('aria-label', t(statusKind)); status.append(statusDot, statusText);
-    const details = document.createElement('div'); details.className = 'reward-details'; details.append(subtitle, status);
-    title.append(titleText, details);
-    const sound = document.createElement('div'); sound.className = 'sound-name';
-    const mappedSound = state.sounds?.[reward.id];
-    sound.textContent = mappedSound?.name || t('noSound');
-    if (mappedSound && mappedSound.available === false) { sound.textContent += ` · ${t('missingFile')}`; sound.classList.add('missing'); }
-    sound.title = sound.textContent;
-    const actions = document.createElement('div'); actions.className = 'row-actions';
-    const choose = document.createElement('button'); choose.className = 'small'; choose.textContent = mappedSound?.available === false ? t('locateFile') : mappedSound ? t('change') : t('chooseSound');
-    choose.addEventListener('click', () => chooseSound(reward));
-    actions.append(choose);
-    if (state.sounds?.[reward.id]) {
-      const play = document.createElement('button'); play.className = 'small'; play.dataset.previewRewardId = reward.id; play.textContent = previewAudio && previewRewardId === reward.id ? t('stopTest') : t('test'); play.title = play.textContent;
-      play.setAttribute('aria-label', play.textContent);
-      play.addEventListener('click', () => playPreview(reward.id));
-      const clear = document.createElement('button'); clear.className = 'small ghost'; clear.textContent = '×'; clear.title = t('removeSound');
-      clear.addEventListener('click', () => clearSound(reward.id));
-      actions.append(play, clear);
+}
+
+// SoundPad delegation
+function triggerPadSound(rewardId) {
+  soundpadModule.triggerPadSound(rewardId, state, (reward) => chooseSound(reward));
+  const sound = state.sounds?.[rewardId];
+  if (sound) {
+    const isReward = Boolean((state.rewards || []).find((r) => String(r.id) === String(rewardId)));
+    const soundBaseName = (sound.path ? sound.path.split(/[\\/]/).pop() : '') || sound.name || rewardId;
+    const title = sound.title || soundBaseName;
+    if (window.kickApp?.notifyOverlayTrigger) {
+      window.kickApp.notifyOverlayTrigger({
+        type: isReward ? 'channel_point' : 'soundpad',
+        soundId: rewardId,
+        title,
+        userName: isReward ? 'Channel Reward' : 'Streamer',
+        cost: isReward ? (state.rewards?.find((r) => String(r.id) === String(rewardId))?.cost || 0) : null,
+        timestamp: Date.now(),
+      }).catch(() => {});
     }
-    const controls = document.createElement('div'); controls.className = 'reward-controls';
-    const volumeControl = document.createElement('div'); volumeControl.className = 'reward-volume-control';
-    const volumeLabel = document.createElement('label'); volumeLabel.className = 'cool-label'; volumeLabel.textContent = t('perRewardVolume');
-    const soundVolume = document.createElement('input'); soundVolume.type = 'range'; soundVolume.min = '0'; soundVolume.max = '100'; soundVolume.value = Math.round((state.rewardVolumes?.[reward.id] ?? 1) * 100);
-    soundVolume.setAttribute('aria-label', `${t('perRewardVolume')}: ${reward.title}`);
-    const soundVolumeValue = document.createElement('span'); soundVolumeValue.className = 'volume-value'; soundVolumeValue.textContent = `${soundVolume.value}%`;
-    soundVolume.addEventListener('input', () => {
-      const value = Number(soundVolume.value) / 100;
-      state.rewardVolumes ||= {}; state.rewardVolumes[reward.id] = value; soundVolumeValue.textContent = `${soundVolume.value}%`;
-      if (activeRewardId === reward.id && activeAudio) activeAudio.volume = effectiveVolume(reward.id);
-      if (previewRewardId === reward.id && previewAudio) previewAudio.volume = effectiveVolume(reward.id);
+  }
+}
+function stopAllPadSounds() {
+  soundpadModule.stopAllPadSounds();
+}
+function panicStopAll() {
+  soundpadModule.stopAllPadSounds();
+  stopPreview();
+  stopQueue();
+  clearQueue();
+}
+function renderSoundPad() {
+  soundpadModule.renderSoundPad('soundpad-grid', 'soundpad-unmapped-section', state, {
+    t,
+    onTrigger: (rid) => triggerPadSound(rid),
+    onChooseSound: (reward) => chooseSound(reward),
+    onOpenKeybindModal: (id, title) => openKeybindModal(id, title),
+    onRenameSoundpadTitle: (id, title) => openRenameModal(id, title),
+    onToast: (msg) => toast(msg),
+  });
+}
+
+// Channel Point Goal delegation
+function renderGoal() {
+  if (typeof goalModule !== 'undefined' && goalModule.renderGoalView) {
+    goalModule.renderGoalView('goal-view-container', state, {
+      t,
+      onToast: (msg) => toast(msg),
+      onAdjustGoal: async (delta) => {
+        try {
+          const res = await request('/api/goal/adjust', {
+            method: 'POST',
+            body: JSON.stringify({ delta }),
+          });
+          if (res?.goal) {
+            state.goal = res.goal;
+            renderGoal();
+            const sign = delta >= 0 ? '+' : '';
+            toast(`${sign}${delta.toLocaleString()} points adjusted.`);
+          }
+        } catch (err) {
+          toast(err.message, true);
+        }
+      },
+      onSetGoalProgress: async (currentVal) => {
+        try {
+          const res = await request('/api/goal', {
+            method: 'POST',
+            body: JSON.stringify({ current: currentVal }),
+          });
+          if (res?.goal) {
+            state.goal = res.goal;
+            renderGoal();
+            toast(t('goalSettingsSaved'));
+          }
+        } catch (err) {
+          toast(err.message, true);
+        }
+      },
+      onResetGoal: async () => {
+        try {
+          const res = await request('/api/goal/reset', { method: 'POST', body: '{}' });
+          if (res?.goal) {
+            state.goal = res.goal;
+            renderGoal();
+            toast(t('goalResetSuccess'));
+          }
+        } catch (err) {
+          toast(err.message, true);
+        }
+      },
+      onSaveGoalSettings: async (settings) => {
+        try {
+          const res = await request('/api/goal', {
+            method: 'POST',
+            body: JSON.stringify(settings),
+          });
+          if (res?.goal) {
+            state.goal = res.goal;
+            renderGoal();
+            toast(t('goalSettingsSaved'));
+          }
+        } catch (err) {
+          toast(err.message, true);
+        }
+      },
+      onTestRedemption: async () => {
+        try {
+          const res = await request('/api/goal/test', { method: 'POST', body: '{}' });
+          if (res?.goal) {
+            state.goal = res.goal;
+            renderGoal();
+          }
+          toast('Test +500 redemption popup dispatched to OBS overlay!');
+        } catch (err) {
+          toast(err.message, true);
+        }
+      },
+      onTestDeduct: async () => {
+        try {
+          const res = await request('/api/goal/test', {
+            method: 'POST',
+            body: JSON.stringify({ delta: -500 }),
+          });
+          if (res?.goal) {
+            state.goal = res.goal;
+            renderGoal();
+          }
+          toast('Test -500 deduction popup dispatched to OBS overlay!');
+        } catch (err) {
+          toast(err.message, true);
+        }
+      },
     });
-    soundVolume.addEventListener('change', () => saveRewardSettings(reward.id, { rewardVolume: Number(soundVolume.value) / 100 }));
-    volumeControl.append(volumeLabel, soundVolume, soundVolumeValue);
-    const cooldownControl = document.createElement('div'); cooldownControl.className = 'cooldown-control';
-    const cooldown = document.createElement('input'); cooldown.type = 'number'; cooldown.min = '0'; cooldown.max = '3600'; cooldown.step = '1';
-    cooldown.className = 'cooldown'; cooldown.title = t('cooldownTitle'); cooldown.value = state.cooldowns?.[reward.id] || 0;
-    cooldown.setAttribute('aria-label', language === 'fa' ? `مدت وقفه برای ${reward.title}` : `Cooldown seconds for ${reward.title}`);
-    cooldown.addEventListener('change', () => saveRewardSettings(reward.id, { cooldown: cooldown.value }));
-    const cooldownLabel = document.createElement('label'); cooldownLabel.className = 'cool-label'; cooldownLabel.textContent = t('cooldown'); cooldownControl.append(cooldown, cooldownLabel);
-    controls.append(volumeControl, cooldownControl);
-    row.append(title, sound, actions, controls);
-    return row;
-  }));
+  }
+}
+
+// Studio & Rewards delegation
+function renderRewards() {
+  studioModule.renderRewards('rewards', state, {
+    t,
+    onChooseSound: (reward) => chooseSound(reward),
+    onClearSound: (rid) => clearSound(rid),
+    onPreviewSound: (rid) => playPreview(rid),
+    onSaveRewardSettings: (rid, fields) => saveRewardSettings(rid, fields),
+  });
 }
 
 function renderHistory() {
-  const query = historySearch.trim().toLocaleLowerCase();
-  const items = (state.history || []).filter((item) => {
-    if (historyStatus !== 'all' && item.status !== historyStatus) return false;
-    const redeemer = item.userName || item.username || item.user || item.redeemerUserId || '';
-    return !query || `${redeemer} ${item.rewardTitle || ''} ${item.userInput || ''}`.toLocaleLowerCase().includes(query);
+  studioModule.renderHistory('history', 'history-pagination', state, {
+    t,
+    language: i18nModule.getLanguage(),
   });
-  const pageCount = Math.max(1, Math.ceil(items.length / historyPageSize));
-  historyPage = Math.min(Math.max(1, historyPage), pageCount);
-  const pagination = $('#history-pagination');
-  pagination.hidden = items.length === 0;
-  $('#history-page').textContent = t('historyPage', { page: pageCount ? historyPage : 1, pages: pageCount });
-  $('#history-prev').disabled = historyPage <= 1;
-  $('#history-next').disabled = historyPage >= pageCount;
-  if (!items.length) {
-    historyRoot.replaceChildren(); const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = (state.history || []).length ? t('noMatches') : t('emptyHistory'); historyRoot.append(empty);
-    return;
-  }
-  const start = (historyPage - 1) * historyPageSize;
-  historyRoot.replaceChildren(...items.slice(start, start + historyPageSize).map((item) => {
-    const row = document.createElement('div'); row.className = 'event';
-    const info = document.createElement('div'); info.className = 'event-info';
-    const oldName = item.user && item.user !== 'Viewer' ? item.user : '';
-    const redeemerName = item.userName || item.username || oldName || (item.redeemerUserId ? t('viewerId', { id: item.redeemerUserId }) : t('unknownViewer'));
-    const user = document.createElement('div'); user.className = 'event-user';
-    const privateName = document.createElement('span'); privateName.className = 'private-blur-wrap';
-    const userBdi = document.createElement('bdi'); userBdi.dir = 'auto'; userBdi.className = 'private-blur'; userBdi.textContent = redeemerName; privateName.append(userBdi); user.append(privateName);
-    const action = document.createElement('div'); action.className = 'event-action';
-    const rewardBdi = document.createElement('bdi'); rewardBdi.dir = 'auto'; rewardBdi.textContent = item.rewardTitle || t('channelReward');
-    if (language === 'fa') action.append(document.createTextNode(`${t('redeemedVerb')} «`), rewardBdi, document.createTextNode('» را بازخرید کرد'));
-    else action.append(document.createTextNode(`${t('redeemedVerb')} `), rewardBdi);
-    const meta = document.createElement('div'); meta.className = 'event-meta';
-    const date = document.createElement('span'); date.textContent = formatTime(item.redeemedAt);
-    const relative = document.createElement('span'); relative.className = 'relative-time'; relative.textContent = relativeTime(item.redeemedAt);
-    meta.append(date, relative);
-    info.append(action, user, meta);
-    const tag = document.createElement('span'); tag.className = `tag ${item.status || ''}`; tag.textContent = t(item.status || 'redeemed');
-    row.append(info, tag);
-    if (item.userInput) { const text = document.createElement('div'); text.className = 'event-text'; const privateMessage = document.createElement('span'); privateMessage.className = 'private-blur-wrap'; const inputBdi = document.createElement('bdi'); inputBdi.dir = 'auto'; inputBdi.className = 'private-blur'; inputBdi.textContent = item.userInput; privateMessage.append(inputBdi); text.append(privateMessage); row.append(text); }
-    return row;
-  }));
 }
 
-function updateQueue() {
-  const locale = language === 'fa' ? 'fa-IR' : 'en-US';
-  const total = queue.length + (playbackBusy ? 1 : 0);
-  $('#queue-count').textContent = `${total.toLocaleString(locale)} ${t('queuedTotal')} · ${queue.length.toLocaleString(locale)} ${t('waiting')}`;
-  const current = $('#current-sound');
-  const currentName = currentItem ? rewardName(currentItem.rewardId) : t('nothingPlaying');
-  current.replaceChildren();
-  const currentLabel = document.createElement('span'); currentLabel.textContent = currentItem && !queuePaused ? t('currentlyPlaying', { name: currentName }) : currentName; current.append(currentLabel);
-  $('#stop-btn').hidden = queuePaused;
-  $('#resume-queue').hidden = !queuePaused;
-  current.classList.toggle('current', Boolean(currentItem));
-  $('#skip-btn').disabled = !currentItem;
-  $('#queue-list').replaceChildren(...queue.map((item, index) => {
-    const row = document.createElement('div'); row.className = 'queue-item';
-    const name = document.createElement('span'); name.className = 'queue-item-name'; name.textContent = rewardName(item.rewardId); row.append(name);
-    const remove = document.createElement('button'); remove.className = 'ghost small'; remove.textContent = t('removeQueueItem'); remove.title = t('removeQueued'); remove.setAttribute('aria-label', `${t('removeQueued')}: ${rewardName(item.rewardId)}`); remove.addEventListener('click', () => removeQueueItem(index)); row.append(remove);
-    return row;
-  }));
-  updateReadiness();
+function updateReadiness() {
+  studioModule.updateReadiness(state, t);
 }
-function rewardName(id) { return rewards.find((reward) => reward.id === id)?.title || state.sounds?.[id]?.name || t('channelReward'); }
-function effectiveVolume(rewardId) {
-  return (state.volume ?? 0.8) * (state.rewardVolumes?.[rewardId] ?? 1);
+
+function renderPollHealth() {
+  studioModule.renderPollHealth(state, t, i18nModule.getLanguage());
 }
-function enqueueRedemptionSound({ rewardId, redemptionId, cooldownMs }) {
-  if (!rewardId || (redemptionId && queuedRedemptionIds.has(redemptionId))) return;
-  if (!state.sounds?.[rewardId]) return toast(t('chooseFirst'), true);
-  if (redemptionId) queuedRedemptionIds.add(redemptionId);
-  queue.push({ rewardId, redemptionId, cooldownMs: Math.max(0, Number(cooldownMs) || 0) }); updateQueue();
-  if (!playbackBusy && !queuePaused) playNext();
+
+// Analytics delegation
+function renderAnalytics() {
+  analyticsModule.renderAnalytics(state, {
+    t,
+    getLanguage: () => i18nModule.getLanguage(),
+  });
 }
-function playNext() {
-  if (playbackBusy || queuePaused) return;
-  const item = queue.shift(); updateQueue();
-  if (!item) return;
-  const { rewardId, cooldownMs } = item;
-  currentItem = item;
-  playbackBusy = true;
-  updateQueue();
-  const waitMs = Math.max(0, (lastPlaybackStart.get(rewardId) || 0) + cooldownMs - Date.now());
-  if (waitMs > 0) {
-    queueTimer = setTimeout(() => { queueTimer = null; startQueuedAudio(item); }, waitMs);
-    return;
+
+// Keybind Helpers (Scoped globally so all handlers can access them)
+function areAcceleratorsEqual(a, b) {
+  if (!a || !b) return false;
+  const norm = (s) => String(s).toLowerCase()
+    .replace(/commandorcontrol|ctrl|control/g, 'ctrl')
+    .replace(/return/g, 'enter')
+    .split('+')
+    .map(x => x.trim())
+    .sort()
+    .join('+');
+  return norm(a) === norm(b);
+}
+
+function formatAcceleratorForDisplay(acc) {
+  if (!acc) return '';
+  return String(acc)
+    .replace(/\bCommandOrControl\b/gi, 'Ctrl')
+    .replace(/\bReturn\b/gi, 'Enter')
+    .replace(/\bmouse4\b/gi, 'Mouse 4')
+    .replace(/\bmouse5\b/gi, 'Mouse 5')
+    .replace(/\bnum(\d)\b/gi, 'Num $1')
+    .replace(/\bnumadd\b/gi, 'Num +')
+    .replace(/\bnumsub\b/gi, 'Num -')
+    .replace(/\bnummult\b/gi, 'Num *')
+    .replace(/\bnumdiv\b/gi, 'Num /')
+    .replace(/\bnumdec\b/gi, 'Num .');
+}
+
+function getMouseAccelerator(e) {
+  if (!e || (e.button !== 3 && e.button !== 4)) return null;
+  const parts = [];
+  if (e.ctrlKey) parts.push('CommandOrControl');
+  if (e.altKey) parts.push('Alt');
+  if (e.shiftKey) parts.push('Shift');
+  parts.push(e.button === 3 ? 'Mouse4' : 'Mouse5');
+  return parts.join('+');
+}
+
+let currentRecordingKeybindTarget = null;
+let recordedAccelerator = '';
+
+function openKeybindModal(targetId, targetTitle) {
+  currentRecordingKeybindTarget = targetId;
+  recordedAccelerator = state.keybinds?.[targetId] || '';
+  const modal = $('#keybind-modal');
+  const titleEl = $('#keybind-target-title');
+  const displayBox = $('#keybind-display-box');
+  const errorMsg = $('#keybind-error-msg');
+  const saveBtn = $('#save-keybind-btn');
+
+  if (titleEl) titleEl.textContent = targetTitle || targetId;
+  if (errorMsg) {
+    errorMsg.style.display = 'none';
+    errorMsg.textContent = '';
   }
-  startQueuedAudio(item);
+  if (displayBox) {
+    displayBox.style.borderColor = 'var(--line)';
+    displayBox.style.color = 'var(--green)';
+    displayBox.textContent = formatAcceleratorForDisplay(recordedAccelerator) || 'Press key or mouse button...';
+  }
+  if (saveBtn) {
+    saveBtn.disabled = !recordedAccelerator;
+  }
+  if (modal) {
+    modal.style.display = 'grid';
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
 }
-function startQueuedAudio(item) {
-  const { rewardId } = item;
-  const audio = new Audio();
-  audio.loop = false;
-  activeRewardId = rewardId;
-  audio.volume = effectiveVolume(rewardId);
-  activeAudio = audio;
-  lastPlaybackStart.set(rewardId, Date.now());
-  updateQueue();
-  let completed = false;
-  const finish = () => {
-    if (completed) return;
-    completed = true;
-    if (activeAudio !== audio) return;
-    activeAudio = null; activeRewardId = ''; currentItem = null;
-    if (activeObjectUrl) URL.revokeObjectURL(activeObjectUrl);
-    activeObjectUrl = '';
-    playbackBusy = false;
-    updateQueue();
-    if (!queuePaused) playNext();
-  };
-  const fail = (message) => { if (activeAudio === audio) toast(message, true); finish(); };
-  audio.addEventListener('ended', finish, { once: true });
-  audio.addEventListener('error', () => {
-    const reason = audio.error?.code === 4 ? 'unsupported format or missing audio file' : 'audio could not be decoded or played';
-    fail(`Could not play this reward sound (${reason}). Check the selected file and try Test.`);
-  }, { once: true });
-  (async () => {
-    try {
-      const sessionToken = await window.kickApp?.getApiSessionToken();
-      if (!sessionToken) throw new Error(t('secureStoreUnavailable'));
-      const response = await fetch(`http://localhost:9000/api/audio/${encodeURIComponent(rewardId)}`, {
-        headers: { 'x-kick-app-session': sessionToken },
+
+function closeKeybindModal() {
+  const modal = $('#keybind-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  const errorMsg = $('#keybind-error-msg');
+  if (errorMsg) {
+    errorMsg.style.display = 'none';
+    errorMsg.textContent = '';
+  }
+  currentRecordingKeybindTarget = null;
+  recordedAccelerator = '';
+}
+
+function openStreamDeckModal() {
+  const modal = $('#streamdeck-modal');
+  const listEl = $('#streamdeck-actions-list');
+  if (!modal) return;
+
+  modal.style.display = 'grid';
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+
+  if (listEl) {
+    const sounds = state.sounds || {};
+    const keybinds = state.keybinds || {};
+    const entries = Object.entries(sounds).filter(([_, s]) => s && (s.path || s.name || s.available));
+    if (!entries.length) {
+      listEl.innerHTML = `<div class="empty" style="padding:20px 10px;">${t('soundpadEmpty')}</div>`;
+    } else {
+      listEl.innerHTML = entries.map(([id, soundObj]) => {
+        const soundBaseName = (soundObj.path ? soundObj.path.split(/[\\/]/).pop() : '') || soundObj.name || id;
+        const reward = (state.rewards || []).find((r) => r.id === id);
+        const title = reward?.title || soundObj.title || soundBaseName;
+        const triggerUrl = `http://localhost:9000/streamdeck/trigger/${encodeURIComponent(id)}`;
+        const protoUri = `kick-soundboard://trigger/${encodeURIComponent(id)}`;
+        const kb = keybinds[id] || '';
+
+        return `
+          <div class="streamdeck-row">
+            <div class="streamdeck-row-info">
+              <div class="streamdeck-row-title">${title}</div>
+              <div class="streamdeck-row-sub">
+                ${kb ? `<span style="color:var(--green); font-weight:700;">⌨️ ${kb}</span> · ` : ''}
+                <span>${soundBaseName}</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; flex-shrink:0;">
+              <button type="button" class="primary small" data-copy-trigger="${triggerUrl}" title="Copy HTTP GET URL for Elgato Website action">${t('copyTriggerUrl')}</button>
+              <button type="button" class="ghost small" data-copy-proto="${protoUri}" title="Copy custom URI for Elgato Open action">${t('copyProtocolUri')}</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      listEl.querySelectorAll('[data-copy-trigger]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(btn.dataset.copyTrigger).catch(() => {});
+          }
+          toast(t('triggerUrlCopied'));
+        });
       });
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data.error || `Audio request failed (${response.status})`);
-      }
-      const objectUrl = URL.createObjectURL(await response.blob());
-      if (activeAudio !== audio) { URL.revokeObjectURL(objectUrl); return; }
-      activeObjectUrl = objectUrl;
-      audio.src = objectUrl;
-      if (state.outputDeviceId && typeof audio.setSinkId === 'function') {
-        try { await audio.setSinkId(state.outputDeviceId); invalidOutput = false; }
-        catch { invalidOutput = true; try { await audio.setSinkId(''); } catch {} $('#audio-warning').textContent = t('deviceUnavailable'); }
-      }
-      await audio.play();
-    } catch (error) {
-      fail(`Could not play this reward sound: ${error.message}`);
+
+      listEl.querySelectorAll('[data-copy-proto]').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(btn.dataset.copyProto).catch(() => {});
+          }
+          toast(t('protocolUriCopied'));
+        });
+      });
     }
-  })();
-}
-async function playPreview(rewardId) {
-  if (!state.sounds?.[rewardId]) return toast(t('chooseFirst'), true);
-  if (previewAudio && previewRewardId === rewardId) {
-    stopPreview();
-    return;
   }
-  stopPreview();
-  const audio = new Audio();
-  audio.loop = false;
-  audio.volume = effectiveVolume(rewardId);
-  previewAudio = audio;
-  previewRewardId = rewardId;
-  updatePreviewButtons();
-  const finish = () => {
-    if (previewAudio !== audio) return;
-    previewAudio = null;
-    previewRewardId = '';
-    audio.src = '';
-    if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
-    previewObjectUrl = '';
-    updatePreviewButtons();
-  };
-  audio.addEventListener('ended', finish, { once: true });
-  audio.addEventListener('error', () => {
-    if (previewAudio === audio) toast('Could not play the preview. Check the selected file and try again.', true);
-    finish();
-  }, { once: true });
+}
+
+function closeStreamDeckModal() {
+  const modal = $('#streamdeck-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+
+// Standalone Sound Pad Rename Title Modal
+function openRenameModal(soundId, currentTitle) {
+  const modal = $('#rename-soundpad-modal');
+  const input = $('#rename-soundpad-input');
+  const idInput = $('#rename-soundpad-id');
+  if (!modal || !input) return;
+  if (idInput) idInput.value = soundId;
+  input.value = currentTitle || '';
+  modal.classList.add('open');
+  modal.style.display = 'grid';
+  modal.setAttribute('aria-hidden', 'false');
+  setTimeout(() => {
+    input.focus();
+    input.select();
+  }, 50);
+}
+
+function closeRenameModal() {
+  const modal = $('#rename-soundpad-modal');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+
+// OBS Stream Overlay Modal
+function getOverlayUrl(channelPointsOnly) {
+  const base = 'http://localhost:9000/overlay';
+  return channelPointsOnly ? `${base}?channelPointsOnly=1` : base;
+}
+
+async function openObsOverlayModal() {
+  const modal = $('#obs-overlay-modal');
+  const toggle = $('#obs-channel-points-only-toggle');
+  const urlInput = $('#obs-overlay-url-input');
+  if (!modal) return;
+
   try {
-    const sessionToken = await window.kickApp?.getApiSessionToken();
-    if (!sessionToken) throw new Error(t('secureStoreUnavailable'));
-    const response = await fetch(`http://localhost:9000/api/audio/${encodeURIComponent(rewardId)}`, {
-      headers: { 'x-kick-app-session': sessionToken },
+    let isChannelOnly = false;
+    if (window.kickApp?.getOverlayConfig) {
+      const cfg = await window.kickApp.getOverlayConfig();
+      isChannelOnly = Boolean(cfg?.channelPointsOnly);
+    } else {
+      const res = await request('/api/overlay/config').catch(() => ({}));
+      isChannelOnly = Boolean(res?.channelPointsOnly);
+    }
+    if (toggle) toggle.checked = isChannelOnly;
+    if (urlInput) urlInput.value = getOverlayUrl(isChannelOnly);
+  } catch {}
+
+  modal.classList.add('open');
+  modal.style.display = 'grid';
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeObsOverlayModal() {
+  const modal = $('#obs-overlay-modal');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+
+// Navigation & Tab Switching
+function switchTab(tabId) {
+  navModule.switchTab(tabId, state, {
+    onTabSwitched: (newTab) => {
+      if (newTab === 'analytics') renderAnalytics();
+      else if (newTab === 'soundpad') renderSoundPad();
+      else if (newTab === 'goal') renderGoal();
+      else if (newTab === 'studio') { renderRewards(); renderHistory(); }
+    },
+  });
+}
+
+// Settings Dialog delegation
+function openSettings() {
+  const modalConnectBtn = $('#modal-connect-btn');
+  if (modalConnectBtn) {
+    modalConnectBtn.hidden = Boolean(state.connected);
+    modalConnectBtn.style.setProperty('display', state.connected ? 'none' : 'inline-flex', 'important');
+  }
+  const disconnectBtn = $('#disconnect-btn');
+  if (disconnectBtn) {
+    disconnectBtn.hidden = !state.connected;
+    disconnectBtn.style.setProperty('display', state.connected ? 'inline-flex' : 'none', 'important');
+  }
+
+  settingsModule.openSettings('settings-modal', {
+    onLoadAudioDevices: () => loadAudioDevices(),
+  });
+}
+
+function closeSettings() {
+  settingsModule.closeSettings('settings-modal');
+}
+
+async function loadAudioDevices() {
+  await settingsModule.loadAudioDevices('audio-output', state, { t });
+}
+
+// Reward & State API actions
+async function chooseSound(target) {
+  try {
+    const selectedPath = await window.kickApp?.chooseAudio();
+    if (!selectedPath) return;
+
+    const baseName = selectedPath.split(/[\\/]/).pop();
+    const soundId = (typeof target === 'object' && target?.id)
+      ? target.id
+      : (typeof target === 'string' && target ? target : `pad_${Date.now()}`);
+    const soundTitle = (typeof target === 'object' && target?.title) ? target.title : baseName;
+
+    state.sounds ||= {};
+    state.sounds[soundId] = {
+      path: selectedPath,
+      name: baseName,
+      available: true,
+      title: soundTitle,
+    };
+
+    await request('/api/settings', {
+      method: 'POST',
+      body: JSON.stringify({
+        rewardId: soundId,
+        soundPath: selectedPath,
+        title: soundTitle,
+        sounds: state.sounds,
+      }),
     });
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data.error || `Audio request failed (${response.status})`);
-    }
-    const objectUrl = URL.createObjectURL(await response.blob());
-    if (previewAudio !== audio) { URL.revokeObjectURL(objectUrl); return; }
-    previewObjectUrl = objectUrl;
-    audio.src = objectUrl;
-    if (state.outputDeviceId && typeof audio.setSinkId === 'function') {
-      try { await audio.setSinkId(state.outputDeviceId); }
-      catch { try { await audio.setSinkId(''); } catch {} $('#audio-warning').textContent = t('deviceUnavailable'); }
-    }
-    await audio.play();
+
+    toast(t('soundAssigned', { name: baseName }));
+    renderRewards();
+    renderSoundPad();
+    updateReadiness();
   } catch (error) {
-    if (previewAudio === audio) toast(`Could not play the preview: ${error.message}`, true);
-    finish();
+    toast(error.message, true);
   }
 }
-function stopPreview() {
-  if (previewAudio) {
-    previewAudio.pause();
-    previewAudio.src = '';
-    previewAudio = null;
-  }
-  previewRewardId = '';
-  if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
-  previewObjectUrl = '';
-  updatePreviewButtons();
-}
-function updatePreviewButtons() {
-  for (const button of document.querySelectorAll('[data-preview-reward-id]')) {
-    const isPreviewing = previewAudio && previewRewardId === button.dataset.previewRewardId;
-    button.textContent = isPreviewing ? t('stopTest') : t('test');
-    button.title = button.textContent;
-    button.setAttribute('aria-label', button.textContent);
-  }
-}
-function stopQueue() {
-  queue = prependInterruptedItem(queue, currentItem);
-  queuePaused = true;
-  if (queueTimer) { clearTimeout(queueTimer); queueTimer = null; }
-  playbackBusy = false;
-  if (activeAudio) { activeAudio.pause(); activeAudio.currentTime = 0; activeAudio.src = ''; activeAudio = null; activeRewardId = ''; }
-  currentItem = null;
-  if (activeObjectUrl) URL.revokeObjectURL(activeObjectUrl);
-  activeObjectUrl = '';
-  updateQueue();
-}
-function skipCurrent() {
-  if (queueTimer) { clearTimeout(queueTimer); queueTimer = null; }
-  if (activeAudio) { activeAudio.pause(); activeAudio.src = ''; activeAudio = null; }
-  if (activeObjectUrl) URL.revokeObjectURL(activeObjectUrl);
-  activeObjectUrl = ''; activeRewardId = ''; currentItem = null; playbackBusy = false;
-  updateQueue(); playNext();
-}
-function removeQueueItem(index) { queue.splice(index, 1); updateQueue(); }
 
-async function chooseSound(reward) {
-  try {
-    if (!window.kickApp?.chooseAudio) return toast(t('audioOnlyApp'), true);
-    const soundPath = await window.kickApp.chooseAudio();
-    if (!soundPath) return;
-    await request('/api/settings', { method: 'POST', body: JSON.stringify({ rewardId: reward.id, soundPath }) });
-    await refreshState(); toast(t('addedSound', { name: reward.title }));
-  } catch (error) { toast(error.message, true); }
-}
 async function clearSound(rewardId) {
-  try { await request('/api/settings', { method: 'POST', body: JSON.stringify({ rewardId, clearSound: true }) }); await refreshState(); }
-  catch (error) { toast(error.message, true); }
-}
-async function saveRewardSettings(rewardId, fields) {
-  try { await request('/api/settings', { method: 'POST', body: JSON.stringify({ rewardId, ...fields }) }); await refreshState(); }
-  catch (error) { toast(error.message, true); }
-}
-async function loadRewards() {
-  const result = await request('/api/rewards');
-  rewards = result.data || [];
-  renderRewards();
-  updateReadiness();
-}
-async function refreshState() {
-  const newState = await request('/api/state');
-  state = { ...state, ...newState };
-  setConnected(state.connected);
-  if ($('#account-status-text')) {
-    const streamerName = state.streamer?.name || '';
-    $('#account-status-text').textContent = state.connected
-      ? (streamerName ? t('connectedAs', { name: streamerName }) : t('connected'))
-      : t('notConnected');
-  }
-  if ($('#modal-connect-btn')) $('#modal-connect-btn').hidden = state.connected;
-  if ($('#disconnect-btn')) $('#disconnect-btn').hidden = !state.connected;
-  if ($('#play-pending-toggle')) $('#play-pending-toggle').checked = Boolean(state.playPending);
-  $('#app-version').textContent = t('appVersion', { version: state.version || '—' });
-  $('#volume').value = Math.round((state.volume ?? 0.8) * 100);
-  $('#volume-label').textContent = `${$('#volume').value}%`;
-  document.body.classList.toggle('stream-mode', Boolean(state.streamerMode));
-  $('#stream-mode-btn').setAttribute('aria-pressed', String(Boolean(state.streamerMode)));
-  $('#stream-mode-btn').classList.toggle('primary', Boolean(state.streamerMode));
-  renderPollHealth();
-  renderRewards(); renderHistory();
-  updateReadiness();
-  if (state.connected && !rewards.length) {
-    try { await loadRewards(); } catch (error) { toast(error.message, true); }
+  try {
+    if (state.sounds?.[rewardId]) {
+      delete state.sounds[rewardId];
+      await request('/api/settings', {
+        method: 'POST',
+        body: JSON.stringify({
+          rewardId,
+          clearSound: true,
+          sounds: state.sounds,
+        }),
+      });
+      renderRewards();
+      renderSoundPad();
+      updateReadiness();
+    }
+  } catch (error) {
+    toast(error.message, true);
   }
 }
 
-function openSettings() { modal.classList.add('open'); loadAudioDevices(); }
-function closeSettings() { modal.classList.remove('open'); }
+async function saveRewardSettings(rewardId, fields) {
+  try {
+    if (fields.volume !== undefined) {
+      state.rewardVolumes ||= {};
+      state.rewardVolumes[rewardId] = fields.volume;
+    }
+    if (fields.cooldown !== undefined) {
+      state.rewardCooldowns ||= {};
+      state.rewardCooldowns[rewardId] = fields.cooldown;
+    }
+    await request('/api/settings', {
+      method: 'POST',
+      body: JSON.stringify({
+        rewardId,
+        cooldown: fields.cooldown,
+        rewardVolume: fields.volume,
+        rewardVolumes: state.rewardVolumes,
+        rewardCooldowns: state.rewardCooldowns,
+      }),
+    });
+  } catch (error) {
+    toast(error.message, true);
+  }
+}
+
+async function loadRewards() {
+  try {
+    const r = await request('/api/rewards');
+    if (Array.isArray(r?.data)) {
+      state.rewards = r.data;
+    } else if (Array.isArray(r)) {
+      state.rewards = r;
+    }
+  } catch (err) {
+    try {
+      const data = await request('/api/state');
+      if (Array.isArray(data.rewards)) state.rewards = data.rewards;
+    } catch (_) {}
+  }
+  renderRewards();
+  renderSoundPad();
+  updateReadiness();
+}
+
 async function connectKick() {
   try {
     const result = await request('/api/connect', { method: 'POST', body: '{}' });
-    if (result.ok) toast(t('openedKick'));
-  } catch (error) { toast(error.message, true); if (error.message.includes('Client ID')) openSettings(); }
+    if (result.ok) {
+      toast(t('openedKick'));
+      try {
+        const r = await request('/api/rewards');
+        if (Array.isArray(r?.data)) {
+          state.rewards = r.data;
+          renderRewards();
+          renderSoundPad();
+          updateReadiness();
+        }
+      } catch (_) {}
+    }
+  } catch (error) {
+    toast(error.message, true);
+    if (error.message.includes('Client ID')) openSettings();
+  }
 }
 
-$('#lang-toggle')?.addEventListener('click', () => {
-  language = language === 'en' ? 'fa' : 'en';
-  localStorage.setItem('kick-soundboard-language', language);
-  applyLanguage();
-});
-$('#settings-btn')?.addEventListener('click', openSettings);
-$('#setup-settings')?.addEventListener('click', openSettings);
-$('#close-settings')?.addEventListener('click', closeSettings);
-$('#cancel-settings')?.addEventListener('click', closeSettings);
-$('#connect-btn')?.addEventListener('click', connectKick);
-$('#banner-connect')?.addEventListener('click', connectKick);
-$('#modal-connect-btn')?.addEventListener('click', connectKick);
-$('#disconnect-btn')?.addEventListener('click', async () => {
+async function refreshState() {
   try {
-    await request('/api/disconnect', { method: 'POST', body: '{}' });
-    await refreshState(); closeSettings(); toast(t('disconnectedKick'));
-  } catch (error) { toast(error.message, true); }
-});
-$('#check-updates')?.addEventListener('click', async () => {
-  const button = $('#check-updates');
-  const status = $('#update-status');
-  button.disabled = true;
-  $('#download-update').hidden = true;
-  status.textContent = t('checkingUpdates');
-  try {
-    const result = await request('/api/updates');
-    status.textContent = result.updateAvailable
-      ? t('updateAvailable', { version: result.latestVersion })
-      : t('upToDate', { version: result.currentVersion });
-    $('#download-update').hidden = !result.updateAvailable;
-  } catch (error) {
-    status.textContent = t('updateError', { message: error.message });
-  } finally { button.disabled = false; }
-});
-$('#download-update')?.addEventListener('click', () => window.kickApp?.openReleases());
-$('#refresh-btn')?.addEventListener('click', async () => { try { await loadRewards(); toast(t('rewardsRefreshed')); } catch (error) { toast(error.message, true); } });
-$('#stop-btn')?.addEventListener('click', stopQueue);
-$('#skip-btn')?.addEventListener('click', skipCurrent);
-$('#clear-queue')?.addEventListener('click', () => { queue = []; updateQueue(); });
-$('#resume-queue')?.addEventListener('click', () => { queuePaused = false; updateQueue(); playNext(); });
-$('#reward-search')?.addEventListener('input', () => { rewardSearch = $('#reward-search').value.trim().toLocaleLowerCase(); renderRewards(); });
-$('#unassigned-only')?.addEventListener('change', renderRewards);
-$('#history-search')?.addEventListener('input', () => { historyPage = 1; historySearch = $('#history-search').value; renderHistory(); });
-$('#history-filter')?.addEventListener('change', () => { historyPage = 1; historyStatus = $('#history-filter').value; renderHistory(); });
-$('#history-prev')?.addEventListener('click', () => { if (historyPage > 1) { historyPage -= 1; renderHistory(); } });
-$('#history-next')?.addEventListener('click', () => {
-  const query = historySearch.trim().toLocaleLowerCase();
-  const filteredCount = (state.history || []).filter((item) => (historyStatus === 'all' || item.status === historyStatus) &&
-    (!query || `${item.userName || item.username || item.user || item.redeemerUserId || ''} ${item.rewardTitle || ''} ${item.userInput || ''}`.toLocaleLowerCase().includes(query))).length;
-  if (historyPage < Math.ceil(filteredCount / historyPageSize)) { historyPage += 1; renderHistory(); }
-});
-$('#stream-mode-btn')?.addEventListener('click', async () => {
-  state.streamerMode = !state.streamerMode;
-  document.body.classList.toggle('stream-mode', state.streamerMode);
-  $('#stream-mode-btn').setAttribute('aria-pressed', String(state.streamerMode));
-  $('#stream-mode-btn').classList.toggle('primary', state.streamerMode);
-  try { await request('/api/settings', { method: 'POST', body: JSON.stringify({ streamerMode: state.streamerMode }) }); }
-  catch (error) { toast(error.message, true); }
-});
-$('#audio-output')?.addEventListener('change', async () => {
-  state.outputDeviceId = $('#audio-output').value;
-  invalidOutput = false; $('#audio-warning').textContent = '';
-  try {
-    await request('/api/settings', { method: 'POST', body: JSON.stringify({ outputDeviceId: state.outputDeviceId }) });
-    if (activeAudio && typeof activeAudio.setSinkId === 'function') await activeAudio.setSinkId(state.outputDeviceId);
-  } catch (error) {
-    invalidOutput = true;
-    if (activeAudio && typeof activeAudio.setSinkId === 'function') { try { await activeAudio.setSinkId(''); } catch {} }
-    $('#audio-warning').textContent = t('deviceUnavailable'); toast(error.message, true);
-  }
-});
-$('#refresh-audio-devices')?.addEventListener('click', () => loadAudioDevices());
-$('#clear-history')?.addEventListener('click', async () => { try { await request('/api/history/clear', { method: 'POST', body: '{}' }); await refreshState(); } catch (error) { toast(error.message, true); } });
-$('#settings-form')?.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  try {
-    const selectedDevice = $('#audio-output').value;
-    const playPending = Boolean($('#play-pending-toggle')?.checked);
-    await request('/api/settings', { method: 'POST', body: JSON.stringify({ outputDeviceId: selectedDevice, playPending }) });
-    closeSettings();
-    await refreshState();
-    toast(t('savedSettings'));
-  } catch (error) {
-    toast(error.message, true);
-  }
-});
-$('#play-pending-toggle')?.addEventListener('change', async () => {
-  const playPending = Boolean($('#play-pending-toggle')?.checked);
-  state.playPending = playPending;
-  try {
-    await request('/api/settings', { method: 'POST', body: JSON.stringify({ playPending }) });
-  } catch (error) {
-    toast(error.message, true);
-  }
-});
-$('#volume')?.addEventListener('input', () => {
-  $('#volume-label').textContent = `${$('#volume').value}%`;
-  state.volume = Number($('#volume').value) / 100;
-  if (activeAudio) activeAudio.volume = effectiveVolume(activeRewardId);
-  if (previewAudio) previewAudio.volume = effectiveVolume(previewRewardId);
-});
-$('#volume')?.addEventListener('change', async () => {
-  try { await request('/api/settings', { method: 'POST', body: JSON.stringify({ volume: Number($('#volume').value) / 100 }) }); }
-  catch (error) { toast(error.message, true); }
-});
-window.kickApp?.onPlaySound(({ rewardId, redemptionId, masterVolume, rewardVolume, cooldownMs }) => {
-  state.volume = masterVolume;
-  state.rewardVolumes ||= {}; state.rewardVolumes[rewardId] = rewardVolume;
-  enqueueRedemptionSound({ rewardId, redemptionId, cooldownMs });
-});
-window.kickApp?.onStateChanged(() => refreshState().catch((error) => toast(error.message, true)));
-window.kickApp?.onPollError(({ message, retryInSeconds }) => toast(
-  `${t('kickCheckFailed', { message })} ${t('pollRetry', { seconds: retryInSeconds })}`,
-  true
-));
-if (navigator.mediaDevices?.addEventListener) navigator.mediaDevices.addEventListener('devicechange', () => loadAudioDevices());
+    const data = await request('/api/state');
+    state.connected = Boolean(data.connected);
+    state.streamerMode = Boolean(data.streamerMode);
+    state.volume = Number.isFinite(data.volume) ? data.volume : 0.8;
+    state.playPending = Boolean(data.playPending);
+    state.audioDeviceId = data.outputDeviceId || data.audioDeviceId || '';
+    state.sounds = data.sounds || {};
+    state.rewardVolumes = data.rewardVolumes || {};
+    state.rewardCooldowns = data.rewardCooldowns || {};
+    state.history = data.history || [];
+    state.rewards = data.rewards || state.rewards || [];
 
-applyLanguage();
-setConnected(false);
-refreshState().catch((error) => toast(error.message, true));
-setInterval(() => { renderHistory(); renderPollHealth(); }, 60_000);
+    if (state.connected) {
+      try {
+        const r = await request('/api/rewards');
+        if (Array.isArray(r?.data)) {
+          state.rewards = r.data;
+        } else if (Array.isArray(r)) {
+          state.rewards = r;
+        }
+      } catch (_) {}
+    }
+
+    state.pollStatus = {
+      lastChecked: data.lastPollSuccessAt || data.lastChecked || null,
+      nextCheck: data.nextPollAt || data.nextCheck || null,
+      consecutiveFailures: data.consecutiveFailures || 0,
+      polling: Boolean(data.polling),
+    };
+
+    // Update UI elements
+    setConnected(state.connected);
+
+    // Streamer badge
+    const streamer = data.streamer || data.streamerProfile;
+    const streamerName = streamer?.username || streamer?.name || streamer?.slug;
+    const chipText = $('#streamer-chip-text');
+    if (chipText) {
+      chipText.textContent = streamerName ? `@${streamerName}` : (data.channelName || 'Kick Local');
+    }
+
+    // Volume input
+    const volInput = $('#volume');
+    const volLabel = $('#volume-label');
+    if (volInput) {
+      volInput.value = Math.round(state.volume * 100);
+      volInput.style.setProperty('--pct', `${volInput.value}%`);
+    }
+    if (volLabel) volLabel.textContent = `${Math.round(state.volume * 100)}%`;
+
+    // Stream mode
+    document.body.classList.toggle('stream-mode', Boolean(state.streamerMode));
+    $('#stream-mode-btn')?.setAttribute('aria-pressed', String(Boolean(state.streamerMode)));
+    $('#stream-mode-btn')?.classList.toggle('primary', Boolean(state.streamerMode));
+
+    // Render active views
+    renderPollHealth();
+    renderRewards();
+    renderHistory();
+    renderSoundPad();
+    if (state.currentTab === 'analytics') renderAnalytics();
+    if (state.currentTab === 'goal') renderGoal();
+    updateReadiness();
+    queueModule.updateQueueUI(state, t);
+
+    // Settings modal fields
+    const accountStatusText = $('#account-status-text');
+    if (accountStatusText) {
+      accountStatusText.textContent = state.connected
+        ? (streamerName ? `Connected as @${streamerName}` : 'Connected')
+        : 'Not connected';
+    }
+    const disconnectBtn = $('#disconnect-btn');
+    if (disconnectBtn) {
+      disconnectBtn.hidden = !state.connected;
+      disconnectBtn.style.setProperty('display', state.connected ? 'inline-flex' : 'none', 'important');
+    }
+    const modalConnectBtn = $('#modal-connect-btn');
+    if (modalConnectBtn) {
+      modalConnectBtn.hidden = Boolean(state.connected);
+      modalConnectBtn.style.setProperty('display', state.connected ? 'none' : 'inline-flex', 'important');
+    }
+
+    const playPendingToggle = $('#play-pending-toggle');
+    if (playPendingToggle) playPendingToggle.checked = Boolean(state.playPending);
+  } catch (error) {
+    toast(error.message, true);
+  }
+}
+
+function setConnected(connected) {
+  state.connected = Boolean(connected);
+  const dot = $('#status-dot');
+  const label = $('#status-label');
+  const banner = $('#setup-banner');
+  const bannerConnect = $('#banner-connect');
+  const connectBtn = $('#connect-btn');
+  const modalConnectBtn = $('#modal-connect-btn');
+  const disconnectBtn = $('#disconnect-btn');
+
+  if (dot) dot.classList.toggle('live', state.connected);
+  if (label) {
+    label.textContent = state.connected ? 'Connected' : 'Not connected';
+    label.classList.toggle('connected', state.connected);
+  }
+  if (banner) {
+    banner.classList.toggle('show', !state.connected);
+    banner.hidden = Boolean(state.connected);
+    banner.style.setProperty('display', state.connected ? 'none' : 'block', 'important');
+  }
+  if (bannerConnect) bannerConnect.hidden = Boolean(state.connected);
+  if (connectBtn) {
+    connectBtn.hidden = Boolean(state.connected);
+    connectBtn.style.setProperty('display', state.connected ? 'none' : 'inline-flex', 'important');
+  }
+  if (modalConnectBtn) {
+    modalConnectBtn.hidden = Boolean(state.connected);
+    modalConnectBtn.style.setProperty('display', state.connected ? 'none' : 'inline-flex', 'important');
+  }
+  if (disconnectBtn) {
+    disconnectBtn.hidden = !state.connected;
+    disconnectBtn.style.setProperty('display', state.connected ? 'inline-flex' : 'none', 'important');
+  }
+}
+
+// Initialize UI Event Listeners
+function initEventListeners() {
+  // Navigation tabs (both dock rail and pill tabs)
+  document.querySelectorAll('.dock-btn[data-tab], .pill-tab[data-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // Master volume control
+  $('#volume')?.addEventListener('input', (e) => {
+    const val = Number(e.target.value);
+    e.target.style.setProperty('--pct', `${val}%`);
+    $('#volume-label').textContent = `${val}%`;
+    state.volume = val / 100;
+
+    // Real-time update volume of any active audio (queue playback, preview, or sound pad)
+    queueModule.updateActiveAudioVolume?.(state);
+    soundpadModule.updateActiveAudioVolume?.(state);
+    const activeAudio = queueModule.getActiveAudio?.();
+    const currentItem = queueModule.getCurrentItem?.();
+    if (activeAudio && currentItem) {
+      activeAudio.volume = effectiveVolume(currentItem.rewardId);
+    }
+    const prevAudio = queueModule.getActivePreviewAudio?.();
+    const prevId = queueModule.getCurrentPlayingPreviewRewardId?.();
+    if (prevAudio && prevId) {
+      prevAudio.volume = effectiveVolume(prevId);
+    }
+    const padAudio = soundpadModule.getActivePadAudio?.();
+    const padId = soundpadModule.getCurrentPlayingPadRewardId?.();
+    if (padAudio && padId) {
+      const rewardVol = Number.isFinite(state.rewardVolumes?.[padId]) ? state.rewardVolumes[padId] : 1.0;
+      padAudio.volume = Math.max(0, Math.min(1, state.volume * rewardVol));
+    }
+  });
+
+  $('#volume')?.addEventListener('change', async () => {
+    try {
+      await request('/api/settings', {
+        method: 'POST',
+        body: JSON.stringify({ volume: Number($('#volume').value) / 100 }),
+      });
+    } catch (error) {
+      toast(error.message, true);
+    }
+  });
+
+  // Stream mode button
+  $('#stream-mode-btn')?.addEventListener('click', () => {
+    navModule.toggleStreamMode(state, async (mode) => {
+      try {
+        await request('/api/settings', { method: 'POST', body: JSON.stringify({ streamerMode: mode }) });
+      } catch (error) {
+        toast(error.message, true);
+      }
+    });
+  });
+
+  // Language toggle
+  $('#lang-toggle')?.addEventListener('click', () => {
+    const newLang = i18nModule.getLanguage() === 'fa' ? 'en' : 'fa';
+    applyLanguage(newLang);
+    renderRewards();
+    renderHistory();
+    renderSoundPad();
+    if (state.currentTab === 'analytics') renderAnalytics();
+    if (state.currentTab === 'goal') renderGoal();
+    renderPollHealth();
+    updateReadiness();
+  });
+
+  // Settings Modal triggers
+  $('#settings-btn')?.addEventListener('click', openSettings);
+  $('#setup-settings')?.addEventListener('click', openSettings);
+  $('#close-settings')?.addEventListener('click', closeSettings);
+  $('#cancel-settings')?.addEventListener('click', closeSettings);
+
+  // Connect Kick buttons
+  $('#connect-btn')?.addEventListener('click', connectKick);
+  $('#banner-connect')?.addEventListener('click', connectKick);
+  $('#modal-connect-btn')?.addEventListener('click', connectKick);
+
+  // Disconnect Kick
+  $('#disconnect-btn')?.addEventListener('click', async () => {
+    if (!confirm(t('confirmDisconnect'))) return;
+    try {
+      await request('/api/disconnect', { method: 'POST', body: '{}' });
+      setConnected(false);
+      state.rewards = [];
+      renderRewards();
+      renderSoundPad();
+      toast(t('disconnected'));
+      closeSettings();
+    } catch (error) {
+      toast(error.message, true);
+    }
+  });
+
+  // Settings Form submit
+  $('#settings-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      await request('/api/settings', {
+        method: 'POST',
+        body: JSON.stringify({
+          playPending: $('#play-pending-toggle')?.checked ?? false,
+          outputDeviceId: $('#audio-output')?.value || '',
+          audioDeviceId: $('#audio-output')?.value || '',
+        }),
+      });
+      state.playPending = $('#play-pending-toggle')?.checked ?? false;
+      state.audioDeviceId = $('#audio-output')?.value || '';
+      toast(t('settingsSaved'));
+      closeSettings();
+    } catch (error) {
+      toast(error.message, true);
+    }
+  });
+
+  // Audio output device refresh
+  $('#refresh-audio-devices')?.addEventListener('click', () => loadAudioDevices());
+
+  // Updates checker
+  $('#check-updates')?.addEventListener('click', async () => {
+    const statusEl = $('#update-status');
+    const downloadBtn = $('#download-update');
+    if (statusEl) statusEl.textContent = 'Checking...';
+    try {
+      const data = await request('/api/updates');
+      if (Boolean(data.updateAvailable || data.hasUpdate)) {
+        if (statusEl) statusEl.textContent = t('updateAvailable', { version: data.latestVersion });
+        if (downloadBtn) {
+          downloadBtn.hidden = false;
+          downloadBtn.removeAttribute('hidden');
+          downloadBtn.onclick = () => window.kickApp?.openReleases();
+        }
+      } else {
+        if (statusEl) statusEl.textContent = t('upToDate', { version: data.currentVersion });
+        if (downloadBtn) {
+          downloadBtn.hidden = true;
+          downloadBtn.setAttribute('hidden', '');
+        }
+      }
+    } catch (error) {
+      if (statusEl) statusEl.textContent = t('updateCheckFailed', { message: error.message });
+    }
+  });
+
+  // Diagnostic Logs UI (Settings modal)
+  $('#open-logs-folder')?.addEventListener('click', () => {
+    if (loggerModule) loggerModule.openLogsFolder();
+  });
+
+  $('#view-recent-logs')?.addEventListener('click', async () => {
+    const out = $('#recent-logs-output');
+    if (!out) return;
+    if (out.style.display === 'block') {
+      out.style.display = 'none';
+      return;
+    }
+    out.style.display = 'block';
+    out.textContent = 'Loading logs...';
+    if (loggerModule) {
+      const logs = await loggerModule.getRecentLogs();
+      out.textContent = logs || 'No error logs recorded yet. Everything running smoothly!';
+    }
+  });
+
+  // Filter Pills (Studio)
+  document.querySelectorAll('.filter-pill-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-pill-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.rewardFilterPill = btn.dataset.filter || 'all';
+      renderRewards();
+    });
+  });
+
+  // Search rewards
+  $('#reward-search')?.addEventListener('input', (e) => {
+    state.rewardSearch = e.target.value;
+    renderRewards();
+  });
+
+  // Unassigned only checkbox
+  $('#unassigned-only')?.addEventListener('change', (e) => {
+    state.unassignedOnly = e.target.checked;
+    renderRewards();
+  });
+
+  // Refresh rewards button
+  $('#refresh-btn')?.addEventListener('click', () => loadRewards());
+
+  // Queue Controls
+  $('#stop-btn')?.addEventListener('click', () => stopQueue());
+  $('#resume-queue')?.addEventListener('click', () => resumeQueue());
+  $('#skip-btn')?.addEventListener('click', () => skipCurrent());
+  $('#clear-queue')?.addEventListener('click', () => clearQueue());
+
+  // History Filter & Search
+  $('#history-search')?.addEventListener('input', (e) => {
+    state.historySearch = e.target.value;
+    state.historyPage = 1;
+    renderHistory();
+  });
+
+  $('#history-filter')?.addEventListener('change', (e) => {
+    state.historyFilter = e.target.value;
+    state.historyPage = 1;
+    renderHistory();
+  });
+
+  $('#clear-history')?.addEventListener('click', async () => {
+    if (!confirm(t('clearHistoryConfirm'))) return;
+    try {
+      await request('/api/history/clear', { method: 'POST', body: '{}' });
+      state.history = [];
+      renderHistory();
+      if (state.currentTab === 'analytics') renderAnalytics();
+      toast(t('historyCleared'));
+    } catch (error) {
+      toast(error.message, true);
+    }
+  });
+
+  $('#history-prev')?.addEventListener('click', () => {
+    if (state.historyPage > 1) {
+      state.historyPage--;
+      renderHistory();
+    }
+  });
+
+  $('#history-next')?.addEventListener('click', () => {
+    state.historyPage++;
+    renderHistory();
+  });
+
+  // Sound Pad Panic Stop & Search
+  $('#soundpad-stop-all')?.addEventListener('click', () => panicStopAll());
+
+  // Pop out Floating Sound Pad Window
+  $('#popout-soundpad-btn')?.addEventListener('click', async () => {
+    try {
+      if (window.kickApp?.openSoundpadWindow) {
+        await window.kickApp.openSoundpadWindow();
+      } else {
+        const token = (await window.kickApp?.getApiSessionToken?.()) || window.sessionToken || '';
+        const url = `http://localhost:9000/soundpad.html${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+        window.open(url, 'KickSoundPad', 'width=760,height=600,menubar=no,toolbar=no');
+      }
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+
+  // Stream Deck Sync & Integration Modal
+  $('#open-streamdeck-sync')?.addEventListener('click', openStreamDeckModal);
+  $('#close-streamdeck-btn')?.addEventListener('click', closeStreamDeckModal);
+  $('#close-streamdeck-bottom-btn')?.addEventListener('click', closeStreamDeckModal);
+
+  $('#copy-panic-url')?.addEventListener('click', async () => {
+    const url = 'http://localhost:9000/streamdeck/stop-all';
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url).catch(() => {});
+    }
+    toast(t('panicStopUrlCopied'));
+  });
+
+  $('#copy-panic-uri')?.addEventListener('click', async () => {
+    const uri = 'kick-soundboard://stop-all';
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(uri).catch(() => {});
+    }
+    toast(t('protocolUriCopied'));
+  });
+
+  function handleRecordedKeybind(acc) {
+    const displayBox = $('#keybind-display-box');
+    const errorMsg = $('#keybind-error-msg');
+    const saveBtn = $('#save-keybind-btn');
+
+    if (!acc) return;
+
+    // 1. Escape is reserved for Panic Stop & Dialog Cancel - strictly reject!
+    if (/^escape$/i.test(acc) || /^esc$/i.test(acc)) {
+      recordedAccelerator = '';
+      if (errorMsg) {
+        errorMsg.textContent = `❌ ${t('keybindEscapeReserved')}`;
+        errorMsg.style.display = 'block';
+      }
+      if (displayBox) {
+        displayBox.textContent = 'Escape (Reserved)';
+        displayBox.style.borderColor = '#ff5c64';
+        displayBox.style.color = '#ff858a';
+      }
+      if (saveBtn) saveBtn.disabled = true;
+      return;
+    }
+
+    // 2. Reject lone modifier keys
+    if (/^(commandorcontrol|ctrl|control|alt|shift|meta)(\+(commandorcontrol|ctrl|control|alt|shift|meta))*$/i.test(acc)) {
+      recordedAccelerator = '';
+      if (errorMsg) {
+        errorMsg.textContent = `⚠️ ${t('keybindInvalidKey')}`;
+        errorMsg.style.display = 'block';
+      }
+      if (displayBox) {
+        displayBox.textContent = formatAcceleratorForDisplay(acc) + ' + ...';
+        displayBox.style.borderColor = '#e3b341';
+        displayBox.style.color = '#e3b341';
+      }
+      if (saveBtn) saveBtn.disabled = true;
+      return;
+    }
+
+    // 3. Conflict Detection with other Sound Pad tiles
+    let conflictName = null;
+    if (state.keybinds) {
+      for (const [otherId, otherAcc] of Object.entries(state.keybinds)) {
+        if (otherId !== currentRecordingKeybindTarget && otherAcc && areAcceleratorsEqual(otherAcc, acc)) {
+          const otherSound = state.sounds?.[otherId] || (state.rewards || []).find((r) => r.id === otherId);
+          conflictName = otherSound?.title || otherSound?.name || otherId;
+          break;
+        }
+      }
+    }
+
+    recordedAccelerator = acc;
+
+    if (conflictName) {
+      if (errorMsg) {
+        errorMsg.textContent = `⚠️ ${t('keybindConflictWarning', { name: conflictName })}`;
+        errorMsg.style.display = 'block';
+      }
+      if (displayBox) {
+        displayBox.textContent = formatAcceleratorForDisplay(acc);
+        displayBox.style.borderColor = '#e3b341';
+        displayBox.style.color = '#e3b341';
+      }
+    } else {
+      if (errorMsg) {
+        errorMsg.style.display = 'none';
+        errorMsg.textContent = '';
+      }
+      if (displayBox) {
+        displayBox.textContent = formatAcceleratorForDisplay(acc);
+        displayBox.style.borderColor = 'var(--green)';
+        displayBox.style.color = 'var(--green)';
+      }
+    }
+
+    if (saveBtn) saveBtn.disabled = false;
+  }
+
+  // Intercept auxclick to prevent Electron window backwards/forwards navigation on Mouse4/Mouse5
+  window.addEventListener('auxclick', (e) => {
+    if (e.button === 3 || e.button === 4) {
+      e.preventDefault();
+    }
+  });
+
+  // Mouse 4 & Mouse 5 Listener (in-window sound triggers & recording)
+  window.addEventListener('mousedown', (e) => {
+    if (e.button !== 3 && e.button !== 4) return;
+    e.preventDefault();
+
+    const mouseAcc = getMouseAccelerator(e);
+    if (!mouseAcc) return;
+
+    // If Keybind Modal is open, record Mouse 4 / Mouse 5
+    const modal = $('#keybind-modal');
+    if (modal?.classList.contains('open') && currentRecordingKeybindTarget) {
+      handleRecordedKeybind(mouseAcc);
+      return;
+    }
+
+    // If another modal is open, ignore
+    if ($('#settings-modal')?.classList.contains('open')) return;
+    if ($('#streamdeck-modal')?.classList.contains('open')) return;
+
+    // Trigger matching SoundPad pad
+    for (const [soundId, acc] of Object.entries(state.keybinds || {})) {
+      if (acc && areAcceleratorsEqual(acc, mouseAcc)) {
+        triggerPadSound(soundId);
+        break;
+      }
+    }
+  });
+
+  function eventToAccelerator(e) {
+    const parts = [];
+    if (e.ctrlKey) parts.push('CommandOrControl');
+    if (e.altKey) parts.push('Alt');
+    if (e.shiftKey) parts.push('Shift');
+
+    let keyName = '';
+    const code = e.code || '';
+
+    if (e.key === 'BrowserBack') {
+      keyName = 'Mouse4';
+    } else if (e.key === 'BrowserForward') {
+      keyName = 'Mouse5';
+    } else if (/^F\d{1,2}$/i.test(code) || /^F\d{1,2}$/i.test(e.key)) {
+      keyName = (code || e.key).toUpperCase();
+    } else if (code.startsWith('Numpad')) {
+      const numPart = code.replace('Numpad', '').toLowerCase();
+      const map = {
+        add: 'numadd',
+        subtract: 'numsub',
+        multiply: 'nummult',
+        divide: 'numdiv',
+        decimal: 'numdec',
+        enter: 'Return'
+      };
+      keyName = map[numPart] || (/^\d$/.test(numPart) ? `num${numPart}` : numPart);
+    } else if (code.startsWith('Digit')) {
+      keyName = code.replace('Digit', '');
+    } else if (code.startsWith('Key')) {
+      keyName = code.replace('Key', '').toUpperCase();
+    } else if (code === 'Space' || e.key === ' ') {
+      keyName = 'Space';
+    } else if (code === 'Enter' || e.key === 'Enter') {
+      keyName = 'Return';
+    } else if (e.key && e.key.length === 1) {
+      keyName = e.key.toUpperCase();
+    } else {
+      keyName = e.key || code;
+    }
+
+    if (!keyName) return '';
+    parts.push(keyName);
+    return parts.join('+');
+  }
+
+  // In-Window Direct Keydown Listener for Instant Soundpad Triggers
+  window.addEventListener('keydown', (e) => {
+    // Ignore if modal is open or if user is typing in an input / textarea / editable
+    if ($('#keybind-modal')?.classList.contains('open')) return;
+    if ($('#settings-modal')?.classList.contains('open')) return;
+    if ($('#streamdeck-modal')?.classList.contains('open')) return;
+
+    const tag = document.activeElement?.tagName?.toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select' || document.activeElement?.isContentEditable) {
+      return;
+    }
+
+    if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return;
+
+    const pressedAcc = eventToAccelerator(e);
+    if (!pressedAcc) return;
+
+    for (const [soundId, acc] of Object.entries(state.keybinds || {})) {
+      if (acc && areAcceleratorsEqual(acc, pressedAcc)) {
+        e.preventDefault();
+        triggerPadSound(soundId);
+        break;
+      }
+    }
+  });
+
+  // Keybind Recording Modal Listener
+  window.addEventListener('keydown', (e) => {
+    const modal = $('#keybind-modal');
+    if (!modal || !modal.classList.contains('open') || !currentRecordingKeybindTarget) return;
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      handleRecordedKeybind('Escape');
+      return;
+    }
+
+    if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) {
+      const parts = [];
+      if (e.ctrlKey) parts.push('CommandOrControl');
+      if (e.altKey) parts.push('Alt');
+      if (e.shiftKey) parts.push('Shift');
+      handleRecordedKeybind(parts.join('+'));
+      return;
+    }
+
+    e.preventDefault();
+    const acc = eventToAccelerator(e);
+    if (!acc) return;
+
+    handleRecordedKeybind(acc);
+  });
+
+  $('#save-keybind-btn')?.addEventListener('click', async () => {
+    if (!currentRecordingKeybindTarget || !recordedAccelerator) return;
+    const targetId = currentRecordingKeybindTarget;
+    const accelerator = recordedAccelerator;
+    state.keybinds = state.keybinds || {};
+
+    // Conflict Detection: check if this hotkey is already assigned to another sound
+    const conflictingIds = [];
+    for (const [otherId, existingAcc] of Object.entries(state.keybinds)) {
+      if (otherId !== targetId && existingAcc && areAcceleratorsEqual(existingAcc, accelerator)) {
+        conflictingIds.push(otherId);
+        delete state.keybinds[otherId];
+      }
+    }
+
+    state.keybinds[targetId] = accelerator;
+
+    // Send payload to backend with new keybind and clearing conflicts
+    const payload = { [targetId]: accelerator };
+    for (const cid of conflictingIds) {
+      payload[cid] = null;
+    }
+
+    if (window.kickApp?.saveKeybind) {
+      await window.kickApp.saveKeybind(targetId, accelerator).catch(() => {});
+      for (const cid of conflictingIds) {
+        await window.kickApp.saveKeybind(cid, null).catch(() => {});
+      }
+    }
+    await request('/api/settings', {
+      method: 'POST',
+      body: JSON.stringify({ keybinds: payload }),
+    }).catch(() => {});
+
+    closeKeybindModal();
+    renderSoundPad();
+
+    if (conflictingIds.length > 0) {
+      toast(t('keybindReassigned', { key: formatAcceleratorForDisplay(accelerator) }));
+    } else {
+      toast(t('keybindSaved', { key: formatAcceleratorForDisplay(accelerator) }));
+    }
+  });
+
+  $('#clear-keybind-btn')?.addEventListener('click', async () => {
+    if (!currentRecordingKeybindTarget) return;
+    const targetId = currentRecordingKeybindTarget;
+    if (state.keybinds) delete state.keybinds[targetId];
+
+    if (window.kickApp?.saveKeybind) {
+      await window.kickApp.saveKeybind(targetId, null).catch(() => {});
+    }
+    await request('/api/settings', {
+      method: 'POST',
+      body: JSON.stringify({ keybinds: { [targetId]: null } }),
+    }).catch(() => {});
+
+    closeKeybindModal();
+    renderSoundPad();
+    toast(t('keybindCleared'));
+  });
+
+  $('#close-keybind-btn')?.addEventListener('click', closeKeybindModal);
+  $('#cancel-keybind-btn')?.addEventListener('click', closeKeybindModal);
+
+  // Standalone Web Sound Pad Launcher
+  $('#open-web-soundpad')?.addEventListener('click', async () => {
+    try {
+      const token = (await window.kickApp?.getApiSessionToken?.()) || window.sessionToken || '';
+      const url = `http://localhost:9000/soundpad.html${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+      if (window.kickApp?.openUrl) {
+        await window.kickApp.openUrl(url);
+      } else {
+        window.open(url, '_blank');
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url).catch(() => {});
+      }
+      toast(t('webPadCopied'));
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+
+  $('#soundpad-search')?.addEventListener('input', (e) => {
+    state.soundpadSearch = e.target.value;
+    renderSoundPad();
+  });
+
+  // Standalone Sound Pad Rename Title Modal Event Listeners
+  $('#close-rename-btn')?.addEventListener('click', closeRenameModal);
+  $('#cancel-rename-btn')?.addEventListener('click', closeRenameModal);
+
+  $('#rename-soundpad-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('#save-rename-btn')?.click();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      closeRenameModal();
+    }
+  });
+
+  $('#save-rename-btn')?.addEventListener('click', async () => {
+    const idInput = $('#rename-soundpad-id');
+    const input = $('#rename-soundpad-input');
+    if (!idInput || !input) return;
+    const soundId = idInput.value;
+    const newTitle = input.value.trim();
+    if (!soundId || !newTitle) return;
+
+    // Only update in-app soundpad display title; NEVER rename or mutate original audio file on disk!
+    if (state.sounds?.[soundId]) {
+      state.sounds[soundId].title = newTitle;
+    }
+    await request('/api/settings', {
+      method: 'POST',
+      body: JSON.stringify({ rewardId: soundId, title: newTitle }),
+    }).catch(() => {});
+
+    closeRenameModal();
+    renderSoundPad();
+    toast(t('titleSaved'));
+  });
+
+  // OBS Stream Overlay Modal Event Listeners
+  $('#open-obs-overlay')?.addEventListener('click', openObsOverlayModal);
+  $('#close-obs-overlay-btn')?.addEventListener('click', closeObsOverlayModal);
+  $('#close-obs-overlay-bottom-btn')?.addEventListener('click', closeObsOverlayModal);
+
+  $('#obs-channel-points-only-toggle')?.addEventListener('change', async (e) => {
+    const checked = e.target.checked;
+    const urlInput = $('#obs-overlay-url-input');
+    if (urlInput) urlInput.value = getOverlayUrl(checked);
+
+    if (window.kickApp?.saveOverlayConfig) {
+      await window.kickApp.saveOverlayConfig({ channelPointsOnly: checked }).catch(() => {});
+    }
+    await request('/api/overlay/config', {
+      method: 'POST',
+      body: JSON.stringify({ channelPointsOnly: checked }),
+    }).catch(() => {});
+  });
+
+  $('#copy-obs-url-btn')?.addEventListener('click', async () => {
+    const urlInput = $('#obs-overlay-url-input');
+    if (!urlInput) return;
+    const url = urlInput.value;
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url).catch(() => {});
+    }
+    toast(t('obsUrlCopied'));
+  });
+
+  $('#test-obs-channel-point-btn')?.addEventListener('click', async () => {
+    try {
+      await request('/api/overlay/test', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'channel_point',
+          title: 'Hydrate Streamer',
+          userName: 'KickViewer_42',
+          cost: 500,
+        }),
+      });
+      toast('Test Channel Point alert sent to OBS overlay!');
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+
+  $('#test-obs-soundpad-btn')?.addEventListener('click', async () => {
+    try {
+      await request('/api/overlay/test', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'soundpad',
+          title: 'Airhorn Blast',
+          userName: 'Streamer',
+        }),
+      });
+      toast('Test Sound Pad alert sent to OBS overlay!');
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+
+  // Analytics Timeframe Toggles
+  $('#timeframe-7d')?.addEventListener('click', () => {
+    $('#timeframe-7d')?.classList.add('active');
+    $('#timeframe-24h')?.classList.remove('active');
+    state.analyticsTimeframe = '7d';
+    renderAnalytics();
+  });
+
+  $('#timeframe-24h')?.addEventListener('click', () => {
+    $('#timeframe-24h')?.classList.add('active');
+    $('#timeframe-7d')?.classList.remove('active');
+    state.analyticsTimeframe = '24h';
+    renderAnalytics();
+  });
+
+  // Global Keyboard Shortcuts
+  navModule.initKeyboardShortcuts({
+    onEscape: () => {
+      const modal = $('#settings-modal');
+      if (modal && modal.classList.contains('open')) {
+        closeSettings();
+      } else {
+        panicStopAll();
+      }
+    },
+    onSwitchTab: (tabId) => switchTab(tabId),
+  });
+
+  // Kick IPC Listeners
+  window.kickApp?.onPlaySound(({ rewardId, redemptionId, masterVolume, rewardVolume, cooldownMs }) => {
+    state.volume = masterVolume;
+    state.rewardVolumes ||= {};
+    state.rewardVolumes[rewardId] = rewardVolume;
+    enqueueRedemptionSound({ rewardId, redemptionId, cooldownMs });
+  });
+
+  window.kickApp?.onStateChanged(() => refreshState().catch((err) => toast(err.message, true)));
+
+  window.kickApp?.onPollError(({ message, retryInSeconds }) => toast(
+    `${t('kickCheckFailed', { message })} ${t('pollRetry', { seconds: retryInSeconds })}`,
+    true
+  ));
+
+  window.kickApp?.onTriggerSoundpad?.(({ id }) => {
+    triggerPadSound(id);
+  });
+
+  window.kickApp?.onPanicStopAll?.(() => {
+    panicStopAll();
+  });
+
+  window.kickApp?.onGoalUpdated?.((goal) => {
+    state.goal = goal;
+    if (state.currentTab === 'goal') renderGoal();
+  });
+
+  if (navigator.mediaDevices?.addEventListener) {
+    navigator.mediaDevices.addEventListener('devicechange', () => loadAudioDevices());
+  }
+}
+
+// Bootstrap
+if (!isNode && typeof window !== 'undefined' && typeof document !== 'undefined') {
+  function bootstrap() {
+    applyLanguage();
+    initEventListeners();
+    setConnected(false);
+    renderUI();
+    refreshState().catch((err) => toast(err.message, true));
+    const timer = setInterval(() => {
+      renderHistory();
+      renderPollHealth();
+      if (state.currentTab === 'analytics') renderAnalytics();
+    }, 60_000);
+    if (timer && typeof timer.unref === 'function') timer.unref();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
+}
+
+// Module export for unit tests & browser globals
+if (isNode) {
+  module.exports = {
+    state,
+    translations,
+    t,
+    applyLanguage,
+    switchTab,
+    request,
+    toast,
+    effectiveVolume,
+    enqueueRedemptionSound,
+    triggerPadSound,
+    stopPreview,
+    playPreview,
+    getTimelineBuckets,
+    renderTimelineChart,
+    renderRewards,
+    renderHistory,
+    renderSoundPad,
+    renderAnalytics,
+    renderGoal,
+    openSettings,
+    closeSettings,
+    openRenameModal,
+    closeRenameModal,
+    panicStopAll,
+  };
+} else if (typeof window !== 'undefined') {
+  window.renderer = {
+    state,
+    translations,
+    t,
+    applyLanguage,
+    switchTab,
+    request,
+    toast,
+    effectiveVolume,
+    enqueueRedemptionSound,
+    triggerPadSound,
+    stopPreview,
+    playPreview,
+    getTimelineBuckets,
+    renderTimelineChart,
+    renderRewards,
+    renderHistory,
+    renderSoundPad,
+    renderAnalytics,
+    renderGoal,
+    openSettings,
+    closeSettings,
+    openRenameModal,
+    closeRenameModal,
+    panicStopAll,
+  };
+}
+
+})();
