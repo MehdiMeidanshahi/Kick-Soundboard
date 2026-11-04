@@ -5,7 +5,7 @@
 Kick Soundboard is a local Windows desktop application that listens for approved Kick channel point reward redemptions and plays your assigned audio files in real time through your sound card into OBS.
 
 [![Platform: Windows x64](https://img.shields.io/badge/Platform-Windows%20x64-0078D6.svg)](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases)
-[![Version: v0.3.0](https://img.shields.io/badge/Version-v0.3.0-53FC18.svg)](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest)
+[![Version: v0.3.1](https://img.shields.io/badge/Version-v0.3.1-53FC18.svg)](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest)
 [![Kick OAuth: 1--Click Bridge](https://img.shields.io/badge/OAuth-1--Click%20Bridge-brightgreen.svg)](https://github.com/MehdiMeidanshahi/Kick-Soundboard)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -33,8 +33,10 @@ No developer app creation, manual Client ID/Secret entry, or localhost redirect 
 
 #### 1. Download & Install
 1. Go to the [**Latest GitHub Releases**](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest).
-2. Download **`Kick-Soundboard-Setup-0.3.0.exe`**.
-3. Run the installer (it creates desktop and Start Menu shortcuts and installs cleanly under your Windows user account).
+2. Choose your preferred format:
+   - **Standalone Portable (No install needed)**: Download **`Kick-Soundboard-Portable-0.3.1.exe`** and run it immediately from any folder or USB drive.
+   - **Windows Installer**: Download **`Kick-Soundboard-Setup-0.3.1.exe`** for desktop and Start Menu shortcuts.
+   - **Standalone Zip Package**: Download **`Kick-Soundboard-0.3.1-win-x64.zip`** if you prefer unzipping the folder manually.
 
 > [!NOTE]
 > As an independent open-source release without an expensive corporate code-signing certificate, Windows SmartScreen may show an *"Unknown publisher"* prompt on first launch. Click **More info** → **Run anyway**. You can verify the published SHA-256 checksum on the Releases page anytime.
@@ -159,9 +161,13 @@ npm test
 
 #### 4. Package Windows Executables
 ```powershell
+# Build all distribution targets (Installer, Portable EXE, Zip archive, Unpacked)
 npm run build:win
+
+# Or build standalone portable executable directly (runs without installation)
+npm run build:win:portable
 ```
-*Generates the standalone executable under `release/win-unpacked/` and the NSIS installer `release/Kick-Soundboard-Setup-0.2.0.exe`.*
+*Generates the standalone portable executable `release/Kick-Soundboard-Portable-0.3.1.exe` (no installer needed), the unpacked directory under `release/win-unpacked/`, and the NSIS installer `release/Kick-Soundboard-Setup-0.3.1.exe`.*
 
 #### 5. Self-Hosting the Vercel OAuth Bridge (Optional)
 If you prefer hosting your own Kick Developer credentials:
@@ -210,10 +216,12 @@ If you prefer hosting your own Kick Developer credentials:
 
 بدون نیاز به ساخت برنامه در پنل توسعه‌دهندگان، بدون نیاز به کپی کردن Client ID یا Client Secret؛ اتصال به کیک تنها با ۱ کلیک انجام می‌شود!
 
-#### ۱. دریافت و نصب برنامه
+#### ۱. دریافت و اجرای برنامه
 ۱. به [**صفحهٔ نسخه‌های منتشرشده در GitHub**](https://github.com/MehdiMeidanshahi/Kick-Soundboard/releases/latest) بروید.
-۲. فایل نصب **`Kick-Soundboard-Setup-0.3.0.exe`** را دانلود کنید.
-۳. فایل را اجرا و نصب کنید (میان‌بر برنامه روی دسکتاپ و منوی استارت ایجاد می‌شود).
+۲. نسخهٔ مورد نظر خود را انتخاب کنید:
+   - **نسخه پرتابل (بدون نیاز به نصب)**: فایل **`Kick-Soundboard-Portable-0.3.1.exe`** را دانلود کرده و بدون هیچ مرحلهٔ نصبی، بلافاصله اجرا کنید.
+   - **نسخه نصبی ویندوز**: فایل **`Kick-Soundboard-Setup-0.3.1.exe`** را دانلود کرده و نصب کنید (با ایجاد آیکون دسکتاپ و استارت).
+   - **آرشیو فشرده زیپ**: فایل **`Kick-Soundboard-0.3.1-win-x64.zip`** را دانلود و در پوشه دلخواه استخراج کنید.
 
 > [!NOTE]
 > چون برنامه متن‌باز است و گواهی تجاری گران‌قیمت کد را ندارد، ممکن است ویندوز SmartScreen هشدار *"Unknown publisher"* نشان دهد. کافی است روی **More info** و سپس **Run anyway** کلیک کنید.
@@ -328,11 +336,15 @@ npm start
 npm test
 ```
 
-#### ۴. ساخت فایل نصب ویندوز
+#### ۴. ساخت خروجی‌های ویندوز
 ```powershell
+# ساخت تمامی خروجی‌ها (نصبی، نسخه پرتابل بدون نیاز به نصب، آرشیو فشرده)
 npm run build:win
+
+# یا ساخت مستقیم نسخه پرتابل (بدون نصب)
+npm run build:win:portable
 ```
-*فایل نصبی نهایی در مسیر `release/Kick-Soundboard-Setup-0.3.0.exe` ساخته خواهد شد.*
+*خروجی پرتابل در مسیر `release/Kick-Soundboard-Portable-0.3.1.exe` (اجرای مستقیم بدون نصب) و فایل نصبی در مسیر `release/Kick-Soundboard-Setup-0.3.1.exe` ساخته خواهند شد.*
 
 ---
 

@@ -1,12 +1,17 @@
 {
   "name": "kick-soundboard-local",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Local Kick channel reward soundboard for Windows streamers",
+  "author": "itsmehdi7",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
     "test": "node --test",
-    "build:win": "electron-builder --win nsis --x64 --publish never"
+    "build:win": "electron-builder --win --x64 --publish never",
+    "build:win:installer": "electron-builder --win nsis --x64 --publish never",
+    "build:win:portable": "electron-builder --win portable --x64 --publish never",
+    "build:win:zip": "electron-builder --win zip --x64 --publish never",
+    "build:win:all": "electron-builder --win nsis portable zip --x64 --publish never"
   },
   "devDependencies": {
     "electron": "44.6.0",
@@ -46,11 +51,23 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
         }
-      ],
-      "artifactName": "Kick-Soundboard-Setup-${version}.${ext}"
+      ]
     },
     "nsis": {
+      "artifactName": "Kick-Soundboard-Setup-${version}.${ext}",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
       "oneClick": false,
@@ -59,6 +76,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "Kick-Soundboard-Portable-${version}.${ext}",
+      "requestExecutionLevel": "user"
     }
   },
   "packageManager": "pnpm@9.15.4"

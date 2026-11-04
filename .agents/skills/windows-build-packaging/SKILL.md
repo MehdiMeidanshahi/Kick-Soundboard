@@ -26,24 +26,34 @@ If any test fails, STOP and fix the issue before building.
 ### Step 2: Running the Windows Package Build
 Execute the Windows package script:
 ```powershell
+# Build all distribution targets (Installer, Portable EXE, Zip Archive, Unpacked):
 pnpm build:win
+
+# Or build individual targets on demand:
+pnpm build:win:portable   # Single-file portable executable (no installer)
+pnpm build:win:zip        # Standalone zip package (extract and run)
+pnpm build:win:installer  # NSIS installation wizard
 ```
 This performs:
 1. Native dependency rebuild via `@electron/rebuild`.
 2. Electron binaries download and packaging into `release/win-unpacked/`.
 3. ASAR archive creation with integrity checksums.
-4. NSIS installer creation (`release/Kick-Soundboard-Setup-0.2.3.exe`).
-5. Blockmap generation for differential auto-updates.
+4. Non-installer portable executable packaging (`release/Kick-Soundboard-Portable-${version}.exe`).
+5. Standalone zip archive creation (`release/Kick-Soundboard-${version}-win-x64.zip`).
+6. NSIS installer creation (`release/Kick-Soundboard-Setup-${version}.exe`).
+7. Blockmap generation for differential auto-updates.
 
 ### Step 3: Inspecting Output Artifacts
-Verify that both output targets exist and have valid file sizes:
+Verify that output targets exist and have valid file sizes:
 ```powershell
 Get-ChildItem -Path "release"
 Get-Item "release\win-unpacked\Kick Soundboard.exe" | Format-List Name, Length, LastWriteTime
 ```
 Expected output:
 - **Standalone Unpacked Directory**: `release\win-unpacked\Kick Soundboard.exe` (~240MB uncompressed)
-- **NSIS Installer**: `release\Kick-Soundboard-Setup-0.2.3.exe` (~100MB compressed)
+- **Standalone Portable Executable**: `release\Kick-Soundboard-Portable-0.3.1.exe` (~100MB standalone .exe, no installer required)
+- **Standalone Zip Package**: `release\Kick-Soundboard-0.3.1-win-x64.zip` (~95MB compressed folder)
+- **NSIS Installer**: `release\Kick-Soundboard-Setup-0.3.1.exe` (~100MB compressed installer)
 
 ### Step 4: Asset & Icon Generation
 If icons need to be updated:
