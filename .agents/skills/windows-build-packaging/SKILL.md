@@ -51,9 +51,9 @@ Get-Item "release\win-unpacked\Kick Soundboard.exe" | Format-List Name, Length, 
 ```
 Expected output:
 - **Standalone Unpacked Directory**: `release\win-unpacked\Kick Soundboard.exe` (~240MB uncompressed)
-- **Standalone Portable Executable**: `release\Kick-Soundboard-Portable-0.3.1.exe` (~100MB standalone .exe, no installer required)
-- **Standalone Zip Package**: `release\Kick-Soundboard-0.3.1-win-x64.zip` (~95MB compressed folder)
-- **NSIS Installer**: `release\Kick-Soundboard-Setup-0.3.1.exe` (~100MB compressed installer)
+- **Standalone Portable Executable**: `release\Kick-Soundboard-Portable-0.3.2.exe` (~100MB standalone .exe, no installer required)
+- **Standalone Zip Package**: `release\Kick-Soundboard-0.3.2-win-x64.zip` (~95MB compressed folder)
+- **NSIS Installer**: `release\Kick-Soundboard-Setup-0.3.2.exe` (~100MB compressed installer)
 
 ### Step 4: Asset & Icon Generation
 If icons need to be updated:

@@ -1,9 +1,13 @@
-const { app, BrowserWindow, dialog, ipcMain, safeStorage, shell, globalShortcut, nativeImage } = require('electron');
+const electron = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, safeStorage, shell, globalShortcut, nativeImage } = electron;
+const session = electron?.session;
+const net = electron?.net;
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const logger = require('./logger');
+const proxyManager = require('./proxy-manager');
 
 // Set Windows AppUserModelId immediately for proper taskbar icon and grouping
 if (process.platform === 'win32') {
@@ -48,12 +52,28 @@ let lastPollSuccessAt = null;
 let nextPollAt = null;
 let cachedRewards = [];
 let latestUpdateAvailable = false;
-let config = { clientId: '', encryptedClientSecret: '', bridgeUrl: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [], pendingIds: [], knownUsers: {}, streamerProfile: null, playPending: false, playedIds: [] };
+let config = { clientId: '', encryptedClientSecret: '', bridgeUrl: '', sounds: {}, volume: 0.8, rewardVolumes: {}, cooldowns: {}, history: [], seenIds: [], pendingIds: [], knownUsers: {}, streamerProfile: null, playPending: false, playedIds: [], proxyMode: 'direct', proxyRules: '' };
 let accessToken = '';
 let refreshToken = '';
 let tokenExpiresAt = 0;
 const apiSessionToken = randomString(32);
 const allowedOrigin = `http://localhost:${PORT}`;
+
+function appFetch(url, options) {
+  if (net && typeof net.fetch === 'function') {
+    return net.fetch(url, options);
+  }
+  return globalThis.fetch(url, options);
+}
+
+async function applyAppProxy() {
+  if (session?.defaultSession) {
+    await proxyManager.applyProxyToSession(session.defaultSession, {
+      mode: config.proxyMode || 'direct',
+      rules: config.proxyRules || '',
+    });
+  }
+}
 
 const dataDir = () => app.getPath('userData');
 const configPath = () => path.join(dataDir(), 'settings.json');
@@ -155,6 +175,7 @@ function loadLocalState() {
     try { refreshToken = safeStorage.decryptString(Buffer.from(tokens.encryptedRefreshToken, 'base64')); } catch {}
   }
   tokenExpiresAt = Number(tokens.expiresAt || 0);
+  applyAppProxy().catch(() => {});
 }
 
 function saveConfig() {
@@ -259,6 +280,9 @@ function publicState() {
       hasUpdate: Boolean(latestUpdateAvailable),
       rewards: screenshotRewards(),
       playPending: Boolean(config.playPending),
+    proxyMode: config.proxyMode || 'direct',
+    proxyRules: config.proxyRules || '',
+    systemProxy: proxyManager.detectSystemProxy().proxyServer || '',
     };
   }
 
@@ -292,6 +316,9 @@ function publicState() {
     hasUpdate: Boolean(latestUpdateAvailable),
     rewards: cachedRewards || [],
     playPending: Boolean(config.playPending),
+    proxyMode: config.proxyMode || 'direct',
+    proxyRules: config.proxyRules || '',
+    systemProxy: proxyManager.detectSystemProxy().proxyServer || '',
     goal: config.goal || { title: 'Community Kick Goal', current: 0, target: 10000, autoAddRedemptions: true },
   };
 }
@@ -580,7 +607,7 @@ async function exchangeCode(code, verifier) {
     grant_type: 'authorization_code', code, client_id: config.clientId,
     client_secret: getClientSecret(), redirect_uri: REDIRECT_URI, code_verifier: verifier,
   });
-  const response = await fetch(`${OAUTH_BASE}/oauth/token`, {
+  const response = await appFetch(`${OAUTH_BASE}/oauth/token`, {
     method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body,
   });
   const data = await response.json();
@@ -598,7 +625,7 @@ async function ensureToken() {
   // If local credentials exist (legacy mode), refresh directly
   if (config.clientId && getClientSecret()) {
     const body = new URLSearchParams({ grant_type: 'refresh_token', client_id: config.clientId, client_secret: getClientSecret(), refresh_token: refreshToken });
-    const response = await fetch(`${OAUTH_BASE}/oauth/token`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
+    const response = await appFetch(`${OAUTH_BASE}/oauth/token`, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       if (shouldClearRefreshTokens(data)) {
@@ -616,7 +643,7 @@ async function ensureToken() {
 
   // Refresh via Vercel OAuth Bridge
   const bridgeUrl = getBridgeUrl();
-  const response = await fetch(`${bridgeUrl}/api/auth/refresh`, {
+  const response = await appFetch(`${bridgeUrl}/api/auth/refresh`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ refresh_token: refreshToken }),
@@ -639,7 +666,7 @@ async function ensureToken() {
 
 async function kickGet(endpoint) {
   const token = await ensureToken();
-  const response = await fetch(`${API_BASE}${endpoint}`, { headers: { authorization: `Bearer ${token}` } });
+  const response = await appFetch(`${API_BASE}${endpoint}`, { headers: { authorization: `Bearer ${token}` } });
   const data = await response.json();
   if (!response.ok) {
     const error = new Error(data.message || `Kick API error (${response.status})`);
@@ -720,6 +747,9 @@ async function pollRedemptions(isInitial = false) {
     const playedIds = new Set(config.playedIds || []);
     const toPlay = getRedemptionsToPlay(sorted, previousHistory, seenIds, pendingIds, isInitial, {
       playPending: Boolean(config.playPending),
+    proxyMode: config.proxyMode || 'direct',
+    proxyRules: config.proxyRules || '',
+    systemProxy: proxyManager.detectSystemProxy().proxyServer || '',
       playedIds,
     });
     for (const item of toPlay) {
@@ -752,7 +782,7 @@ async function pollRedemptions(isInitial = false) {
     lastPollRetryAfterMs = retryAfterMs;
     const retryInSeconds = Math.ceil(getPollDelay({ consecutiveFailures: consecutivePollFailures, retryAfterMs }) / 1000);
     nextPollAt = new Date(Date.now() + retryInSeconds * 1000).toISOString();
-    const message = String(error.message || 'Kick request failed.');
+    const message = proxyManager.formatNetworkError(error, config.proxyMode || 'direct');
     if (message !== lastPollError) {
       lastPollError = message;
     }
@@ -1111,7 +1141,7 @@ async function handleRequest(req, res) {
   }
   if (req.method === 'GET' && url.pathname === '/api/updates') {
     try {
-      const response = await fetch('https://api.github.com/repos/MehdiMeidanshahi/Kick-Soundboard/releases?per_page=100', {
+      const response = await appFetch('https://api.github.com/repos/MehdiMeidanshahi/Kick-Soundboard/releases?per_page=100', {
         headers: { accept: 'application/vnd.github+json', 'user-agent': 'Kick-Soundboard' },
         signal: AbortSignal.timeout(8000),
       });
@@ -1176,6 +1206,16 @@ async function handleRequest(req, res) {
     if (typeof body.audioDeviceId === 'string') config.outputDeviceId = body.audioDeviceId;
     if (typeof body.streamerMode === 'boolean') config.streamerMode = body.streamerMode;
     if (typeof body.playPending === 'boolean') config.playPending = body.playPending;
+    if (typeof body.proxyMode === 'string') {
+      const validModes = new Set(['direct', 'system', 'custom']);
+      if (!validModes.has(body.proxyMode)) {
+        return sendJson(res, 400, { error: 'Invalid proxyMode value. Must be direct, system, or custom.' });
+      }
+      config.proxyMode = body.proxyMode;
+    }
+    if (typeof body.proxyRules === 'string') {
+      config.proxyRules = body.proxyRules.trim();
+    }
 
     if (body.rewardVolumes && typeof body.rewardVolumes === 'object') {
       config.rewardVolumes = { ...config.rewardVolumes, ...body.rewardVolumes };
@@ -1263,7 +1303,53 @@ async function handleRequest(req, res) {
       registerGlobalKeybinds();
     }
     saveConfig();
+    await applyAppProxy().catch((err) => {
+      logger.logError('Apply Proxy Error', err);
+    });
     return sendJson(res, 200, { ok: true });
+  }
+  if (req.method === 'GET' && url.pathname === '/api/proxy/system') {
+    const detected = proxyManager.detectSystemProxy();
+    return sendJson(res, 200, { ok: true, data: detected });
+  }
+  if (req.method === 'POST' && url.pathname === '/api/proxy/test') {
+    let body = {};
+    try { body = JSON.parse(await readBody(req)); } catch {}
+    const testMode = body.proxyMode || 'direct';
+    const testRules = proxyManager.normalizeProxyRules(body.proxyRules || '');
+    const startTime = Date.now();
+    try {
+      if (session?.defaultSession) {
+        await proxyManager.applyProxyToSession(session.defaultSession, { mode: testMode, rules: testRules });
+      }
+      const testResp = await appFetch('https://api.kick.com/public/v1/users?usernames[]=kick', {
+        method: 'GET',
+        headers: { 'user-agent': 'Kick-Soundboard' },
+        signal: AbortSignal.timeout(6000),
+      }).catch(async () => {
+        return appFetch('https://api.kick.com', {
+          method: 'GET',
+          headers: { 'user-agent': 'Kick-Soundboard' },
+          signal: AbortSignal.timeout(6000),
+        });
+      });
+      const latencyMs = Date.now() - startTime;
+      await applyAppProxy().catch(() => {});
+      return sendJson(res, 200, {
+        ok: true,
+        latencyMs,
+        status: testResp.status,
+        message: `Connection successful (${latencyMs}ms)`,
+      });
+    } catch (err) {
+      await applyAppProxy().catch(() => {});
+      const formattedError = proxyManager.formatNetworkError(err, testMode);
+      return sendJson(res, 200, {
+        ok: false,
+        error: formattedError,
+        rawError: err.message,
+      });
+    }
   }
   if (req.method === 'POST' && url.pathname === '/api/history/clear') {
     config.history = [];
@@ -1609,4 +1695,6 @@ module.exports = {
   triggerSoundpadAction,
   panicStopAllAction,
   openSoundpadWindow,
+  appFetch,
+  applyAppProxy,
 };

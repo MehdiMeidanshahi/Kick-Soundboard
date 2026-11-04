@@ -504,6 +504,7 @@ function openSettings() {
   settingsModule.openSettings('settings-modal', {
     onLoadAudioDevices: () => loadAudioDevices(),
   });
+  settingsModule.updateProxyUI?.(state);
 }
 
 function closeSettings() {
@@ -647,6 +648,9 @@ async function refreshState() {
     state.volume = Number.isFinite(data.volume) ? data.volume : 0.8;
     state.playPending = Boolean(data.playPending);
     state.audioDeviceId = data.outputDeviceId || data.audioDeviceId || '';
+    state.proxyMode = data.proxyMode || 'direct';
+    state.proxyRules = data.proxyRules || '';
+    state.systemProxy = data.systemProxy || '';
     state.sounds = data.sounds || {};
     state.rewardVolumes = data.rewardVolumes || {};
     state.rewardCooldowns = data.rewardCooldowns || {};
@@ -768,8 +772,8 @@ function setConnected(connected) {
 
 // Initialize UI Event Listeners
 function initEventListeners() {
-  // Navigation tabs (both dock rail and pill tabs)
-  document.querySelectorAll('.dock-btn[data-tab], .pill-tab[data-tab]').forEach((btn) => {
+  // Navigation tabs (dock sidebar rail)
+  document.querySelectorAll('.dock-btn[data-tab]').forEach((btn) => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
@@ -867,20 +871,103 @@ function initEventListeners() {
   $('#settings-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     try {
+      const proxyMode = $('#proxy-mode-select')?.value || 'direct';
+      const proxyRules = $('#proxy-rules-input')?.value || '';
       await request('/api/settings', {
         method: 'POST',
         body: JSON.stringify({
           playPending: $('#play-pending-toggle')?.checked ?? false,
           outputDeviceId: $('#audio-output')?.value || '',
           audioDeviceId: $('#audio-output')?.value || '',
+          proxyMode,
+          proxyRules,
         }),
       });
       state.playPending = $('#play-pending-toggle')?.checked ?? false;
       state.audioDeviceId = $('#audio-output')?.value || '';
+      state.proxyMode = proxyMode;
+      state.proxyRules = proxyRules;
       toast(t('settingsSaved'));
       closeSettings();
     } catch (error) {
       toast(error.message, true);
+    }
+  });
+
+  // Proxy mode select toggle
+  $('#proxy-mode-select')?.addEventListener('change', (e) => {
+    const customContainer = $('#proxy-custom-container');
+    if (customContainer) {
+      customContainer.style.display = e.target.value === 'custom' ? 'block' : 'none';
+    }
+    const statusPill = $('#proxy-status-message');
+    if (statusPill) { statusPill.style.display = 'none'; statusPill.textContent = ''; }
+  });
+
+  // Detect system proxy
+  $('#detect-proxy-btn')?.addEventListener('click', async () => {
+    const statusPill = $('#proxy-status-message');
+    const rulesInput = $('#proxy-rules-input');
+    try {
+      const res = await request('/api/proxy/system');
+      if (res?.data?.proxyServer) {
+        if (rulesInput) rulesInput.value = res.data.proxyServer;
+        if (statusPill) {
+          statusPill.style.display = 'inline-flex';
+          statusPill.className = 'proxy-status-pill success';
+          statusPill.textContent = t('proxyDetected', { proxy: res.data.proxyServer });
+        }
+      } else {
+        if (statusPill) {
+          statusPill.style.display = 'inline-flex';
+          statusPill.className = 'proxy-status-pill error';
+          statusPill.textContent = t('noSystemProxyDetected');
+        }
+      }
+    } catch (err) {
+      if (statusPill) {
+        statusPill.style.display = 'inline-flex';
+        statusPill.className = 'proxy-status-pill error';
+        statusPill.textContent = err.message;
+      }
+    }
+  });
+
+  // Test proxy connection
+  $('#test-proxy-btn')?.addEventListener('click', async () => {
+    const statusPill = $('#proxy-status-message');
+    const proxyMode = $('#proxy-mode-select')?.value || 'direct';
+    const proxyRules = $('#proxy-rules-input')?.value || '';
+
+    if (statusPill) {
+      statusPill.style.display = 'inline-flex';
+      statusPill.className = 'proxy-status-pill testing';
+      statusPill.textContent = t('proxyTesting');
+    }
+
+    try {
+      const res = await request('/api/proxy/test', {
+        method: 'POST',
+        body: JSON.stringify({ proxyMode, proxyRules }),
+      });
+      if (res.ok) {
+        if (statusPill) {
+          statusPill.className = 'proxy-status-pill success';
+          statusPill.textContent = proxyMode === 'direct'
+            ? t('proxyDirectSuccess', { latency: res.latencyMs })
+            : t('proxySuccess', { latency: res.latencyMs });
+        }
+      } else {
+        if (statusPill) {
+          statusPill.className = 'proxy-status-pill error';
+          statusPill.textContent = res.error || 'Connection failed';
+        }
+      }
+    } catch (err) {
+      if (statusPill) {
+        statusPill.className = 'proxy-status-pill error';
+        statusPill.textContent = err.message;
+      }
     }
   });
 

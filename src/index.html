@@ -90,25 +90,6 @@
           </div>
         </div>
 
-        <!-- Center Pill Tabs -->
-        <nav class="pill-tabs" role="tablist">
-          <button class="pill-tab active" id="tab-studio" data-tab="studio" role="tab" aria-selected="true">
-            <span>🎛️</span>
-            <span data-i18n="navStudio">Soundboard Studio</span>
-          </button>
-          <button class="pill-tab" id="tab-analytics" data-tab="analytics" role="tab" aria-selected="false">
-            <span>📊</span>
-            <span data-i18n="navAnalytics">Stream Analytics</span>
-          </button>
-          <button class="pill-tab" id="tab-soundpad" data-tab="soundpad" role="tab" aria-selected="false">
-            <span>⚡</span>
-            <span data-i18n="navSoundpad">Sound Pad</span>
-          </button>
-          <button class="pill-tab" id="tab-goal" data-tab="goal" role="tab" aria-selected="false">
-            <span>🎯</span>
-            <span data-i18n="navGoal">Channel Goal</span>
-          </button>
-        </nav>
 
         <div class="head-actions">
           <!-- Prominent Master Volume Control -->
@@ -434,6 +415,29 @@
             <button type="button" id="refresh-audio-devices" class="ghost small" data-i18n="refreshDevices">Refresh devices</button>
           </div>
           <div id="audio-warning" class="field-note" role="status"></div>
+        </div>
+
+        <!-- Proxy & Network Section -->
+        <div class="proxy-section">
+          <label for="proxy-mode-select" data-i18n="proxySettingsTitle" style="display:block; font-weight:650; font-size:13px; margin-bottom:6px;">Network & Proxy</label>
+          <div class="proxy-mode-picker">
+            <select id="proxy-mode-select" style="flex:1;">
+              <option value="direct" data-i18n="proxyModeDirect">Direct Connection (No proxy)</option>
+              <option value="system" data-i18n="proxyModeSystem">Use Windows System Proxy (VPN / Auto)</option>
+              <option value="custom" data-i18n="proxyModeCustom">Custom Proxy (v2ray / Clash / SOCKS5 / HTTP)</option>
+            </select>
+          </div>
+          <div id="proxy-custom-container" style="display:none; margin-top:8px;">
+            <div class="proxy-input-group">
+              <input type="text" id="proxy-rules-input" placeholder="http://127.0.0.1:10809 or socks5://127.0.0.1:10808" data-i18n-placeholder="proxyRulesPlaceholder" autocomplete="off" spellcheck="false">
+              <button type="button" id="detect-proxy-btn" class="ghost small" data-i18n="detectSystemProxy">Detect</button>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px; gap:8px; flex-wrap:wrap;">
+            <button type="button" id="test-proxy-btn" class="ghost small" data-i18n="testProxy">Test Connection</button>
+            <div id="proxy-status-message" class="proxy-status-pill" style="display:none;" role="status"></div>
+          </div>
+          <div class="field-note" data-i18n="proxyHelpNote">If Kick or OAuth is blocked in your region, enter your v2ray, Clash, or VPN proxy address here.</div>
         </div>
 
         <div class="update-area">

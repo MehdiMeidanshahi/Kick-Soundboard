@@ -64,8 +64,30 @@ async function loadAudioDevices(selectId, state, options = {}) {
   }
 }
 
+function updateProxyUI(state) {
+  const modeSelect = document.getElementById('proxy-mode-select');
+  const rulesInput = document.getElementById('proxy-rules-input');
+  const customContainer = document.getElementById('proxy-custom-container');
+  const statusPill = document.getElementById('proxy-status-message');
+
+  if (modeSelect) {
+    modeSelect.value = state.proxyMode || 'direct';
+  }
+  if (rulesInput && typeof state.proxyRules === 'string') {
+    rulesInput.value = state.proxyRules;
+  }
+  if (customContainer && modeSelect) {
+    customContainer.style.display = modeSelect.value === 'custom' ? 'block' : 'none';
+  }
+  if (statusPill) {
+    statusPill.style.display = 'none';
+    statusPill.textContent = '';
+    statusPill.className = 'proxy-status-pill';
+  }
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { openSettings, closeSettings, loadAudioDevices };
+  module.exports = { openSettings, closeSettings, loadAudioDevices, updateProxyUI };
 } else {
-  window.settingsComponent = { openSettings, closeSettings, loadAudioDevices };
+  window.settingsComponent = { openSettings, closeSettings, loadAudioDevices, updateProxyUI };
 }

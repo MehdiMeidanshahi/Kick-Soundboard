@@ -88,3 +88,59 @@
   overflow-x: auto;
   white-space: nowrap;
 }
+
+/* Proxy & Network Settings */
+.proxy-section {
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+  padding-top: 16px;
+}
+.proxy-mode-picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.proxy-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.proxy-input-group input {
+  flex: 1;
+  min-width: 0;
+  background: #090c10;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.proxy-input-group input:focus {
+  border-color: var(--green);
+  outline: none;
+}
+.proxy-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+.proxy-status-pill.success {
+  background: rgba(83, 252, 24, 0.12);
+  border: 1px solid rgba(83, 252, 24, 0.3);
+  color: var(--green);
+}
+.proxy-status-pill.error {
+  background: rgba(255, 68, 68, 0.12);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+  color: #ff6b6b;
+}
+.proxy-status-pill.testing {
+  background: rgba(255, 170, 0, 0.12);
+  border: 1px solid rgba(255, 170, 0, 0.3);
+  color: #ffaa00;
+}

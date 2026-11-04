@@ -18,14 +18,7 @@ function switchTab(tabId, state, options = {}) {
     btn.setAttribute('aria-selected', String(isActive));
   });
 
-  // 2. Sync center pill tabs
-  document.querySelectorAll('.pill-tab[data-tab]').forEach((btn) => {
-    const isActive = btn.dataset.tab === tabId;
-    btn.classList.toggle('active', isActive);
-    btn.setAttribute('aria-selected', String(isActive));
-  });
-
-  // 3. Switch view container
+  // 2. Switch view container
   document.querySelectorAll('.app-view').forEach((view) => {
     view.classList.remove('active');
   });

@@ -180,41 +180,6 @@ h1 {
   gap: 10px;
 }
 
-/* Center Pill Tabs */
-.pill-tabs {
-  display: flex;
-  align-items: center;
-  background: rgba(14, 19, 27, 0.9);
-  border: 1px solid var(--line);
-  padding: 4px;
-  border-radius: var(--radius-pill);
-  gap: 4px;
-  backdrop-filter: blur(12px);
-}
-.pill-tab {
-  border-radius: var(--radius-pill);
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 650;
-  padding: 8px 16px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: all .16s ease;
-}
-.pill-tab:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.05);
-}
-.pill-tab.active {
-  background: #1b2432;
-  color: var(--green);
-  border-color: rgba(83, 252, 24, 0.3);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), 0 0 12px rgba(83, 252, 24, 0.12);
-}
 
 /* Status Indicator */
 .status {
@@ -329,5 +294,4 @@ h1 {
 @media (max-width: 600px) {
   .analytics-grid { grid-template-columns: 1fr; }
   header { flex-direction: column; align-items: stretch; }
-  .pill-tabs { width: 100%; justify-content: space-between; overflow-x: auto; }
 }

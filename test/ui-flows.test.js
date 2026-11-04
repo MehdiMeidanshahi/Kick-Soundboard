@@ -18,8 +18,7 @@ test('UI Flow: HTML has all required IDs and DOM elements for app functionality'
     'account-status-text', 'modal-connect-btn', 'disconnect-btn', 'play-pending-toggle',
     'audio-output', 'refresh-audio-devices', 'app-version', 'check-updates',
     'update-status', 'download-update', 'stream-mode-btn', 'refresh-btn',
-    'dock-studio', 'dock-analytics', 'dock-soundpad', 'tab-studio', 'tab-analytics',
-    'tab-soundpad', 'view-studio', 'view-analytics', 'view-soundpad'
+    'dock-studio', 'dock-analytics', 'dock-soundpad', 'view-studio', 'view-analytics', 'view-soundpad'
   ];
 
   for (const id of requiredIds) {

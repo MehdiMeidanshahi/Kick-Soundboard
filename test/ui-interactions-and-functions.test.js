@@ -126,7 +126,6 @@ test('Navigation: switchTab PASS scenario - Valid tab switches view and tab stat
   const tabs = ['studio', 'analytics', 'soundpad'];
   for (const tab of tabs) {
     assert.ok(indexHtml.includes(`id="dock-${tab}"`), `Expected dock button for ${tab}`);
-    assert.ok(indexHtml.includes(`id="tab-${tab}"`), `Expected pill tab for ${tab}`);
     assert.ok(indexHtml.includes(`id="view-${tab}"`), `Expected app view for ${tab}`);
   }
 });
